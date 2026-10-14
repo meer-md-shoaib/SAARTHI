@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Camera, Keyboard, Mic, ScanLine, Sparkles, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  Keyboard,
+  Mic,
+  ScanLine,
+  Sparkles,
+  Upload,
+  X,
+} from "lucide-react";
 import { ApiError, api } from "../api";
 import { BigButton } from "../components/Button";
 import { Banner, Card, Spinner } from "../components/bits";
@@ -200,6 +209,38 @@ export function ScanScreen() {
     await runAnalyzeWithText(rawText, source);
   }, [rawText, source, runAnalyzeWithText]);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      setActionError(null);
+      setBusy(true);
+      try {
+        const scannerLib = await import("../lib/scanner");
+        const detected = await scannerLib.decodeQrFromImageFile(file);
+        const trimmed = detected.trim();
+        if (!trimmed) {
+          throw new Error("No readable QR data found in the image.");
+        }
+        setRawText(trimmed);
+        setSource("camera");
+        await runAnalyzeWithText(trimmed, "camera");
+      } catch (err: unknown) {
+        setActionError(
+          err instanceof Error
+            ? err.message
+            : "Could not detect a valid QR code in this image. Please ensure the QR code is clear and well-lit.",
+        );
+      } finally {
+        setBusy(false);
+        if (event.target) event.target.value = "";
+      }
+    },
+    [runAnalyzeWithText],
+  );
+
 
   const methods: { id: Method; icon: typeof Camera; label: string; sub: string }[] = [
     { id: "camera", icon: Camera, label: t.scan.methodCamera, sub: t.scan.methodCameraSub },
@@ -213,6 +254,20 @@ export function ScanScreen() {
         <h1 className="text-3xl font-extrabold">{t.scan.title}</h1>
         <p className="mt-1 text-lg text-navy/80">{t.scan.subtitle}</p>
       </header>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
+
+      {actionError ? (
+        <Banner tone="danger" title={t.common.errorTitle}>
+          {actionError}
+        </Banner>
+      ) : null}
 
       {step === "method" ? (
         <>
@@ -270,9 +325,27 @@ export function ScanScreen() {
                       {cameraError}
                     </Banner>
                   ) : null}
-                  <BigButton onClick={() => void startCamera()} icon={<Camera className="h-6 w-6" />}>
-                    {t.scan.startCamera}
-                  </BigButton>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <BigButton
+                      full
+                      onClick={() => void startCamera()}
+                      icon={<Camera className="h-6 w-6" />}
+                    >
+                      {t.scan.startCamera}
+                    </BigButton>
+                    <BigButton
+                      full
+                      variant="teal"
+                      onClick={() => fileInputRef.current?.click()}
+                      icon={<Upload className="h-6 w-6" />}
+                    >
+                      {uiLang === "hi"
+                        ? "फोटो से QR स्कैन करें"
+                        : uiLang === "kn"
+                          ? "ಚಿತ್ರದಿಂದ QR ಸ್ಕ್ಯಾನ್ ಮಾಡಿ"
+                          : "Upload QR Photo"}
+                    </BigButton>
+                  </div>
                   <BigButton
                     variant="outline"
                     full
@@ -287,14 +360,24 @@ export function ScanScreen() {
                   <p className="text-center text-lg font-bold text-navy">
                     {cameraState === "starting" ? t.scan.cameraStarting : t.scan.cameraHint}
                   </p>
-                  <BigButton
-                    variant="coral"
-                    full
-                    onClick={stopCamera}
-                    icon={<X className="h-6 w-6" />}
-                  >
-                    {t.scan.stopCamera}
-                  </BigButton>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <BigButton
+                      variant="coral"
+                      full
+                      onClick={stopCamera}
+                      icon={<X className="h-6 w-6" />}
+                    >
+                      {t.scan.stopCamera}
+                    </BigButton>
+                    <BigButton
+                      variant="outline"
+                      full
+                      onClick={() => fileInputRef.current?.click()}
+                      icon={<Upload className="h-6 w-6" />}
+                    >
+                      {uiLang === "hi" ? "फोटो चुनें" : "Upload QR Photo"}
+                    </BigButton>
+                  </div>
                 </div>
               )}
             </Card>
@@ -305,25 +388,35 @@ export function ScanScreen() {
             <Card>
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-xl font-extrabold">{t.scan.manualTitle}</h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (isDictating) {
-                      stopDictation();
-                    } else {
-                      startDictation();
-                    }
-                  }}
-                  className={`flex items-center gap-2 rounded-2xl border-2 px-3.5 py-1.5 text-sm font-extrabold shadow-xs transition-all ${
-                    isDictating
-                      ? "animate-pulse border-coral bg-coral text-white"
-                      : "border-teal bg-teal/10 text-teal-dark hover:bg-teal hover:text-white"
-                  }`}
-                  aria-label={isDictating ? t.scan.stopDictation : t.scan.voiceDictate}
-                >
-                  <Mic className="h-4 w-4" aria-hidden="true" />
-                  <span>{isDictating ? t.scan.stopDictation : t.scan.voiceDictate}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 rounded-2xl border-2 border-teal bg-teal/10 px-3 py-1.5 text-sm font-extrabold text-teal-dark hover:bg-teal hover:text-white transition-colors"
+                  >
+                    <Upload className="h-4 w-4" aria-hidden="true" />
+                    <span>{uiLang === "hi" ? "QR फोटो चुनें" : "Upload QR"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isDictating) {
+                        stopDictation();
+                      } else {
+                        startDictation();
+                      }
+                    }}
+                    className={`flex items-center gap-2 rounded-2xl border-2 px-3.5 py-1.5 text-sm font-extrabold shadow-xs transition-all ${
+                      isDictating
+                        ? "animate-pulse border-coral bg-coral text-white"
+                        : "border-teal bg-teal/10 text-teal-dark hover:bg-teal hover:text-white"
+                    }`}
+                    aria-label={isDictating ? t.scan.stopDictation : t.scan.voiceDictate}
+                  >
+                    <Mic className="h-4 w-4" aria-hidden="true" />
+                    <span>{isDictating ? t.scan.stopDictation : t.scan.voiceDictate}</span>
+                  </button>
+                </div>
               </div>
 
               {isDictating ? (

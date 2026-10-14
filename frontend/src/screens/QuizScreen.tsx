@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Check, PartyPopper, RotateCcw, X } from "lucide-react";
+import { Check, RotateCcw, X } from "lucide-react";
+import confetti from "canvas-confetti";
 import { BigButton } from "../components/Button";
 import { Banner, Card, ProgressBar } from "../components/bits";
 import { SceneArt } from "../components/illustrations";
+import { ThreeSafetyShield } from "../components/ThreeSafetyShield";
 import { QUIZ_QUESTIONS } from "../data/quiz";
 import { useApp } from "../state";
 
@@ -22,12 +24,25 @@ export function QuizScreen() {
   const select = (optionId: string) => {
     if (answered) return;
     setSelected(optionId);
-    if (optionId === question.correctId) setScore((value) => value + 1);
+    if (optionId === question.correctId) {
+      setScore((value) => value + 1);
+      confetti({
+        particleCount: 35,
+        spread: 50,
+        origin: { y: 0.65 },
+        colors: ["#2dd4bf", "#f59e0b", "#10b981"],
+      });
+    }
   };
 
   const next = () => {
     if (index + 1 >= total) {
       setDone(true);
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.5 },
+      });
       return;
     }
     setIndex(index + 1);
@@ -50,11 +65,15 @@ export function QuizScreen() {
           : t.quiz.scoreLow;
     return (
       <div className="space-y-5">
-        <Card className="flex flex-col items-center text-center">
-          <PartyPopper className="h-16 w-16 text-teal" aria-hidden="true" />
+        <Card className="flex flex-col items-center text-center p-6 sm:p-8">
+          <ThreeSafetyShield
+            className="w-full h-48 max-w-sm"
+            celebrate={score >= Math.ceil(total / 2)}
+            tone={score >= Math.ceil(total / 2) ? "safe" : "warning"}
+          />
           <h1 className="mt-3 text-3xl font-extrabold">{t.quiz.scoreTitle}</h1>
-          <p className="mt-2 text-xl font-bold">{t.quiz.scoreMessage(score, total)}</p>
-          <p className="mt-2 text-lg text-navy/85">{verdict}</p>
+          <p className="mt-2 text-xl font-bold text-teal-dark">{t.quiz.scoreMessage(score, total)}</p>
+          <p className="mt-2 text-lg text-navy/85 max-w-md">{verdict}</p>
           <div className="mt-6 w-full max-w-md">
             <BigButton
               full

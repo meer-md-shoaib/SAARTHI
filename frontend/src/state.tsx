@@ -34,7 +34,8 @@ export type ScreenId =
   | "help"
   | "practice"
   | "roleplay"
-  | "jargon";
+  | "jargon"
+  | "defender";
 
 export type Route =
   | { screen: "home" }
@@ -52,7 +53,8 @@ export type Route =
   | { screen: "help" }
   | { screen: "practice" }
   | { screen: "roleplay" }
-  | { screen: "jargon" };
+  | { screen: "jargon" }
+  | { screen: "defender" };
 
 interface NavContextValue {
   route: Route;

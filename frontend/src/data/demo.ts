@@ -16,6 +16,24 @@ export interface DemoScenario {
  */
 export const DEMO_SCENARIOS: DemoScenario[] = [
   {
+    id: "gpay-user-qr",
+    art: "shop",
+    title: {
+      en: "Google Pay QR (Meer Mohammed Shoaib)",
+      hi: "गूगल पे क्यूआर (मीर मोहम्मद शोएब)",
+      kn: "ಗೂಗಲ್ ಪೇ QR (ಮೀರ್ ಮೊಹಮ್ಮದ್ ಶೋಯೆಬ್)",
+    },
+    description: {
+      en: "Official Google Pay UPI QR: @okicici for Meer Mohammed Shoaib.",
+      hi: "मीर मोहम्मद शोएब का आधिकारिक गूगल पे UPI क्यूआर (@okicici)।",
+      kn: "ಮೀರ್ ಮೊಹಮ್ಮದ್ ಶೋಯೆಬ್ ಅವರ ಅಧಿಕೃತ ಗೂಗಲ್ ಪೇ UPI QR (@okicici).",
+    },
+    raw_text:
+      "upi://pay?pa=meermohammedshoaib@okicici&pn=Meer%20Mohammed%20Shoaib&aid=uGICAgKCC74LNFw",
+    intention: "pay",
+    expected_amount: null,
+  },
+  {
     id: "kirana",
     art: "shop",
     title: {

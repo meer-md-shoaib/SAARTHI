@@ -1,16 +1,17 @@
 import { useState } from "react";
+import confetti from "canvas-confetti";
 import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
   RotateCcw,
   ShieldCheck,
-  Trophy,
   Volume2,
   XCircle,
 } from "lucide-react";
 import { BigButton } from "../components/Button";
 import { Banner, Card, ProgressBar } from "../components/bits";
+import { ThreeSafetyShield } from "../components/ThreeSafetyShield";
 import { useApp, useNav } from "../state";
 
 interface PracticeScenario {
@@ -249,6 +250,12 @@ export function PracticeScreen() {
     const opt = scenario.options.find((o) => o.id === optionId);
     if (opt?.correct) {
       setScore((s) => s + 1);
+      confetti({
+        particleCount: 40,
+        spread: 60,
+        origin: { y: 0.65 },
+        colors: ["#2dd4bf", "#f59e0b", "#10b981"],
+      });
       speakIfOn(opt.explanation[uiLang]);
     } else if (opt) {
       speakIfOn(opt.explanation[uiLang]);
@@ -259,6 +266,11 @@ export function PracticeScreen() {
     stopSpeaking();
     if (index + 1 >= total) {
       setCompleted(true);
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.5 },
+      });
       return;
     }
     setIndex(index + 1);
@@ -288,9 +300,11 @@ export function PracticeScreen() {
         </div>
 
         <Card className="flex flex-col items-center p-6 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-amber-100 text-amber-600 shadow-soft">
-            <Trophy className="h-10 w-10" aria-hidden="true" />
-          </div>
+          <ThreeSafetyShield
+            className="w-full h-48 max-w-xs"
+            celebrate={isPerfect}
+            tone={isPerfect ? "safe" : "warning"}
+          />
           <h1 className="mt-4 text-3xl font-extrabold text-navy">
             {uiLang === "hi" ? "शाबाश! अभ्यास पूरा हुआ" : uiLang === "kn" ? "ಅಭಿನಂದನೆಗಳು! ಅಭ್ಯಾಸ ಪೂರ್ಣಗೊಂಡಿದೆ" : "Practice Completed!"}
           </h1>

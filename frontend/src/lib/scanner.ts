@@ -75,3 +75,19 @@ export async function startQrScanner(
     },
   };
 }
+
+export async function decodeQrFromImageFile(file: File | Blob): Promise<string> {
+  const reader = new BrowserQRCodeReader();
+  const url = URL.createObjectURL(file);
+  try {
+    const result = await reader.decodeFromImageUrl(url);
+    return result.getText();
+  } catch {
+    throw new ScanError(
+      "generic",
+      "Could not find a valid QR code in this image. Please try a clearer picture or screenshot.",
+    );
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}

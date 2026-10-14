@@ -76,41 +76,28 @@ def _rx(pattern: str) -> re.Pattern[str]:
 
 
 # Requests for secrets. Matched against the whole scanned/entered text.
+# Genuine secret requests require an action/demand verb (share, enter, send, forward, tell, etc.)
+# or appear inside a payment note/URI. Simple informational statements (e.g. "otp is 2039")
+# or delivery notifications must NOT be flagged as secret requests.
 SECRET_PATTERNS: dict[str, list[re.Pattern[str]]] = {
     "en": [
-        _rx(r"\bupi\s+pin\b"),
-        _rx(r"\bpin\b(?!\s*code)"),
-        _rx(r"\botp\b"),
-        _rx(r"\bone[\s-]time\s+password\b"),
-        _rx(r"\bmpin\b"),
-        _rx(r"\bcvv\d?\b"),
-        _rx(r"\batm\s+pin\b"),
-        _rx(r"\bpassword\b"),
-        _rx(r"\bpasscode\b"),
-        _rx(r"\bsecret\s+(code|key)\b"),
-        _rx(r"\bcard\s+(number|no\.?)\b"),
-        _rx(r"\bexpiry\s+date\b"),
-        _rx(r"\bnet\s+banking\s+password\b"),
+        # Request or demand to share, enter, send, forward, tell, or provide credentials
+        _rx(r"\b(share|enter|send|forward|submit|give|tell|provide|ask|type|input|verify|require|demand)\b.{0,40}\b(otp|one[\s-]time\s+password|upi\s*pin|pin|mpin|cvv\d?|password|passcode|secret\s+(code|key)|atm\s+pin)\b"),
+        # Secret demanded to receive funds, claim prizes, or unblock accounts
+        _rx(r"\b(otp|one[\s-]time\s+password|upi\s*pin|pin|mpin|cvv\d?|password|passcode)\b.{0,40}\b(to\s+(receive|claim|cancel|unblock|verify|get|approve|proceed|refund|activate)|is\s+required|needed|mandatory)\b"),
+        # Demands for UPI PIN, ATM PIN, CVV, or passwords (never requested in legitimate communications)
+        _rx(r"\b(enter|share|type|submit|provide)\s+(your\s+)?(upi\s+pin|atm\s+pin|mpin|cvv\d?|net\s+banking\s+password)\b"),
+        _rx(r"\b(net\s+banking\s+password|card\s+(number|no\.?)\b.{0,20}\b(expiry|cvv)|expiry\s+date\b.{0,20}\bcvv)\b"),
     ],
     "hi": [
-        re.compile("ओटीपी"),
-        re.compile("ओ\\.टी\\.पी"),
-        re.compile("एटीएम पिन"),
-        re.compile("पासवर्ड"),
-        re.compile("गोपनीय"),
-        re.compile("कार्ड नंबर"),
-        re.compile("सीवीवी"),
-        re.compile("पिन"),
+        re.compile(r"(साझा|बताएं|दें|भेजें|दर्ज|एंटर|डालें|पूछ|मांग).{0,30}(ओटीपी|पिन|पासवर्ड|सीवीवी|गोपनीय)", re.IGNORECASE),
+        re.compile(r"(ओटीपी|पिन|पासवर्ड).{0,30}(बताएं|दें|भेजें|दर्ज|साझा|अनब्लॉक|पाने के लिए|आवश्यक)", re.IGNORECASE),
+        re.compile(r"(एटीएम\s*पिन|नेट\s*बैंकिंग\s*पासवर्ड|कार्ड\s*नंबर.{0,20}सीवीवी)", re.IGNORECASE),
     ],
     "kn": [
-        re.compile("ಒಟಿಪಿ"),
-        re.compile("ಒ\\.ಟಿ\\.ಪಿ"),
-        re.compile("ಪಾಸ್‌ವರ್ಡ್"),
-        re.compile("ಪಾಸ್ವರ್ಡ್"),
-        re.compile("ಎಟಿಎಂ ಪಿನ್"),
-        re.compile("ಕಾರ್ಡ್ ಸಂಖ್ಯೆ"),
-        re.compile("ಸಿವಿವಿ"),
-        re.compile("ಪಿನ್"),
+        re.compile(r"(ಹಂಚಿಕೊಳ್ಳಿ|ನಮೂದಿಸಿ|ಕಳುಹಿಸಿ|ತಿಳಿಸಿ|ನೀಡಿ|ಕೇಳಿದರೆ).{0,30}(ಒಟಿಪಿ|ಪಿನ್|ಪಾಸ್‌ವರ್ಡ್|ಪಾಸ್ವರ್ಡ್|ಸಿವಿವಿ)", re.IGNORECASE),
+        re.compile(r"(ಒಟಿಪಿ|ಪಿನ್|ಪಾಸ್‌ವರ್ಡ್).{0,30}(ಹಂಚಿಕೊಳ್ಳಿ|ನಮೂದಿಸಿ|ಕಳುಹಿಸಿ|ತಿಳಿಸಿ|ನೀಡಿ|ಅನ್‌ಬ್ಲಾಕ್|ಪಡೆಯಲು)", re.IGNORECASE),
+        re.compile(r"(ಎಟಿಎಂ\s*ಪಿನ್|ಕಾರ್ಡ್\s*ಸಂಖ್ಯೆ.{0,20}ಸಿವಿವಿ)", re.IGNORECASE),
     ],
 }
 

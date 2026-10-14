@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AppShell } from "./components/AppShell";
 import { AppProvider, useNav } from "./state";
 import { AskScreen } from "./screens/AskScreen";
+import { DefenderScreen } from "./screens/DefenderScreen";
 import { HelpScreen } from "./screens/HelpScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { JargonScreen } from "./screens/JargonScreen";
@@ -41,6 +42,8 @@ function CurrentScreen() {
       return <ScamRoleplayScreen />;
     case "jargon":
       return <JargonScreen />;
+    case "defender":
+      return <DefenderScreen />;
     default:
       return null;
   }

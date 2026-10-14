@@ -8,6 +8,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.7
+      - key: GEMINI_API_KEY
+        sync: false
       - key: SARVAM_API_KEY
         sync: false
       - key: CORS_ORIGINS

@@ -17,9 +17,16 @@ text,label,source,subcategory
 "Dear HDFC Bank user, 10,000 points credited to your credit card. Redeem for iPhone 15 at bit.ly/hdfc-redeem-points before midnight.",scam,rbi_advisory,phishing
 "GPay alert: Someone is trying to link your bank account to a new device in Pune. If this was not you, enter your UPI PIN on this link to secure your account: http://gpay-secure.xyz",scam,npci_alert,otp_pin_theft
 "Dear user, your PAN card is not linked with your bank account. Your account has been put on hold. Download link-pan.apk to resolve.",scam,rbi_advisory,phishing
+"Dear customer, your card is blocked. Call 9876543210 and share the OTP sent to your phone to activate.",scam,rbi_advisory,otp_pin_theft
+"Bank verification: Share your 6 digit UPI PIN or OTP immediately with the caller to prevent account freeze.",scam,rbi_advisory,otp_pin_theft
+"Enter your 6-digit UPI PIN to claim lottery prize of Rs 50,000 on PhonePe: http://phonepe-reward.site",scam,npci_alert,payment_fraud
+"Police notice: High Court arrest warrant issued against you for illegal money transfer. Call IO immediately.",scam,cyber_police,urgency_threat
+"Electricity Office: Unpaid bill found. Disconnection order issued for tonight. Contact line man 9123456789.",scam,cert_in,urgency_threat
 "Flash Sale: Flat 50% off on all groceries at Green Kiran Stores today! Use code SAVE50 on checkout. Valid till Sunday.",promotional,synthetic,none
 "Exclusive offer for HDFC cardholders: Get 10% instant discount on electronics at Croma stores this weekend. T&C apply.",promotional,synthetic,none
 "Swiggy: Raining outside? Enjoy hot biryani with flat Rs 120 off. Order now on Swiggy app. Use coupon HUNGRY.",promotional,synthetic,none
+"Big Billion Days: Upto 80% off on Mobiles, Fashion and Electronics. Visit Flipkart app now.",promotional,synthetic,none
+"Special personal loan offer for you at 10.5% p.a. Check your pre-approved limit in Axis Mobile app.",promotional,synthetic,none
 "Your Airtel fiber broadband bill of Rs 943 for the month of October is generated. Due date is 25-Oct. Pay via Airtel Thanks app.",legitimate,synthetic,none
 "Your OTP for login to SBI YONO is 482901. Valid for 5 minutes. Do not share this OTP with anyone, including bank staff.",legitimate,synthetic,none
 "Dear Customer, your savings account XX1204 has been credited with Rs 15,000 via UPI on 14-Oct-2026. Ref no: 428710294812. - ICICI Bank",legitimate,synthetic,none
@@ -27,3 +34,23 @@ text,label,source,subcategory
 "Your package from Amazon with tracking ID 491028491 will be delivered today by 6 PM. OTP for delivery is 3921.",legitimate,synthetic,none
 "Your electricity bill of Rs 1,420 for consumer no 8492019 has been paid successfully on 10-Oct via BBPS. Transaction ID: TXN940182.",legitimate,synthetic,none
 "Dear Customer, your monthly bank statement for account ending 5902 has been sent to your registered email address.",legitimate,synthetic,none
+"otp is 2039",legitimate,synthetic,none
+"The OTP is 2039",legitimate,synthetic,none
+"Your OTP is 2039",legitimate,synthetic,none
+"My OTP is 2039",legitimate,synthetic,none
+"Your OTP for order verification is 5821. Valid for 10 minutes.",legitimate,synthetic,none
+"4829 is your one time password for logging into your account. Do not share.",legitimate,synthetic,none
+"Swiggy order: Your delivery OTP is 7392. Share with delivery partner on arrival.",legitimate,synthetic,none
+"Zomato delivery code is 1934 for order #482910.",legitimate,synthetic,none
+"Amazon delivery: Arriving today by 5 PM. Provide OTP 2039 to driver.",legitimate,synthetic,none
+"Your ICICI Bank OTP for transaction of Rs 850 is 492019. Do not disclose to anyone.",legitimate,synthetic,none
+"Your HDFC NetBanking OTP is 109283 for beneficiary addition. Valid for 3 mins.",legitimate,synthetic,none
+"Aadhaar auth OTP 920192 generated on 15-Oct. If not requested, visit uidai.gov.in.",legitimate,synthetic,none
+"Please tell the driver OTP 2039 when he arrives.",legitimate,synthetic,none
+"Hi bro, the otp is 2039 enter it quickly",legitimate,synthetic,none
+"What is OTP? It is a one-time password used for secure authentication.",legitimate,synthetic,none
+"How do I change my UPI PIN securely in BHIM app?",legitimate,synthetic,none
+"Hi Mom, I reached Bangalore safely. Love you.",legitimate,synthetic,none
+"Your electricity bill of Rs 1,280 is generated. Last date is 28th October.",legitimate,synthetic,none
+"Booking confirmed: PNR 4829104829, Train 12626 Kerala Express, Seat S4-42.",legitimate,synthetic,none
+"Doctor appointment booked at Apollo Clinic for Dr. Rao at 4:30 PM tomorrow.",legitimate,synthetic,none

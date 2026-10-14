@@ -11,12 +11,16 @@
     "e2e:smoke": "node scripts/e2e-smoke.mjs"
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/three": "^0.186.0",
     "@zxing/browser": "^0.2.1",
     "@zxing/library": "^0.23.0",
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.43.0",
     "lucide-react": "^1.57.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
