@@ -75,6 +75,34 @@ class VoiceService:
 
     # --- speech-to-text -----------------------------------------------------
 
+    async def _transcribe_google(self, audio: bytes, language: str) -> str | None:
+        """Fallback transcription via Google SpeechRecognition for WAV/PCM audio."""
+        try:
+            import asyncio
+            import io
+            import speech_recognition as sr  # type: ignore[import-untyped]
+
+            lang_map = {
+                "kn": "kn-IN",
+                "hi": "hi-IN",
+                "en": "en-IN",
+            }
+            target_lang = lang_map.get(language, "en-IN")
+
+            def _sync_recognize() -> str | None:
+                r = sr.Recognizer()
+                with sr.AudioFile(io.BytesIO(audio)) as source:
+                    audio_data = r.record(source)
+                try:
+                    return r.recognize_google(audio_data, language=target_lang)
+                except (sr.UnknownValueError, sr.RequestError):
+                    return None
+
+            return await asyncio.to_thread(_sync_recognize)
+        except Exception as exc:
+            logger.debug("Google STT fallback attempt failed: %s", exc)
+            return None
+
     async def speech_to_text(
         self,
         audio: bytes,
@@ -83,15 +111,6 @@ class VoiceService:
         language: str = "en",
     ) -> dict[str, Any]:
         settings = self.settings
-        if not settings.sarvam_api_key:
-            return {
-                "status": "unavailable",
-                "error_code": "missing_api_key",
-                "message": (
-                    "Speech-to-text is not configured. Set SARVAM_API_KEY on the "
-                    "backend, or type your question instead."
-                ),
-            }
         if not audio:
             return {
                 "status": "unavailable",
@@ -105,63 +124,57 @@ class VoiceService:
                 "message": "The recording is too long. Please keep it under 30 seconds.",
             }
 
-        data = {"model": settings.stt_model, "mode": "transcribe"}
-        files = {"file": (filename or "audio.webm", audio, content_type or "application/octet-stream")}
-        try:
-            response = await self.client.post(
-                settings.sarvam_stt_url,
-                data=data,
-                files=files,
-                headers={"api-subscription-key": settings.sarvam_api_key},
-            )
-        except httpx.TimeoutException:
-            return {
-                "status": "unavailable",
-                "error_code": "timeout",
-                "message": "The speech service took too long. Please type your question instead.",
-            }
-        except httpx.HTTPError as exc:
-            logger.warning("speech-to-text transport error: %s", exc)
-            return {
-                "status": "unavailable",
-                "error_code": "network_error",
-                "message": "Could not reach the speech service. Please type your question instead.",
-            }
+        # If Sarvam key is configured, query Sarvam AI
+        if settings.sarvam_api_key:
+            data = {"model": settings.stt_model, "mode": "transcribe"}
+            files = {"file": (filename or "audio.webm", audio, content_type or "application/octet-stream")}
+            try:
+                response = await self.client.post(
+                    settings.sarvam_stt_url,
+                    data=data,
+                    files=files,
+                    headers={"api-subscription-key": settings.sarvam_api_key},
+                )
+                if response.status_code == 200:
+                    payload = response.json()
+                    transcript = (payload.get("transcript") or "").strip()
+                    if transcript:
+                        return {
+                            "status": "ok",
+                            "transcript": transcript,
+                            "detected_language": payload.get("language_code"),
+                            "engine": settings.stt_model,
+                        }
+            except Exception as exc:
+                logger.warning("Sarvam STT failed: %s", exc)
 
-        if response.status_code != 200:
-            logger.warning(
-                "speech-to-text failed with status %s: %s", response.status_code, response.text[:500]
-            )
-            return {
-                "status": "unavailable",
-                "error_code": f"upstream_{response.status_code}",
-                "message": "The speech service could not read that recording. Please type instead.",
-            }
+        # Fallback: Google Speech Recognition if enabled
+        if settings.use_google_stt:
+            google_text = await self._transcribe_google(audio, language)
+            if google_text:
+                return {
+                    "status": "ok",
+                    "transcript": google_text,
+                    "detected_language": language,
+                    "engine": "google-stt",
+                }
 
-        try:
-            payload = response.json()
-        except ValueError:
+        if not settings.sarvam_api_key:
             return {
                 "status": "unavailable",
-                "error_code": "bad_response",
-                "message": "The speech service returned an unreadable response. Please type instead.",
-            }
-
-        transcript = (payload.get("transcript") or "").strip()
-        if not transcript:
-            return {
-                "status": "unavailable",
-                "error_code": "empty_transcript",
+                "error_code": "missing_api_key",
                 "message": (
-                    "We could not hear anything clearly. Please try again or "
-                    "type your question."
+                    "Speech-to-text is not configured. Set SARVAM_API_KEY on the "
+                    "backend, or type your question instead."
                 ),
             }
+
         return {
-            "status": "ok",
-            "transcript": transcript,
-            "detected_language": payload.get("language_code"),
-            "engine": settings.stt_model,
+            "status": "unavailable",
+            "error_code": "empty_transcript",
+            "message": (
+                "We could not hear anything clearly. Please try again or type your question."
+            ),
         }
 
     # --- text-to-speech -----------------------------------------------------

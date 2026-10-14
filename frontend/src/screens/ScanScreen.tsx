@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Camera, Keyboard, ScanLine, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Camera, Keyboard, Mic, ScanLine, Sparkles, X } from "lucide-react";
 import { ApiError, api } from "../api";
 import { BigButton } from "../components/Button";
 import { Banner, Card, Spinner } from "../components/bits";
 import type { Dict } from "../i18n";
 import type { Scanner } from "../lib/scanner";
+import { LiveSpeechRecognizer } from "../lib/speechRecognition";
 import { useApp, useNav } from "../state";
 import type { Intention } from "../types";
 import { DEMO_SCENARIOS } from "../data/demo";
@@ -55,9 +56,51 @@ export function ScanScreen() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [isDictating, setIsDictating] = useState(false);
+  const [dictationInterim, setDictationInterim] = useState("");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scannerRef = useRef<Scanner | null>(null);
+  const recognizerRef = useRef<LiveSpeechRecognizer | null>(null);
+
+  const stopDictation = useCallback(() => {
+    recognizerRef.current?.stop();
+    recognizerRef.current = null;
+    setIsDictating(false);
+    setDictationInterim("");
+  }, []);
+
+  const startDictation = useCallback(() => {
+    const recognizer = new LiveSpeechRecognizer();
+    recognizerRef.current = recognizer;
+    setIsDictating(true);
+    setDictationInterim("");
+    recognizer.start(lang, {
+      onInterim: (interim) => {
+        setDictationInterim(interim);
+      },
+      onFinal: (finalText) => {
+        setRawText((prev) => (prev.trim() ? `${prev.trim()} ${finalText}` : finalText));
+        setIsDictating(false);
+        setDictationInterim("");
+      },
+      onError: () => {
+        setIsDictating(false);
+        setDictationInterim("");
+      },
+      onEnd: () => {
+        setIsDictating(false);
+        setDictationInterim("");
+      },
+    });
+  }, [lang]);
+
+  useEffect(() => {
+    return () => {
+      recognizerRef.current?.stop();
+      recognizerRef.current = null;
+    };
+  }, []);
 
   const stopCamera = useCallback(() => {
     scannerRef.current?.stop();
@@ -234,7 +277,36 @@ export function ScanScreen() {
           {/* manual panel */}
           {method === "manual" ? (
             <Card>
-              <h2 className="text-xl font-extrabold">{t.scan.manualTitle}</h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-xl font-extrabold">{t.scan.manualTitle}</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isDictating) {
+                      stopDictation();
+                    } else {
+                      startDictation();
+                    }
+                  }}
+                  className={`flex items-center gap-2 rounded-2xl border-2 px-3.5 py-1.5 text-sm font-extrabold shadow-xs transition-all ${
+                    isDictating
+                      ? "animate-pulse border-coral bg-coral text-white"
+                      : "border-teal bg-teal/10 text-teal-dark hover:bg-teal hover:text-white"
+                  }`}
+                  aria-label={isDictating ? t.scan.stopDictation : t.scan.voiceDictate}
+                >
+                  <Mic className="h-4 w-4" aria-hidden="true" />
+                  <span>{isDictating ? t.scan.stopDictation : t.scan.voiceDictate}</span>
+                </button>
+              </div>
+
+              {isDictating ? (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-coral/30 bg-coral/5 px-3 py-2 text-sm font-bold text-coral-dark">
+                  <span className="h-2.5 w-2.5 animate-ping rounded-full bg-coral" />
+                  <span>{dictationInterim ? `"${dictationInterim}..."` : t.scan.listeningDictation}</span>
+                </div>
+              ) : null}
+
               <label className="mt-3 block">
                 <span className="sr-only">{t.scan.manualTitle}</span>
                 <textarea

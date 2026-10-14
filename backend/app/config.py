@@ -22,6 +22,13 @@ def _split_csv(raw: str) -> list[str]:
     return [item.strip() for item in raw.replace(";", ",").split(",") if item.strip()]
 
 
+try:
+    import speech_recognition as sr  # type: ignore[import-untyped]
+    HAS_SPEECH_RECOGNITION = True
+except ImportError:
+    HAS_SPEECH_RECOGNITION = False
+
+
 @dataclass(frozen=True)
 class Settings:
     sarvam_api_key: str | None
@@ -31,13 +38,14 @@ class Settings:
     tts_model: str
     tts_speaker: str | None
     use_edge_tts: bool
+    use_google_stt: bool
     cors_origins: list[str]
     voice_timeout_seconds: float
     max_audio_bytes: int
 
     @property
     def stt_configured(self) -> bool:
-        return self.sarvam_api_key is not None
+        return (self.sarvam_api_key is not None) or (self.use_google_stt and HAS_SPEECH_RECOGNITION)
 
     @property
     def tts_configured(self) -> bool:
@@ -68,6 +76,7 @@ def get_settings() -> Settings:
         tts_model=os.getenv("SARVAM_TTS_MODEL", "bulbul:v3").strip(),
         tts_speaker=(os.getenv("SARVAM_TTS_SPEAKER", "") or "").strip() or None,
         use_edge_tts=os.getenv("USE_EDGE_TTS", "true").strip().lower() in ("1", "true", "yes"),
+        use_google_stt=os.getenv("USE_GOOGLE_STT", "false").strip().lower() in ("1", "true", "yes"),
         cors_origins=_split_csv(os.getenv("CORS_ORIGINS", DEFAULT_ORIGINS)),
         voice_timeout_seconds=timeout,
         max_audio_bytes=max_mb * 1024 * 1024,
