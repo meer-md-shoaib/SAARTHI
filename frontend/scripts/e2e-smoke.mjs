@@ -145,6 +145,10 @@ try {
   step = "analyze-high";
   await clickText("Check Another QR");
   await waitForText("Scan & Check");
+  await clickText("Type or paste details");
+  if (await hasText("Speak details")) pass("voice dictation option visible in manual scan");
+  else fail("voice dictation option missing in manual scan");
+
   await clickText("Try a demo");
   await clickText("A threatening message");
   await waitForText("Two quick questions");
@@ -205,6 +209,24 @@ try {
   await waitForText("Namaste!");
   await clickText("Someone is asking me to pay");
   await waitForText("Safety SOS");
+
+  if (await hasText("Immediate Family Emergency Contacts"))
+    pass("4 family emergency contacts shown");
+  else fail("emergency contacts header missing");
+
+  if ((await hasText("Rahul")) && (await hasText("Savitri")) && (await hasText("Aarav")) && (await hasText("Ananya")))
+    pass("son, wife, grandson, granddaughter contacts present");
+  else fail("family member names missing");
+
+  if ((await hasText("1930")) && (await hasText("cybercrime.gov.in")))
+    pass("cybercrime.gov.in portal and 1930 helpline present");
+  else fail("cybercrime portal link or helpline missing");
+
+  await clickText("Send SOS Alert", "button", true);
+  if (await hasText("Alert dispatched to Rahul"))
+    pass("emergency alert dispatch confirmation displayed");
+  else fail("emergency alert feedback missing");
+
   await clickText("They are asking for my PIN or OTP.");
   await waitForText("Do this now");
   if (await hasText("not an emergency service")) pass("SOS shows its guidance disclaimer");
@@ -228,40 +250,58 @@ try {
   await clickText("Do not pay, tell her son", "button", true);
   await waitForText("A safe choice");
   pass("story reaches the safe ending");
+  await new Promise((r) => setTimeout(r, 400));
 
   /* ------------------------------------------------ language switch */
   step = "language";
   await clickText("Home", "nav button");
   await waitForText("Namaste!");
-  await page.click('[data-testid="language-button"]');
+  await new Promise((r) => setTimeout(r, 400));
+  await page.evaluate(() => document.querySelector('[data-testid="language-button"]')?.click());
   await waitForText("हिन्दी");
-  await clickText("हिन्दी");
+  await new Promise((r) => setTimeout(r, 150));
+  await page.evaluate(() => {
+    const btns = [...document.querySelectorAll(".z-50 button")];
+    btns.find((b) => b.textContent.includes("हिन्दी"))?.click();
+  });
   await waitForText("नमस्ते");
   pass("Hindi language switch works");
 
-  await page.click('[data-testid="language-button"]');
+  await page.evaluate(() => document.querySelector('[data-testid="language-button"]')?.click());
   await waitForText("ಕನ್ನಡ");
-  await clickText("ಕನ್ನಡ");
+  await new Promise((r) => setTimeout(r, 150));
+  await page.evaluate(() => {
+    const btns = [...document.querySelectorAll(".z-50 button")];
+    btns.find((b) => b.textContent.includes("ಕನ್ನಡ"))?.click();
+  });
   await waitForText("ನಮಸ್ಕಾರ");
   pass("Kannada language switch works");
 
-  await page.click('[data-testid="language-button"]');
+  await page.evaluate(() => document.querySelector('[data-testid="language-button"]')?.click());
   await waitForText("English");
-  await clickText("English", "button", true);
+  await new Promise((r) => setTimeout(r, 150));
+  await page.evaluate(() => {
+    const btns = [...document.querySelectorAll(".z-50 button")];
+    btns.find((b) => b.textContent.includes("English"))?.click();
+  });
   await waitForText("Namaste!");
   pass("English switch back works");
+  await new Promise((r) => setTimeout(r, 200));
 
   /* ------------------------------------------------ text size */
   step = "text-size";
+  await new Promise((r) => setTimeout(r, 300));
   const before = await page.evaluate(() => document.documentElement.style.fontSize);
-  await page.click('[data-testid="text-size-button"]');
+  await page.evaluate(() => document.querySelector('[data-testid="text-size-button"]')?.click());
+  await new Promise((r) => setTimeout(r, 100));
   const after = await page.evaluate(() => document.documentElement.style.fontSize);
   if (before !== after && after === "112%") pass(`text size control works (${before} -> ${after})`);
   else fail(`text size did not change: ${before} -> ${after}`);
 
   /* ------------------------------------------------ voice toggle */
   step = "voice-toggle";
-  await page.click('[data-testid="voice-toggle"]');
+  await page.evaluate(() => document.querySelector('[data-testid="voice-toggle"]')?.click());
+  await new Promise((r) => setTimeout(r, 100));
   const voiceOff = await page.evaluate(() => {
     const button = document.querySelector('[data-testid="voice-toggle"]');
     return Boolean(button) && button.getAttribute("aria-label") === "Voice guidance on";

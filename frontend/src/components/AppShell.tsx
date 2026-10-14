@@ -122,6 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <button
                         key={entry.code}
                         type="button"
+                        data-testid={`lang-option-${entry.code}`}
                         onClick={() => {
                           setLang(entry.code);
                           setLangOpen(false);

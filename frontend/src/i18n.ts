@@ -95,6 +95,9 @@ export const en = {
     checkingSub: "This takes only a moment.",
     emptyInput: "There is nothing to check yet. Paste some details or pick a demo.",
     analyzeFailed: "The safety check could not run. Please try again.",
+    voiceDictate: "Speak details",
+    listeningDictation: "Listening... speak now",
+    stopDictation: "Done speaking",
   },
   result: {
     title: "Safety Check Result",
@@ -191,6 +194,18 @@ export const en = {
     choicePin: "They are asking for my PIN or OTP.",
     choiceRush: "They are rushing or threatening me.",
     choiceQr: "I am unsure about a QR code or payment.",
+    emergencyContactsTitle: "Immediate Family Emergency Contacts",
+    emergencyContactsSub: "Tap any family member to immediately send an urgent SOS alert message or call them for advice.",
+    sendAlert: "Send SOS Alert",
+    alertSent: (name: string) => `Alert dispatched to ${name}. Waiting for call or reply.`,
+    callContact: "Call",
+    openSms: "Send SMS Alert",
+    openWhatsapp: "Send WhatsApp Alert",
+    cyberCrimeTitle: "National Cyber Crime Reporting Portal",
+    cyberCrimeSub: "Official 24/7 Government of India Financial Fraud Reporting (1930)",
+    cyberCrimeDesc: "Report cyber fraud within the 2-hour golden period to freeze fraudulent transactions.",
+    cyberCrimeBtn: "Open cybercrime.gov.in",
+    cyberCrimeHelpline: "Call 1930 Helpline",
   },
   story: {
     title: "Safer Choices",
@@ -227,6 +242,10 @@ export const en = {
     aboutTitle: "About this app",
     aboutText:
       "SAARTHI SafePay is a guidance prototype. It never asks for your PIN or OTP, never makes payments, and never sends your details to a bank or an AI service.",
+    cyberCrimeTitle: "Report Financial Cyber Fraud (Helpline 1930)",
+    cyberCrimeText:
+      "If money has left your account, immediately call the National Cyber Crime Helpline on 1930 or submit an online report at cybercrime.gov.in within 2 hours to freeze stolen money.",
+    cyberCrimeBtn: "Visit cybercrime.gov.in",
   },
   voiceErrors: {
     missing_api_key: "Voice service is not configured on the server.",
@@ -328,6 +347,9 @@ export const hi: Dict = {
     emptyInput:
       "अभी जाँचने के लिए कुछ नहीं है। जानकारी पेस्ट करें या कोई डेमो चुनें।",
     analyzeFailed: "सुरक्षा जाँच नहीं हो सकी। कृपया फिर कोशिश करें।",
+    voiceDictate: "बोलकर बताएँ",
+    listeningDictation: "सुन रहे हैं... अभी बोलें",
+    stopDictation: "बोलना पूरा हुआ",
   },
   result: {
     title: "सुरक्षा जाँच का परिणाम",
@@ -423,6 +445,18 @@ export const hi: Dict = {
     choicePin: "मेरा पिन या OTP माँगा जा रहा है।",
     choiceRush: "मुझ पर जल्दबाज़ी या धमकी डाली जा रही है।",
     choiceQr: "मुझे किसी क्यूआर या भुगतान पर शक है।",
+    emergencyContactsTitle: "परिवार के आपातकालीन संपर्क",
+    emergencyContactsSub: "किसी भी सदस्य को तुरंत आपातकालीन SOS संदेश भेजने या सलाह के लिए कॉल करने के लिए टैप करें।",
+    sendAlert: "SOS संदेश भेजें",
+    alertSent: (name: string) => `${name} को आपातकालीन संदेश भेजा गया। जवाब की प्रतीक्षा है।`,
+    callContact: "कॉल करें",
+    openSms: "SMS संदेश भेजें",
+    openWhatsapp: "WhatsApp पर भेजें",
+    cyberCrimeTitle: "राष्ट्रीय साइबर अपराध रिपोर्टिंग पोर्टल",
+    cyberCrimeSub: "भारत सरकार का आधिकारिक 24/7 वित्तीय धोखाधड़ी पोर्टल (1930)",
+    cyberCrimeDesc: "पैसे कटने के 2 घंटे के भीतर तुरंत 1930 पर कॉल करें या ऑनलाइन रिपोर्ट करें ताकि पैसे फ्रीज किए जा सकें।",
+    cyberCrimeBtn: "cybercrime.gov.in खोलें",
+    cyberCrimeHelpline: "हेल्पलाइन 1930 पर कॉल करें",
   },
   story: {
     title: "सुरक्षित चुनाव",
@@ -458,6 +492,10 @@ export const hi: Dict = {
     aboutTitle: "इस ऐप के बारे में",
     aboutText:
       "SAARTHI SafePay एक मार्गदर्शन प्रोटोटाइप है। यह आपसे पिन या OTP कभी नहीं माँगता, भुगतान कभी नहीं करता, और आपकी जानकारी किसी बैंक या AI सेवा को कभी नहीं भेजता।",
+    cyberCrimeTitle: "वित्तीय साइबर धोखाधड़ी की रिपोर्ट (हेल्पलाइन 1930)",
+    cyberCrimeText:
+      "अगर आपके खाते से पैसे कट गए हैं, तो तुरंत 1930 पर कॉल करें या 2 घंटे के अंदर cybercrime.gov.in पर शिकायत दर्ज करें।",
+    cyberCrimeBtn: "cybercrime.gov.in पोर्टल पर जाएँ",
   },
   voiceErrors: {
     missing_api_key: "सर्वर पर आवाज़ सेवा सेट नहीं है।",
@@ -560,6 +598,9 @@ export const kn: Dict = {
     emptyInput:
       "ಈಗ ಪರಿಶೀಲಿಸಲು ಏನೂ ಇಲ್ಲ. ಮಾಹಿತಿ ಪೇಸ್ಟ್ ಮಾಡಿ ಅಥವಾ ಡೆಮೊ ಆಯ್ಕೆ ಮಾಡಿ.",
     analyzeFailed: "ಸುರಕ್ಷತಾ ಪರಿಶೀಲನೆ ನಡೆಯಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    voiceDictate: "ಧ್ವನಿ ಮೂಲಕ ತಿಳಿಸಿ",
+    listeningDictation: "ಆಲಿಸಲಾಗುತ್ತಿದೆ... ಈಗ ಮಾತನಾಡಿ",
+    stopDictation: "ಮಾತನಾಡುವುದು ಮುಗಿಯಿತು",
   },
   result: {
     title: "ಸುರಕ್ಷತಾ ಪರಿಶೀಲನೆಯ ಫಲಿತಾಂಶ",
@@ -659,6 +700,18 @@ export const kn: Dict = {
     choicePin: "ನನ್ನ ಪಿನ್ ಅಥವಾ ಒಟಿಪಿ ಕೇಳಲಾಗುತ್ತಿದೆ.",
     choiceRush: "ನನ್ನ ಮೇಲೆ ಅವಸರ ಅಥವಾ ಬೆದರಿಕೆ.",
     choiceQr: "ನನಗೆ QR ಅಥವಾ ಪಾವತಿಯ ಬಗ್ಗೆ ಅನುಮಾನವಿದೆ.",
+    emergencyContactsTitle: "ಕುಟುಂಬದ ತಕ್ಷಣದ ತುರ್ತು ಸಂಪರ್ಕಗಳು",
+    emergencyContactsSub: "ಯಾವುದೇ ಸದಸ್ಯರಿಗೆ ತುರ್ತು SOS ಸಂದೇಶ ಕಳುಹಿಸಲು ಅಥವಾ ಕರೆ ಮಾಡಿ ಮಾರ್ಗದರ್ಶನ ಪಡೆಯಲು ಅವರ ಮೇಲೆ ಒತ್ತಿ.",
+    sendAlert: "SOS ಸಂದೇಶ ಕಳುಹಿಸಿ",
+    alertSent: (name: string) => `${name} ಅವರಿಗೆ ತುರ್ತು ಸಂದೇಶ ಕಳುಹಿಸಲಾಗಿದೆ. ಪ್ರತ್ಯುತ್ತರಕ್ಕಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ.`,
+    callContact: "ಕರೆ ಮಾಡಿ",
+    openSms: "SMS ಸಂದೇಶ ಕಳುಹಿಸಿ",
+    openWhatsapp: "WhatsApp ಮೂಲಕ ಕಳುಹಿಸಿ",
+    cyberCrimeTitle: "ರಾಷ್ಟ್ರೀಯ ಸೈಬರ್ ಅಪರಾಧ ವರದಿ ಪೋರ್ಟಲ್",
+    cyberCrimeSub: "ಭಾರತ ಸರ್ಕಾರದ ಅಧಿಕೃತ 24/7 ಹಣಕಾಸು ವಂಚನೆ ವರದಿ ಪೋರ್ಟಲ್ (1930)",
+    cyberCrimeDesc: "ವಂಚನೆಗೊಳಗಾದ 2 ಗಂಟೆಯೊಳಗೆ 1930 ಗೆ ಕರೆ ಮಾಡಿ ಅಥವಾ ದೂರು ನೀಡಿ ಬ್ಯಾಂಕ್‌ನಲ್ಲಿ ಹಣ ಸ್ಥಗಿತಗೊಳಿಸಿ.",
+    cyberCrimeBtn: "cybercrime.gov.in ತೆರೆಯಿರಿ",
+    cyberCrimeHelpline: "1930 ಸಹಾಯವಾಣಿಗೆ ಕರೆ ಮಾಡಿ",
   },
   story: {
     title: "ಸುರಕ್ಷಿತ ಆಯ್ಕೆಗಳು",
@@ -697,6 +750,10 @@ export const kn: Dict = {
     aboutTitle: "ಈ ಆ್ಯಪ್ ಬಗ್ಗೆ",
     aboutText:
       "SAARTHI SafePay ಮಾರ್ಗದರ್ಶನ ಪ್ರೋಟೋಟೈಪ್. ಇದು ನಿಮ್ಮ ಪಿನ್ ಅಥವಾ ಒಟಿಪಿ ಎಂದಿಗೂ ಕೇಳುವುದಿಲ್ಲ, ಪಾವತಿ ಎಂದಿಗೂ ಮಾಡುವುದಿಲ್ಲ, ಮತ್ತು ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ಬ್ಯಾಂಕ್ ಅಥವಾ AI ಸೇವೆಗೆ ಎಂದಿಗೂ ಕಳುಹಿಸುವುದಿಲ್ಲ.",
+    cyberCrimeTitle: "ಹಣಕಾಸು ಸೈಬರ್ ವಂಚನೆ ವರದಿ (ಸಹಾಯವಾಣಿ 1930)",
+    cyberCrimeText:
+      "ನಿಮ್ಮ ಖಾತೆಯಿಂದ ಹಣ ವರ್ಗಾವಣೆಯಾಗಿದ್ದರೆ, ತಕ್ಷಣ 1930 ಸಂಖ್ಯೆಗೆ ಕರೆ ಮಾಡಿ ಅಥವಾ 2 ಗಂಟೆಯೊಳಗೆ cybercrime.gov.in ನಲ್ಲಿ ದೂರು ದಾಖಲಿಸಿ.",
+    cyberCrimeBtn: "cybercrime.gov.in ಭೇಟಿ ನೀಡಿ",
   },
   voiceErrors: {
     missing_api_key: "ಸರ್ವರ್‌ನಲ್ಲಿ ಧ್ವನಿ ಸೇವೆ ಹೊಂದಿಸಲಾಗಿಲ್ಲ.",
