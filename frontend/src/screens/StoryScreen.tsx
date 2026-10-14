@@ -52,7 +52,7 @@ function playSoundFeedback(type: "success" | "alert") {
 }
 
 export function StoryScreen() {
-  const { t, lang, speakIfOn, isSpeaking, stopSpeaking } = useApp();
+  const { t, uiLang, speakIfOn, isSpeaking, stopSpeaking } = useApp();
 
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>("prize");
   const currentEpisode: StoryEpisode =
@@ -68,7 +68,7 @@ export function StoryScreen() {
 
   /* Read each scene aloud as the reader advances if voice is enabled. */
   useEffect(() => {
-    const text = node?.text[lang];
+    const text = node?.text[uiLang];
     if (text) {
       speakIfOn(text);
     }
@@ -105,7 +105,7 @@ export function StoryScreen() {
     if (isSpeaking) {
       stopSpeaking();
     } else if (node) {
-      speakIfOn(node.text[lang]);
+      speakIfOn(node.text[uiLang]);
     }
   };
 
@@ -119,7 +119,7 @@ export function StoryScreen() {
         <div className="flex items-center gap-2 text-teal-dark">
           <BookOpen className="h-6 w-6" aria-hidden="true" />
           <span className="text-sm font-extrabold uppercase tracking-wide">
-            {lang === "kn" ? "ಸಂವಾದಾತ್ಮಕ ಕಥೆಗಳ ಆಟ" : lang === "hi" ? "इंटरएक्टिव कहानी का खेल" : "Interactive Stories Game"}
+            {uiLang === "kn" ? "ಸಂವಾದಾತ್ಮಕ ಕಥೆಗಳ ಆಟ" : uiLang === "hi" ? "इंटरएक्टिव कहानी का खेल" : "Interactive Stories Game"}
           </span>
         </div>
         <h1 className="mt-1 text-3xl font-extrabold sm:text-4xl">{t.story.title}</h1>
@@ -129,7 +129,7 @@ export function StoryScreen() {
       {/* Episode selection cards */}
       <div className="space-y-2">
         <label className="block text-sm font-bold text-navy/70">
-          {lang === "kn" ? "ಕಥೆಯ ಸನ್ನಿವೇಶ ಆಯ್ಕೆಮಾಡಿ:" : lang === "hi" ? "कहानी का प्रसंग चुनें:" : "Choose a Scam Scenario:"}
+          {uiLang === "kn" ? "ಕಥೆಯ ಸನ್ನಿವೇಶ ಆಯ್ಕೆಮಾಡಿ:" : uiLang === "hi" ? "कहानी का प्रसंग चुनें:" : "Choose a Scam Scenario:"}
         </label>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {STORY_EPISODES.map((ep) => {
@@ -147,7 +147,7 @@ export function StoryScreen() {
               >
                 <span className="text-2xl">{ep.icon}</span>
                 <span className="mt-1.5 line-clamp-1 text-sm font-extrabold text-navy">
-                  {ep.title[lang]}
+                  {ep.title[uiLang]}
                 </span>
                 <span className="line-clamp-1 text-xs text-navy/70">{ep.character}</span>
               </button>
@@ -163,7 +163,7 @@ export function StoryScreen() {
             <div className="flex items-center gap-2">
               <span className="text-xl">{currentEpisode.icon}</span>
               <span className="font-extrabold text-navy sm:text-lg">
-                {currentEpisode.title[lang]}
+                {currentEpisode.title[uiLang]}
               </span>
             </div>
             <button
@@ -179,12 +179,12 @@ export function StoryScreen() {
               {isSpeaking ? (
                 <>
                   <VolumeX className="h-4 w-4" aria-hidden="true" />
-                  <span>{lang === "kn" ? "ನಿಲ್ಲಿಸಿ" : lang === "hi" ? "रोकें" : "Stop"}</span>
+                  <span>{uiLang === "kn" ? "ನಿಲ್ಲಿಸಿ" : uiLang === "hi" ? "रोकें" : "Stop"}</span>
                 </>
               ) : (
                 <>
                   <Volume2 className="h-4 w-4" aria-hidden="true" />
-                  <span>{lang === "kn" ? "ಧ್ವನಿಯಲ್ಲಿ ಕೇಳಿ" : lang === "hi" ? "आवाज़ में सुनें" : "Listen Aloud"}</span>
+                  <span>{uiLang === "kn" ? "ಧ್ವನಿಯಲ್ಲಿ ಕೇಳಿ" : uiLang === "hi" ? "आवाज़ में सुनें" : "Listen Aloud"}</span>
                 </>
               )}
             </button>
@@ -192,7 +192,7 @@ export function StoryScreen() {
 
           <div className="pt-4">
             <SceneArt kind={node.art} className="w-full" />
-            <p className="mt-4 text-lg font-medium leading-relaxed sm:text-xl">{node.text[lang]}</p>
+            <p className="mt-4 text-lg font-medium leading-relaxed sm:text-xl">{node.text[uiLang]}</p>
           </div>
         </Card>
       ) : null}
@@ -218,21 +218,21 @@ export function StoryScreen() {
               >
                 {ending.kind === "good" ? t.story.goodBadge : t.story.badBadge}
               </span>
-              <h2 className="mt-1 text-2xl font-extrabold sm:text-3xl">{ending.title[lang]}</h2>
+              <h2 className="mt-1 text-2xl font-extrabold sm:text-3xl">{ending.title[uiLang]}</h2>
             </div>
           </div>
 
-          <p className="text-lg leading-relaxed text-navy/90">{ending.text[lang]}</p>
+          <p className="text-lg leading-relaxed text-navy/90">{ending.text[uiLang]}</p>
 
           {/* Golden Rule box */}
           <div className="flex items-start gap-3 rounded-2xl border border-sun/60 bg-sun/20 p-4">
             <Lightbulb className="h-6 w-6 shrink-0 text-navy" aria-hidden="true" />
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-navy/70">
-                {lang === "kn" ? "ಮುಖ್ಯ ಪಾಠ (ಗೋಲ್ಡನ್ ರೂಲ್)" : lang === "hi" ? "मूल सीख (गोल्डन रूल)" : "Golden Rule Takeaway"}
+                {uiLang === "kn" ? "ಮುಖ್ಯ ಪಾಠ (ಗೋಲ್ಡನ್ ರೂಲ್)" : uiLang === "hi" ? "मूल सीख (गोल्डन रूल)" : "Golden Rule Takeaway"}
               </p>
               <p className="mt-0.5 font-bold text-navy sm:text-base">
-                {ending.goldenRule ? ending.goldenRule[lang] : currentEpisode.goldenRule[lang]}
+                {ending.goldenRule ? ending.goldenRule[uiLang] : currentEpisode.goldenRule[uiLang]}
               </p>
             </div>
           </div>
@@ -256,18 +256,18 @@ export function StoryScreen() {
               onClick={() => handleSelectEpisode(nextEpisode)}
               icon={<Sparkles className="h-5 w-5" />}
             >
-              {lang === "kn"
-                ? `ಮುಂದಿನ ಕಥೆ: ${nextEpisode.title[lang]}`
-                : lang === "hi"
-                  ? `अगली कहानी: ${nextEpisode.title[lang]}`
-                  : `Next: ${nextEpisode.title[lang]}`}
+              {uiLang === "kn"
+                ? `ಮುಂದಿನ ಕಥೆ: ${nextEpisode.title[uiLang]}`
+                : uiLang === "hi"
+                  ? `अगली कहानी: ${nextEpisode.title[uiLang]}`
+                  : `Next: ${nextEpisode.title[uiLang]}`}
             </BigButton>
           </div>
         </Card>
       ) : node ? (
         <div className="space-y-3">
           <p className="text-sm font-bold text-navy/70">
-            {lang === "kn" ? "ನೀವು ಏನು ಮಾಡುತ್ತೀರಿ?" : lang === "hi" ? "आप क्या करेंगे?" : "What would you do?"}
+            {uiLang === "kn" ? "ನೀವು ಏನು ಮಾಡುತ್ತೀರಿ?" : uiLang === "hi" ? "आप क्या करेंगे?" : "What would you do?"}
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             {node.options.map((option) => (
@@ -277,7 +277,7 @@ export function StoryScreen() {
                 variant="outline"
                 onClick={() => handleOptionClick(option.next)}
               >
-                {option.label[lang]}
+                {option.label[uiLang]}
               </BigButton>
             ))}
           </div>

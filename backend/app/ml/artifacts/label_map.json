@@ -1,0 +1,17 @@
+{
+  "classes": [
+    "legitimate",
+    "promotional",
+    "scam"
+  ],
+  "class_to_idx": {
+    "legitimate": 0,
+    "promotional": 1,
+    "scam": 2
+  },
+  "idx_to_class": {
+    "0": "legitimate",
+    "1": "promotional",
+    "2": "scam"
+  }
+}

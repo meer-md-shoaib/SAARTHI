@@ -5,6 +5,7 @@ import {
   CircleHelp,
   House,
   Languages,
+  Mic,
   Repeat,
   Square,
   Type,
@@ -12,15 +13,9 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { SUPPORTED_LANGUAGES } from "../lib/languages";
 import { useApp, useNav } from "../state";
-import type { Lang } from "../types";
 import { SaarthiMascot } from "./illustrations";
-
-const LANGUAGES: { code: Lang; label: string; native: string }[] = [
-  { code: "en", label: "English", native: "English" },
-  { code: "hi", label: "Hindi", native: "हिन्दी" },
-  { code: "kn", label: "Kannada", native: "ಕನ್ನಡ" },
-];
 
 const SCALE_CLASSES = ["text-sm", "text-base", "text-xl"];
 
@@ -28,6 +23,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const {
     lang,
     setLang,
+    activeLangInfo,
+    hasUiTranslation,
     t,
     scale,
     setScale,
@@ -37,11 +34,15 @@ export function AppShell({ children }: { children: ReactNode }) {
     hasLastSpoken,
     stopSpeaking,
     repeatLast,
+    assistantState,
+    startVoiceSession,
+    stopVoiceSession,
   } = useApp();
   const { route, go, back, home, canGoBack } = useNav();
   const [langOpen, setLangOpen] = useState(false);
 
-  const currentLang = LANGUAGES.find((entry) => entry.code === lang) ?? LANGUAGES[0];
+  const fullSupportLangs = SUPPORTED_LANGUAGES.filter((l) => l.hasUiTranslation);
+  const voiceOnlyLangs = SUPPORTED_LANGUAGES.filter((l) => !l.hasUiTranslation);
 
   const navItems = [
     {
@@ -97,6 +98,30 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
 
           <div className="flex items-center gap-1 sm:gap-1.5">
+            {/* global mic trigger if not on home screen */}
+            {route.screen !== "home" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (assistantState === "listening") {
+                    stopVoiceSession();
+                  } else {
+                    startVoiceSession();
+                  }
+                }}
+                className={`flex min-h-[44px] items-center gap-1.5 rounded-2xl border-2 px-2.5 sm:min-h-[48px] sm:px-3 font-bold transition-all ${
+                  assistantState === "listening"
+                    ? "border-coral bg-coral text-white animate-pulse"
+                    : "border-navy/15 bg-paper text-navy hover:border-navy/40"
+                }`}
+                title="Voice Assistant"
+                aria-label="Voice Assistant"
+              >
+                <Mic className="h-5 w-5 text-coral" aria-hidden="true" />
+                <span className="hidden text-xs sm:inline">Voice</span>
+              </button>
+            ) : null}
+
             {/* language picker */}
             <div className="relative">
               <button
@@ -104,11 +129,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 data-testid="language-button"
                 onClick={() => setLangOpen((open) => !open)}
                 aria-expanded={langOpen}
-                aria-label={`${t.nav.language}: ${currentLang.label}`}
+                aria-label={`${t.nav.language}: ${activeLangInfo.label}`}
                 className="flex min-h-[44px] sm:min-h-[48px] items-center gap-1.5 rounded-2xl border-2 border-navy/15 bg-paper px-2.5 sm:px-3 font-bold transition-colors hover:border-navy/40"
               >
-                <Languages className="h-5 w-5" aria-hidden="true" />
-                <span className="hidden sm:inline">{currentLang.native}</span>
+                <Languages className="h-5 w-5 text-teal" aria-hidden="true" />
+                <span className="hidden sm:inline">{activeLangInfo.native}</span>
               </button>
               {langOpen ? (
                 <>
@@ -117,8 +142,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                     onClick={() => setLangOpen(false)}
                     aria-hidden="true"
                   />
-                  <div className="absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-navy/15 bg-paper p-2 shadow-lift">
-                    {LANGUAGES.map((entry) => (
+                  <div className="absolute right-0 z-50 mt-2 max-h-[80vh] w-72 overflow-y-auto rounded-3xl border border-navy/15 bg-paper p-3 shadow-lift">
+                    <div className="mb-2 px-2 pt-1 text-xs font-bold uppercase tracking-wider text-navy/60">
+                      Full App (UI + Voice)
+                    </div>
+                    {fullSupportLangs.map((entry) => (
                       <button
                         key={entry.code}
                         type="button"
@@ -128,11 +156,45 @@ export function AppShell({ children }: { children: ReactNode }) {
                           setLangOpen(false);
                         }}
                         aria-pressed={entry.code === lang}
-                        className={`flex w-full items-center justify-between gap-2 rounded-xl px-4 py-3.5 text-left text-lg font-bold transition-colors hover:bg-navy/5 ${
+                        className={`mb-1 flex w-full items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 text-left transition-colors hover:bg-navy/5 ${
                           entry.code === lang ? "bg-teal-soft" : ""
                         }`}
                       >
-                        <span>{entry.native}</span>
+                        <div>
+                          <div className="font-extrabold text-navy">{entry.native}</div>
+                          <div className="text-xs text-navy/70">{entry.label}</div>
+                        </div>
+                        {entry.code === lang ? (
+                          <Check className="h-5 w-5 text-teal-dark" aria-hidden="true" />
+                        ) : null}
+                      </button>
+                    ))}
+
+                    <div className="my-2 border-t border-navy/10 pt-2" />
+
+                    <div className="mb-2 px-2 text-xs font-bold uppercase tracking-wider text-navy/60">
+                      Voice & Speech Support (Sarvam AI)
+                    </div>
+                    {voiceOnlyLangs.map((entry) => (
+                      <button
+                        key={entry.code}
+                        type="button"
+                        data-testid={`lang-option-${entry.code}`}
+                        onClick={() => {
+                          setLang(entry.code);
+                          setLangOpen(false);
+                        }}
+                        aria-pressed={entry.code === lang}
+                        className={`mb-1 flex w-full items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 text-left transition-colors hover:bg-navy/5 ${
+                          entry.code === lang ? "bg-teal-soft" : ""
+                        }`}
+                      >
+                        <div>
+                          <div className="font-extrabold text-navy">{entry.native}</div>
+                          <div className="text-xs text-navy/70">
+                            {entry.label} <span className="text-[10px] text-teal-dark">(Voice Only)</span>
+                          </div>
+                        </div>
                         {entry.code === lang ? (
                           <Check className="h-5 w-5 text-teal-dark" aria-hidden="true" />
                         ) : null}
@@ -177,6 +239,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
+
+        {/* Notice banner for voice-only languages */}
+        {!hasUiTranslation ? (
+          <div className="border-t border-teal/20 bg-teal-soft/60 px-3 py-1.5 text-center text-xs text-navy/85 sm:text-sm">
+            <span>
+              Voice Assistant configured for <strong>{activeLangInfo.native}</strong> ({activeLangInfo.label}). UI text is displayed in English.
+            </span>
+          </div>
+        ) : null}
       </header>
 
       {/* ------------------------------------------------ main */}
@@ -184,9 +255,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto w-full max-w-5xl px-3 py-4 pb-28 sm:px-4 sm:py-6 sm:pb-32">{children}</div>
       </main>
 
-      {/* ------------------------------------------------ speaking indicator */}
+      {/* ------------------------------------------------ speaking / listening indicator */}
       <AnimatePresence>
-        {isSpeaking ? (
+        {isSpeaking || assistantState === "speaking" ? (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}

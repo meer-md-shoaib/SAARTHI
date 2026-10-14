@@ -1,0 +1,47 @@
+{
+  "model_version": "1.0.0",
+  "artifact_file": "model_v1.joblib",
+  "selected_architecture": "LinearSVC_Calibrated_ClassWeighted",
+  "trained_at_utc": "2026-10-14T18:14:47.508481+00:00",
+  "random_seed": 42,
+  "features": {
+    "word_ngrams": [
+      1,
+      2
+    ],
+    "char_ngrams": [
+      3,
+      5
+    ],
+    "analyzer": "word + char_wb"
+  },
+  "classes": [
+    "legitimate",
+    "promotional",
+    "scam"
+  ],
+  "dataset_splits": {
+    "train_samples": 6408,
+    "val_samples": 1374,
+    "test_samples": 1374
+  },
+  "candidate_comparison": {
+    "LogisticRegression_ClassWeighted": {
+      "macro_f1": 0.9615,
+      "scam_f1": 0.9545,
+      "accuracy": 0.9723
+    },
+    "LinearSVC_Calibrated_ClassWeighted": {
+      "macro_f1": 0.9669,
+      "scam_f1": 0.9599,
+      "accuracy": 0.9767
+    }
+  },
+  "held_out_test_metrics": {
+    "accuracy": 0.968,
+    "macro_f1": 0.9548,
+    "scam_f1": 0.943,
+    "scam_recall": 0.9469,
+    "scam_precision": 0.9391
+  }
+}

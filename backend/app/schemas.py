@@ -6,7 +6,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-Language = Literal["en", "hi", "kn"]
+Language = Literal[
+    "en", "hi", "kn", "bn", "gu", "ml", "mr", "od", "or", "pa", "ta", "te"
+]
 Intention = Literal["pay", "receive", "unknown"]
 OutcomeValue = Literal["low_concern", "be_careful", "high_concern", "unable_to_verify"]
 Source = Literal["camera", "manual", "demo"]
@@ -121,7 +123,7 @@ class AskResponse(BaseModel):
     answer: str
     suggested: list[SuggestedTopic]
     language: Language
-    answered_by: Literal["knowledge_base"]
+    answered_by: Literal["knowledge_base", "ml_message_analysis"] = "knowledge_base"
 
 
 class SpeechToTextResponse(BaseModel):
@@ -192,12 +194,59 @@ class ErrorResponse(BaseModel):
     detail: str
 
 
+class EvidenceItem(BaseModel):
+    subtype: str
+    title: str
+    snippet: str
+    explanation: str
+
+
+class AnalyzeMessageRequest(BaseModel):
+    """Input for analyzing text messages, SMS, or chat forwards for fraud."""
+
+    message: str = Field(
+        ...,
+        min_length=1,
+        max_length=5000,
+        description="Full SMS, WhatsApp or communication text to analyze.",
+    )
+    language: Language = "en"
+
+    @field_validator("message")
+    @classmethod
+    def strip_message(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("message must not be empty")
+        return cleaned
+
+
+class AnalyzeMessageResponse(BaseModel):
+    """Calibrated multi-class classification and safety synthesis for a message."""
+
+    category: Literal["legitimate", "promotional", "scam", "unsupported", "unknown"]
+    risk_level: Literal["low", "medium", "high", "unknown"]
+    confidence: float
+    class_probabilities: dict[str, float]
+    subcategories: list[str]
+    is_out_of_distribution: bool
+    evidence: list[EvidenceItem]
+    safe_next_steps: list[str]
+    explanation: str
+    model_version: str
+    safety_engine_override: bool
+
+
 __all__ = [
+    "AnalyzeMessageRequest",
+    "AnalyzeMessageResponse",
     "AnalyzePaymentRequest",
     "AnalyzePaymentResponse",
     "AskRequest",
     "AskResponse",
     "Check",
+    "ErrorResponse",
+    "EvidenceItem",
     "ExtractedInfo",
     "HealthResponse",
     "SpeechToTextResponse",
@@ -206,5 +255,5 @@ __all__ = [
     "TextToSpeechResponse",
     "VoiceConfigResponse",
     "WarningSign",
-    "ErrorResponse",
 ]
+

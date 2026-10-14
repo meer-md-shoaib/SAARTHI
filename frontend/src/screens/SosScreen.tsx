@@ -24,7 +24,7 @@ import {
 import { useApp } from "../state";
 
 export function SosScreen() {
-  const { t, lang, speakIfOn } = useApp();
+  const { t, uiLang, speakIfOn } = useApp();
   const [selected, setSelected] = useState<SosChoice | null>(null);
   const [dispatchedContact, setDispatchedContact] = useState<EmergencyContact | null>(null);
 
@@ -39,7 +39,7 @@ export function SosScreen() {
     }
   };
 
-  const guidance = selected ? `${titleFor(selected)}. ${selected.spoken[lang]}` : "";
+  const guidance = selected ? `${titleFor(selected)}. ${selected.spoken[uiLang]}` : "";
 
   /* Read the guidance aloud as soon as it opens. */
   useEffect(() => {
@@ -48,16 +48,17 @@ export function SosScreen() {
   }, [selected]);
 
   const handleSendAlert = (contact: EmergencyContact) => {
-    const message = EMERGENCY_MESSAGES[lang];
+    const message = EMERGENCY_MESSAGES[uiLang];
     setDispatchedContact(contact);
 
     // Speak confirmation
-    speakIfOn(t.sos.alertSent(contact.name[lang]));
+    speakIfOn(t.sos.alertSent(contact.name[uiLang]));
 
     // Trigger SMS application intent with pre-filled urgent message
     const smsUrl = `sms:${contact.phone}?body=${encodeURIComponent(message)}`;
     window.location.href = smsUrl;
   };
+
 
   // Section 1: Immediate Family Emergency Contacts
   const renderEmergencyContacts = () => (
@@ -73,7 +74,7 @@ export function SosScreen() {
           <div className="flex items-center gap-3">
             <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-600" aria-hidden="true" />
             <p className="font-bold text-base">
-              {t.sos.alertSent(dispatchedContact.name[lang])}
+              {t.sos.alertSent(dispatchedContact.name[uiLang])}
             </p>
           </div>
           <a
@@ -94,12 +95,12 @@ export function SosScreen() {
           >
             <FamilyAvatar role={contact.avatarRole} className="h-16 w-16 sm:h-18 sm:w-18" />
             <span className="mt-2 text-base font-extrabold text-navy sm:text-lg">
-              {contact.name[lang]}
+              {contact.name[uiLang]}
             </span>
             <span
               className={`mt-1 inline-block rounded-full border px-2.5 py-0.5 text-xs font-bold ${contact.badgeBg}`}
             >
-              {contact.relation[lang]}
+              {contact.relation[uiLang]}
             </span>
 
             {/* Quick alert and call actions */}
@@ -108,7 +109,7 @@ export function SosScreen() {
                 type="button"
                 onClick={() => handleSendAlert(contact)}
                 className="flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-coral bg-coral px-2 py-2 text-xs font-extrabold text-white shadow-soft transition-colors hover:bg-coral-dark"
-                aria-label={`Send SOS alert to ${contact.name[lang]}`}
+                aria-label={`Send SOS alert to ${contact.name[uiLang]}`}
               >
                 <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="truncate">{t.sos.sendAlert}</span>
@@ -116,14 +117,14 @@ export function SosScreen() {
 
               <div className="flex w-full gap-1">
                 <a
-                  href={`sms:${contact.phone}?body=${encodeURIComponent(EMERGENCY_MESSAGES[lang])}`}
+                  href={`sms:${contact.phone}?body=${encodeURIComponent(EMERGENCY_MESSAGES[uiLang])}`}
                   className="flex flex-1 items-center justify-center rounded-xl border border-navy/20 bg-white py-1.5 text-xs font-bold text-navy hover:bg-navy/5"
                   title="SMS"
                 >
                   SMS
                 </a>
                 <a
-                  href={`https://wa.me/${contact.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(EMERGENCY_MESSAGES[lang])}`}
+                  href={`https://wa.me/${contact.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(EMERGENCY_MESSAGES[uiLang])}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex flex-1 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
@@ -137,6 +138,7 @@ export function SosScreen() {
                   className="flex items-center justify-center rounded-xl border border-blue-300 bg-blue-50 px-2.5 py-1.5 text-xs font-bold text-blue-800 hover:bg-blue-100"
                   title="Call"
                 >
+
                   <Phone className="h-3.5 w-3.5" aria-hidden="true" />
                 </a>
               </div>
@@ -156,10 +158,10 @@ export function SosScreen() {
             Government of India
           </span>
           <h2 className="mt-1 text-xl font-extrabold text-navy">
-            {CYBER_CRIME_PORTAL.title[lang]}
+            {CYBER_CRIME_PORTAL.title[uiLang]}
           </h2>
           <p className="text-sm font-semibold text-navy/70">
-            {CYBER_CRIME_PORTAL.subtitle[lang]}
+            {CYBER_CRIME_PORTAL.subtitle[uiLang]}
           </p>
         </div>
         <a
@@ -172,7 +174,7 @@ export function SosScreen() {
       </div>
 
       <p className="mt-2.5 text-sm leading-relaxed text-navy/85">
-        {CYBER_CRIME_PORTAL.description[lang]}
+        {CYBER_CRIME_PORTAL.description[uiLang]}
       </p>
 
       <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
@@ -182,7 +184,7 @@ export function SosScreen() {
           rel="noopener noreferrer"
           className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-navy bg-navy px-4 py-3 text-base font-extrabold text-white shadow-soft transition-colors hover:bg-navy-dark"
         >
-          <span>{CYBER_CRIME_PORTAL.actionText[lang]}</span>
+          <span>{CYBER_CRIME_PORTAL.actionText[uiLang]}</span>
           <ExternalLink className="h-4 w-4" aria-hidden="true" />
         </a>
         <a
@@ -190,7 +192,7 @@ export function SosScreen() {
           className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-red-600 bg-red-50 px-4 py-3 text-base font-extrabold text-red-700 shadow-soft transition-colors hover:bg-red-100"
         >
           <PhoneCall className="h-4 w-4 text-red-600" aria-hidden="true" />
-          <span>{CYBER_CRIME_PORTAL.callText[lang]}</span>
+          <span>{CYBER_CRIME_PORTAL.callText[uiLang]}</span>
         </a>
       </div>
     </Card>
@@ -225,7 +227,7 @@ export function SosScreen() {
                   <SceneArt kind={choice.art} className="w-full sm:w-60 sm:shrink-0" />
                   <span className="flex-1 px-5 py-4">
                     <span className="block text-xl font-extrabold">{titleFor(choice)}</span>
-                    <span className="mt-1 block text-navy/75">{choice.sub[lang]}</span>
+                    <span className="mt-1 block text-navy/75">{choice.sub[uiLang]}</span>
                   </span>
                 </button>
               </li>
@@ -264,10 +266,11 @@ export function SosScreen() {
         <div className="mt-4">
           <h2 className="text-xl font-extrabold">{t.sos.stepsTitle}</h2>
           <div className="mt-3">
-            <NumberedList items={selected.steps.map((step) => step[lang])} />
+            <NumberedList items={selected.steps.map((step) => step[uiLang])} />
           </div>
         </div>
       </Card>
+
 
       <BigButton
         full

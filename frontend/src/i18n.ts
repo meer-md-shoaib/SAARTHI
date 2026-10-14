@@ -5,7 +5,7 @@
  * missing or extra translation is a TypeScript build error.
  */
 
-import type { Lang } from "./types";
+import type { UILang } from "./types";
 
 export const en = {
   app: {
@@ -766,4 +766,4 @@ export const kn: Dict = {
   },
 };
 
-export const STRINGS: Record<Lang, Dict> = { en, hi, kn };
+export const STRINGS: Record<UILang, Dict> = { en, hi, kn };

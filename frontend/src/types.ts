@@ -4,7 +4,19 @@
  * as soon as a response shape changes.
  */
 
-export type Lang = "en" | "hi" | "kn";
+export type Lang =
+  | "en"
+  | "hi"
+  | "kn"
+  | "bn"
+  | "gu"
+  | "ml"
+  | "mr"
+  | "od"
+  | "pa"
+  | "ta"
+  | "te";
+
 export type Intention = "pay" | "receive" | "unknown";
 
 export type Outcome = "low_concern" | "be_careful" | "high_concern" | "unable_to_verify";
@@ -51,7 +63,7 @@ export interface AnalyzeResult {
   extracted: ExtractedInfo;
   insufficient_reasons: string[];
   disclaimer: string;
-  language: Lang;
+  language: string;
   engine_version: string;
   ai_overrode_engine: boolean;
 }
@@ -60,7 +72,7 @@ export interface AnalyzePayload {
   raw_text: string;
   intention: Intention;
   expected_amount: number | null;
-  language: Lang;
+  language: string;
   source: "camera" | "manual" | "demo";
 }
 
@@ -75,8 +87,29 @@ export interface AskResult {
   title: string;
   answer: string;
   suggested: SuggestedTopic[];
-  language: Lang;
-  answered_by: "knowledge_base";
+  language: string;
+  answered_by: "knowledge_base" | "ml_message_analysis";
+}
+
+export interface EvidenceItem {
+  subtype: string;
+  title: string;
+  snippet: string;
+  explanation: string;
+}
+
+export interface AnalyzeMessageResult {
+  category: "legitimate" | "promotional" | "scam" | "unsupported" | "unknown";
+  risk_level: "low" | "medium" | "high" | "unknown";
+  confidence: number;
+  class_probabilities: Record<string, number>;
+  subcategories: string[];
+  is_out_of_distribution: boolean;
+  evidence: EvidenceItem[];
+  safe_next_steps: string[];
+  explanation: string;
+  model_version: string;
+  safety_engine_override: boolean;
 }
 
 export interface SttResult {
@@ -112,9 +145,13 @@ export interface HealthInfo {
   };
 }
 
+export type UILang = "en" | "hi" | "kn";
+
 /** Localised text container used by demo/quiz/SOS/story content. */
 export interface Translated {
   en: string;
   hi: string;
   kn: string;
+  [key: string]: string;
 }
+

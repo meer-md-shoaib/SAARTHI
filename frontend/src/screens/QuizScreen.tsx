@@ -7,7 +7,7 @@ import { QUIZ_QUESTIONS } from "../data/quiz";
 import { useApp } from "../state";
 
 export function QuizScreen() {
-  const { t, lang } = useApp();
+  const { t, uiLang } = useApp();
 
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -70,7 +70,7 @@ export function QuizScreen() {
     );
   }
 
-  const chosenLabel = question.options.find((option) => option.id === selected)?.label[lang] ?? "";
+  const chosenLabel = question.options.find((option) => option.id === selected)?.label[uiLang] ?? "";
 
   return (
     <div className="space-y-5">
@@ -85,8 +85,8 @@ export function QuizScreen() {
 
       <Card className="overflow-hidden">
         <SceneArt kind={question.art} className="w-full" />
-        <p className="mt-4 text-lg leading-relaxed">{question.scene[lang]}</p>
-        <h2 className="mt-3 text-xl font-extrabold">{question.question[lang]}</h2>
+        <p className="mt-4 text-lg leading-relaxed">{question.scene[uiLang]}</p>
+        <h2 className="mt-3 text-xl font-extrabold">{question.question[uiLang]}</h2>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {question.options.map((option) => {
@@ -114,7 +114,7 @@ export function QuizScreen() {
                   ) : undefined
                 }
               >
-                {option.label[lang]}
+                {option.label[uiLang]}
               </BigButton>
             );
           })}
@@ -131,9 +131,9 @@ export function QuizScreen() {
           </Banner>
           <Card>
             <h3 className="text-lg font-extrabold">{t.quiz.whyLabel}</h3>
-            <p className="mt-1 text-lg text-navy/90">{question.explanation[lang]}</p>
+            <p className="mt-1 text-lg text-navy/90">{question.explanation[uiLang]}</p>
             <h3 className="mt-4 text-lg font-extrabold">{t.quiz.actionLabel}</h3>
-            <p className="mt-1 text-lg text-navy/90">{question.action[lang]}</p>
+            <p className="mt-1 text-lg text-navy/90">{question.action[uiLang]}</p>
           </Card>
           <BigButton full variant="navy" onClick={next}>
             {index + 1 >= total ? t.quiz.seeScore : t.quiz.next}

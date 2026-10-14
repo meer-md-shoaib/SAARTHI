@@ -33,13 +33,24 @@ export function ResultScreen() {
 
   const result = route.screen === "result" ? route.result : null;
   const expectation = route.screen === "result" ? route.expectation : null;
-  const speakText = result ? `${result.outcome_label}. ${result.explanation}` : "";
+
+  const actionsSpoken =
+    result && result.recommended_actions.length > 0
+      ? ` Recommended next steps: ${result.recommended_actions.slice(0, 2).join(". ")}`
+      : "";
+  const safetyReminder =
+    " Remember: Never share your UPI PIN or OTP. SAARTHI never enters PINs or authorizes payments for you.";
+
+  const speakText = result
+    ? `${result.outcome_label}. ${result.summary}. ${result.explanation}.${actionsSpoken}.${safetyReminder}`
+    : "";
 
   /* Voice guidance: read the verdict aloud when the screen opens. */
   useEffect(() => {
     if (speakText) speakIfOn(speakText);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   if (!result || !expectation) return null;
 

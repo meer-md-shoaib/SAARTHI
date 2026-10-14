@@ -4,7 +4,8 @@ Endpoints
 ---------
 GET  /health                     - service + voice configuration status
 POST /api/v1/analyze-payment     - deterministic payment safety analysis
-POST /api/v1/ask                 - Ask Saarthi (curated knowledge base)
+POST /api/v1/analyze-message     - ML message safety & fraud analysis
+POST /api/v1/ask                 - Ask Saarthi (curated knowledge base + ML message assistance)
 POST /api/v1/speech-to-text      - Sarvam saaras:v4 transcription (or honest fallback)
 POST /api/v1/text-to-speech      - Sarvam bulbul:v3 synthesis (or honest fallback)
 GET  /api/v1/voice-config        - whether voice services are configured
@@ -26,7 +27,10 @@ from fastapi.responses import FileResponse, JSONResponse
 from .config import get_settings
 from .engine import ENGINE_VERSION, analyze_payment
 from .knowledge import answer_question
+from .ml import get_message_analysis_service
 from .schemas import (
+    AnalyzeMessageRequest,
+    AnalyzeMessageResponse,
     AnalyzePaymentRequest,
     AnalyzePaymentResponse,
     AskRequest,
@@ -123,6 +127,23 @@ async def analyze(payload: AnalyzePaymentRequest) -> AnalyzePaymentResponse:
         language=payload.language,
     )
     return AnalyzePaymentResponse(**result)
+
+
+@app.post(
+    "/api/v1/analyze-message",
+    response_model=AnalyzeMessageResponse,
+    responses={422: {"description": "Invalid input"}},
+    tags=["analysis"],
+)
+async def analyze_message_endpoint(payload: AnalyzeMessageRequest) -> AnalyzeMessageResponse:
+    """Analyze a communication or SMS text for fraud and scam indicators.
+
+    Combines calibrated ML categorization with deterministic security checks and
+    secondary evidence extraction.
+    """
+    service = get_message_analysis_service()
+    result = service.analyze_message(text=payload.message, language=payload.language)
+    return AnalyzeMessageResponse(**result)
 
 
 # --- Ask Saarthi --------------------------------------------------------------

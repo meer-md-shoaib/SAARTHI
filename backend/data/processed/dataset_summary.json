@@ -1,0 +1,46 @@
+{
+  "random_seed": 42,
+  "deduplication_stats": {
+    "initial_samples": 15793,
+    "deduplicated_samples": 9156,
+    "duplicates_dropped": 6631,
+    "conflicts_resolved": 231
+  },
+  "canonical_labels": [
+    "legitimate",
+    "promotional",
+    "scam"
+  ],
+  "total_samples": 9156,
+  "class_imbalance_pct": {
+    "legitimate": 53.44,
+    "promotional": 20.52,
+    "scam": 26.04
+  },
+  "splits": {
+    "train": {
+      "total": 6408,
+      "by_class": {
+        "legitimate": 3425,
+        "promotional": 1315,
+        "scam": 1668
+      }
+    },
+    "val": {
+      "total": 1374,
+      "by_class": {
+        "legitimate": 734,
+        "promotional": 282,
+        "scam": 358
+      }
+    },
+    "test": {
+      "total": 1374,
+      "by_class": {
+        "legitimate": 734,
+        "promotional": 282,
+        "scam": 358
+      }
+    }
+  }
+}

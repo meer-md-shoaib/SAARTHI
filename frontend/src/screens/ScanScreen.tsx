@@ -43,7 +43,7 @@ function errorText(error: unknown, t: Dict): string {
 }
 
 export function ScanScreen() {
-  const { t, lang } = useApp();
+  const { t, lang, uiLang } = useApp();
   const { go } = useNav();
 
   const [step, setStep] = useState<"method" | "details">("method");
@@ -120,6 +120,34 @@ export function ScanScreen() {
     [],
   );
 
+  const runAnalyzeWithText = useCallback(
+    async (textToAnalyze: string, customSource: "camera" | "manual" | "demo" = "camera") => {
+      setBusy(true);
+      setActionError(null);
+      const expectedAmount = parseAmount(amountText);
+      try {
+        const result = await api.analyze({
+          raw_text: textToAnalyze.trim(),
+          intention: intention ?? "unknown",
+          expected_amount: expectedAmount,
+          language: lang,
+          source: customSource,
+        });
+        go({
+          screen: "result",
+          result,
+          expectation: { intention: intention ?? "unknown", expectedAmount },
+        });
+      } catch (error) {
+        setStep("details");
+        setActionError(errorText(error, t));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [amountText, go, intention, lang, t],
+  );
+
   const startCamera = useCallback(async () => {
     const video = videoRef.current;
     if (!video) return;
@@ -128,7 +156,7 @@ export function ScanScreen() {
     try {
       /* zxing is heavy - load it only when the camera is actually used. */
       const scannerLib = await import("../lib/scanner");
-      const scanner = await scannerLib.startQrScanner(video, (text) => {
+      const scanner = await scannerLib.startQrScanner(video, async (text) => {
         const detected = text.trim();
         if (!detected) return;
         scannerRef.current?.stop();
@@ -136,7 +164,7 @@ export function ScanScreen() {
         setRawText(detected);
         setSource("camera");
         setCameraState("off");
-        setStep("details");
+        await runAnalyzeWithText(detected, "camera");
       });
       scannerRef.current = scanner;
       setCameraState("on");
@@ -149,31 +177,22 @@ export function ScanScreen() {
           : "generic";
       setCameraError(cameraErrorText(kind, t));
     }
-  }, [t]);
+  }, [runAnalyzeWithText, t]);
+
+  // Auto-start camera when entering method === "camera"
+  useEffect(() => {
+    if (method === "camera" && step === "method" && cameraState === "off") {
+      const timer = window.setTimeout(() => {
+        void startCamera();
+      }, 300);
+      return () => window.clearTimeout(timer);
+    }
+  }, [method, step, cameraState, startCamera]);
 
   const runAnalyze = useCallback(async () => {
-    setBusy(true);
-    setActionError(null);
-    const expectedAmount = parseAmount(amountText);
-    try {
-      const result = await api.analyze({
-        raw_text: rawText.trim(),
-        intention: intention ?? "unknown",
-        expected_amount: expectedAmount,
-        language: lang,
-        source,
-      });
-      go({
-        screen: "result",
-        result,
-        expectation: { intention: intention ?? "unknown", expectedAmount },
-      });
-    } catch (error) {
-      setActionError(errorText(error, t));
-    } finally {
-      setBusy(false);
-    }
-  }, [amountText, go, intention, lang, rawText, source, t]);
+    await runAnalyzeWithText(rawText, source);
+  }, [rawText, source, runAnalyzeWithText]);
+
 
   const methods: { id: Method; icon: typeof Camera; label: string; sub: string }[] = [
     { id: "camera", icon: Camera, label: t.scan.methodCamera, sub: t.scan.methodCameraSub },
@@ -354,8 +373,8 @@ export function ScanScreen() {
                       }}
                       className="w-full rounded-2xl border-2 border-navy/15 bg-paper px-4 py-3.5 text-left transition-colors hover:border-teal"
                     >
-                      <span className="block text-lg font-extrabold">{scenario.title[lang]}</span>
-                      <span className="mt-0.5 block text-navy/75">{scenario.description[lang]}</span>
+                      <span className="block text-lg font-extrabold">{scenario.title[uiLang]}</span>
+                      <span className="mt-0.5 block text-navy/75">{scenario.description[uiLang]}</span>
                     </button>
                   </li>
                 ))}

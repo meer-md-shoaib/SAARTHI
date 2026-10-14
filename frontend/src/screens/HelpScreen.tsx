@@ -25,7 +25,7 @@ function Bullet({ icon: Icon, text }: { icon: typeof House; text: string }) {
 }
 
 export function HelpScreen() {
-  const { t, lang } = useApp();
+  const { t, uiLang } = useApp();
 
   return (
     <div className="space-y-2">
@@ -87,10 +87,10 @@ export function HelpScreen() {
               Government of India
             </span>
             <h2 className="mt-1 text-xl font-extrabold text-navy">
-              {CYBER_CRIME_PORTAL.title[lang]}
+              {CYBER_CRIME_PORTAL.title[uiLang]}
             </h2>
             <p className="text-sm font-semibold text-navy/70">
-              {CYBER_CRIME_PORTAL.subtitle[lang]}
+              {CYBER_CRIME_PORTAL.subtitle[uiLang]}
             </p>
           </div>
           <a
@@ -103,7 +103,7 @@ export function HelpScreen() {
         </div>
 
         <p className="mt-2.5 text-sm leading-relaxed text-navy/85">
-          {CYBER_CRIME_PORTAL.description[lang]}
+          {CYBER_CRIME_PORTAL.description[uiLang]}
         </p>
 
         <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
@@ -113,7 +113,7 @@ export function HelpScreen() {
             rel="noopener noreferrer"
             className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-navy bg-navy px-4 py-3 text-base font-extrabold text-white shadow-soft transition-colors hover:bg-navy-dark"
           >
-            <span>{CYBER_CRIME_PORTAL.actionText[lang]}</span>
+            <span>{CYBER_CRIME_PORTAL.actionText[uiLang]}</span>
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </a>
           <a
@@ -121,7 +121,7 @@ export function HelpScreen() {
             className="flex flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-red-600 bg-red-50 px-4 py-3 text-base font-extrabold text-red-700 shadow-soft transition-colors hover:bg-red-100"
           >
             <PhoneCall className="h-4 w-4 text-red-600" aria-hidden="true" />
-            <span>{CYBER_CRIME_PORTAL.callText[lang]}</span>
+            <span>{CYBER_CRIME_PORTAL.callText[uiLang]}</span>
           </a>
         </div>
       </Card>

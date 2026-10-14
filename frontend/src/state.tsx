@@ -10,8 +10,13 @@ import {
 } from "react";
 import { api } from "./api";
 import { STRINGS, type Dict } from "./i18n";
+import { getLanguageInfo, SUPPORTED_LANGUAGES, type LanguageInfo } from "./lib/languages";
 import { speakText, stopSpeech } from "./lib/speech";
-import type { AnalyzeResult, HealthInfo, Intention, Lang } from "./types";
+import {
+  VoiceAssistantSession,
+  type AssistantState,
+} from "./lib/voiceAssistant";
+import type { AnalyzeResult, HealthInfo, Intention, Lang, UILang } from "./types";
 
 /* ------------------------------------------------------------------ */
 /* Navigation                                                          */
@@ -30,13 +35,13 @@ export type ScreenId =
 
 export type Route =
   | { screen: "home" }
-  | { screen: "scan" }
+  | { screen: "scan"; autoStartCamera?: boolean }
   | {
       screen: "result";
       result: AnalyzeResult;
       expectation: { intention: Intention; expectedAmount: number | null };
     }
-  | { screen: "ask" }
+  | { screen: "ask"; initialQuery?: string }
   | { screen: "learn" }
   | { screen: "quiz" }
   | { screen: "sos" }
@@ -55,9 +60,12 @@ interface NavContextValue {
 /* App-wide settings + voice                                           */
 /* ------------------------------------------------------------------ */
 
-interface AppContextValue {
+export interface AppContextValue {
   lang: Lang;
+  uiLang: UILang;
   setLang: (lang: Lang) => void;
+  activeLangInfo: LanguageInfo;
+  hasUiTranslation: boolean;
   t: Dict;
   scale: number;
   setScale: (scale: number) => void;
@@ -70,6 +78,18 @@ interface AppContextValue {
   speakIfOn: (text: string) => void;
   stopSpeaking: () => void;
   repeatLast: () => void;
+
+  // Voice-first assistant continuous flow
+  assistantState: AssistantState;
+  interimTranscript: string;
+  lastTranscript: string;
+  lastAssistantResponse: string;
+  isContinuousVoice: boolean;
+  setIsContinuousVoice: (active: boolean) => void;
+  startVoiceSession: () => void;
+  stopVoiceSession: () => void;
+  cancelVoiceSession: () => void;
+  voiceErrorMessage: string | null;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -102,6 +122,8 @@ const ROUTE_SPEECH: Partial<Record<ScreenId, (t: Dict) => string>> = {
   help: (t) => `${t.help.title}. ${t.help.subtitle}`,
 };
 
+const VALID_LANG_CODES = new Set(SUPPORTED_LANGUAGES.map((l) => l.code));
+
 function usePersisted<T>(key: string, fallback: T): [T, (value: T) => void] {
   const [value, setValue] = useState<T>(() => {
     try {
@@ -126,14 +148,23 @@ function usePersisted<T>(key: string, fallback: T): [T, (value: T) => void] {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [storedLang, setLang] = usePersisted<Lang>("saarthi:lang", "en");
-  const lang: Lang = storedLang in STRINGS ? storedLang : "en";
-  const t = STRINGS[lang];
+  const [storedLang, setStoredLang] = usePersisted<string>("saarthi:lang", "en");
+  const lang: Lang = VALID_LANG_CODES.has(storedLang as Lang) ? (storedLang as Lang) : "en";
+  const activeLangInfo = useMemo(() => getLanguageInfo(lang), [lang]);
+
+  // Gracefully fall back to English if UI strings are not yet translated for this Indic language
+  const uiLang: UILang = lang === "hi" || lang === "kn" ? lang : "en";
+  const t = STRINGS[uiLang];
+  const hasUiTranslation = lang === "en" || lang === "hi" || lang === "kn";
 
   const [rawScale, setScale] = usePersisted<number>("saarthi:scale", 0);
   const scale = rawScale >= 0 && rawScale <= 2 ? rawScale : 0;
 
   const [voiceOn, setVoiceOn] = usePersisted<boolean>("saarthi:voice", true);
+  const [isContinuousVoice, setIsContinuousVoice] = usePersisted<boolean>(
+    "saarthi:continuous_voice",
+    true,
+  );
 
   const [stack, setStack] = useState<Route[]>([{ screen: "home" }]);
   const route = stack[stack.length - 1];
@@ -142,6 +173,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const lastSpokenRef = useRef<string>("");
   const [hasLastSpoken, setHasLastSpoken] = useState(false);
+
+  // Assistant states
+  const [assistantState, setAssistantState] = useState<AssistantState>("idle");
+  const [interimTranscript, setInterimTranscript] = useState("");
+  const [lastTranscript, setLastTranscript] = useState("");
+  const [lastAssistantResponse, setLastAssistantResponse] = useState("");
+  const [voiceErrorMessage, setVoiceErrorMessage] = useState<string | null>(null);
+
+  const assistantSessionRef = useRef<VoiceAssistantSession | null>(null);
 
   /* Text size drives rem-based Tailwind sizes. */
   useEffect(() => {
@@ -189,21 +229,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const stopSpeaking = useCallback(() => {
     stopSpeech();
     setIsSpeaking(false);
+    assistantSessionRef.current?.stopSpeaking();
   }, []);
 
   const repeatLast = useCallback(() => {
     if (lastSpokenRef.current) speak(lastSpokenRef.current);
   }, [speak]);
-
-  /* Voice guidance: announce the screen when it changes (if enabled). */
-  useEffect(() => {
-    if (!voiceOn) return;
-    const builder = ROUTE_SPEECH[route.screen];
-    if (!builder) return;
-    const timer = window.setTimeout(() => speak(builder(t)), 150);
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.screen, lang, voiceOn]);
 
   const go = useCallback((next: Route) => {
     setStack((current) => [...current, next]);
@@ -214,13 +245,95 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const home = useCallback(() => {
     stopSpeech();
     setIsSpeaking(false);
+    assistantSessionRef.current?.cancelSession();
     setStack([{ screen: "home" }]);
   }, []);
+
+  const setLang = useCallback(
+    (newLang: Lang) => {
+      setStoredLang(newLang);
+      assistantSessionRef.current?.updateLanguage(newLang);
+    },
+    [setStoredLang],
+  );
+
+  // Initialize or update the Voice Assistant Session
+  useEffect(() => {
+    const session = new VoiceAssistantSession(lang, {
+      onStateChange: (state) => {
+        setAssistantState(state);
+        setIsSpeaking(state === "speaking");
+      },
+      onInterimText: (text) => setInterimTranscript(text),
+      onTranscript: (userText) => {
+        setLastTranscript(userText);
+        setInterimTranscript("");
+      },
+      onResponse: (response) => {
+        setLastAssistantResponse(response);
+        lastSpokenRef.current = response;
+        setHasLastSpoken(true);
+      },
+      onError: (errMsg) => {
+        setVoiceErrorMessage(errMsg);
+      },
+      onNavigate: (screen) => {
+        if (screen === "home") {
+          home();
+        } else if (screen === "scan") {
+          go({ screen: "scan", autoStartCamera: true });
+        } else {
+          go({ screen });
+        }
+      },
+      onChangeLanguage: (newLang) => {
+        setLang(newLang);
+      },
+      onContinuousLoopChange: (active) => {
+        setIsContinuousVoice(active);
+      },
+    });
+
+    session.setContinuous(isContinuousVoice);
+    assistantSessionRef.current = session;
+
+    return () => {
+      session.destroy();
+    };
+  }, [lang, isContinuousVoice, go, home, setLang, setIsContinuousVoice]);
+
+  const startVoiceSession = useCallback(() => {
+    setVoiceErrorMessage(null);
+    assistantSessionRef.current?.setContinuous(isContinuousVoice);
+    assistantSessionRef.current?.startListening();
+  }, [isContinuousVoice]);
+
+  const stopVoiceSession = useCallback(() => {
+    assistantSessionRef.current?.stopListening();
+  }, []);
+
+  const cancelVoiceSession = useCallback(() => {
+    assistantSessionRef.current?.cancelSession();
+  }, []);
+
+  /* Voice guidance: announce the screen when it changes (if enabled and assistant not active). */
+  useEffect(() => {
+    if (!voiceOn) return;
+    if (assistantState !== "idle") return;
+    const builder = ROUTE_SPEECH[route.screen];
+    if (!builder) return;
+    const timer = window.setTimeout(() => speak(builder(t)), 200);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.screen, lang, voiceOn]);
 
   const appValue = useMemo<AppContextValue>(
     () => ({
       lang,
+      uiLang,
       setLang,
+      activeLangInfo,
+      hasUiTranslation,
       t,
       scale,
       setScale,
@@ -233,8 +346,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
       speakIfOn,
       stopSpeaking,
       repeatLast,
+      assistantState,
+      interimTranscript,
+      lastTranscript,
+      lastAssistantResponse,
+      isContinuousVoice,
+      setIsContinuousVoice,
+      startVoiceSession,
+      stopVoiceSession,
+      cancelVoiceSession,
+      voiceErrorMessage,
     }),
-    [lang, setLang, t, scale, setScale, voiceOn, setVoiceOn, health, isSpeaking, hasLastSpoken, speak, speakIfOn, stopSpeaking, repeatLast],
+    [
+      lang,
+      uiLang,
+      setLang,
+      activeLangInfo,
+      hasUiTranslation,
+      t,
+      scale,
+      setScale,
+      voiceOn,
+      setVoiceOn,
+      health,
+      isSpeaking,
+      hasLastSpoken,
+      speak,
+      speakIfOn,
+      stopSpeaking,
+      repeatLast,
+      assistantState,
+      interimTranscript,
+      lastTranscript,
+      lastAssistantResponse,
+      isContinuousVoice,
+      setIsContinuousVoice,
+      startVoiceSession,
+      stopVoiceSession,
+      cancelVoiceSession,
+      voiceErrorMessage,
+    ],
   );
 
   const navValue = useMemo<NavContextValue>(

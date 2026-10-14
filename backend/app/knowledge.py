@@ -419,37 +419,118 @@ def _topic_score(candidate: dict[str, Any], normalized: str) -> int:
 def answer_question(
     text: str, language: str = "en", topic_id: str | None = None
 ) -> dict[str, Any]:
-    """Match a question to a curated topic (keyword scoring, no AI)."""
-    lang = language if language in ("en", "hi", "kn") else "en"
-    normalized = _normalize(text)
+    """Match a question to a curated topic or analyze messages using the ML pipeline.
 
-    topic: dict[str, Any] | None = None
+    - If topic_id is provided, answers directly from curated knowledge.
+    - If the user provides an SMS/message for evaluation or asks about a message containing
+      fraud patterns, analyzes it dynamically using the ML message analysis service.
+    - Retains curated FAQs as a reliable fallback for conceptual payment safety questions.
+    """
+    from .ml.service import get_message_analysis_service
+
+    lang = language if language in ("en", "hi", "kn") else "en"
+    clean_text = text.strip()
+    normalized = _normalize(clean_text)
+
+    # 1. Direct topic selection via chips
     if topic_id and topic_id in TOPICS_BY_ID and topic_id != FALLBACK_ID:
         topic = TOPICS_BY_ID[topic_id]
-    else:
-        best_score = 0
-        for candidate in TOPICS:
-            if candidate["id"] == FALLBACK_ID:
-                continue
-            score = _topic_score(candidate, normalized)
-            if score > best_score:
-                best_score = score
-                topic = candidate
+        suggested_ids = [
+            cid for cid in ANSWERABLE_IDS if cid != topic["id"]
+        ][:3]
+        return {
+            "topic_id": topic["id"],
+            "question": clean_text,
+            "title": _pick(topic["title"], topic["title"], lang),
+            "answer": _pick(topic["answer"], topic["answer"], lang),
+            "suggested": [
+                {
+                    "topic_id": cid,
+                    "title": _pick(
+                        TOPICS_BY_ID[cid]["title"],
+                        TOPICS_BY_ID[cid]["title"],
+                        lang,
+                    ),
+                }
+                for cid in suggested_ids
+            ],
+            "language": lang,
+            "answered_by": "knowledge_base",
+        }
 
-    if topic is None:
-        topic = TOPICS_BY_ID[FALLBACK_ID]
+    # 2. Check if the input looks like a message to analyze (SMS, alert, link, or scam pattern)
+    is_message_format = (
+        len(clean_text) > 35
+        and any(
+            marker in clean_text.lower()
+            for marker in (
+                "http", "www.", ".top", ".site", ".xyz", ".apk", "kyc", "sbi", "hdfc",
+                "paytm", "phonepe", "electricity", "bill", "disconnected", "lottery",
+                "cashback", "dear customer", "dear user", "acc", "a/c", "credited", "debited"
+            )
+        )
+    )
+
+    if is_message_format:
+        service = get_message_analysis_service()
+        ml_res = service.analyze_message(text=clean_text, language=lang)
+        if ml_res["category"] == "scam" or ml_res["subcategories"] or ml_res["risk_level"] == "high":
+            # Formulate structured dynamic companion response
+            title_map = {
+                "en": f"Message Safety Analysis: High Risk ({ml_res['category'].title()})",
+                "hi": f"संदेश सुरक्षा विश्लेषण: उच्च जोखिम ({ml_res['category']})",
+                "kn": f"ಸಂದೇಶ ಸುರಕ್ಷತಾ ವಿಶ್ಲೇಷಣೆ: ಹೆಚ್ಚಿನ ಅಪಾಯ ({ml_res['category']})",
+            }
+            steps_joined = "\n• " + "\n• ".join(ml_res["safe_next_steps"]) if ml_res["safe_next_steps"] else ""
+            answer_text = f"{ml_res['explanation']}\n\nRecommended Safe Next Steps:{steps_joined}"
+
+            suggested_ids = ["scam_call", "otp", "fake_support"]
+            return {
+                "topic_id": "message_analysis",
+                "question": clean_text,
+                "title": title_map.get(lang, title_map["en"]),
+                "answer": answer_text,
+                "suggested": [
+                    {
+                        "topic_id": cid,
+                        "title": _pick(
+                            TOPICS_BY_ID[cid]["title"],
+                            TOPICS_BY_ID[cid]["title"],
+                            lang,
+                        ),
+                    }
+                    for cid in suggested_ids
+                    if cid in TOPICS_BY_ID
+                ],
+                "language": lang,
+                "answered_by": "ml_message_analysis",
+            }
+
+    # 3. Match against curated knowledge base topics
+    best_score = 0
+    matched_topic: dict[str, Any] | None = None
+    for candidate in TOPICS:
+        if candidate["id"] == FALLBACK_ID:
+            continue
+        score = _topic_score(candidate, normalized)
+        if score > best_score:
+            best_score = score
+            matched_topic = candidate
+
+    if matched_topic is None:
+        matched_topic = TOPICS_BY_ID[FALLBACK_ID]
 
     suggested_ids = [
         candidate_id
         for candidate_id in ANSWERABLE_IDS
-        if candidate_id != topic["id"]
+        if candidate_id != matched_topic["id"]
     ][:3]
 
     return {
-        "topic_id": topic["id"],
-        "question": text.strip(),
-        "title": _pick(topic["title"], topic["title"], lang),
-        "answer": _pick(topic["answer"], topic["answer"], lang),
+        "topic_id": matched_topic["id"],
+        "question": clean_text,
+        "title": _pick(matched_topic["title"], matched_topic["title"], lang),
+        "answer": _pick(matched_topic["answer"], matched_topic["answer"], lang),
         "suggested": [
             {
                 "topic_id": candidate_id,
@@ -464,3 +545,4 @@ def answer_question(
         "language": lang,
         "answered_by": "knowledge_base",
     }
+

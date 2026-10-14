@@ -7,6 +7,7 @@
  */
 
 import type {
+  AnalyzeMessageResult,
   AnalyzePayload,
   AnalyzeResult,
   AskResult,
@@ -106,4 +107,8 @@ export const api = {
 
   textToSpeech: (text: string, language: string) =>
     request<TtsResult>("/api/v1/text-to-speech", jsonInit({ text, language }), 45000),
+
+  analyzeMessage: (message: string, language: string) =>
+    request<AnalyzeMessageResult>("/api/v1/analyze-message", jsonInit({ message, language })),
 };
+

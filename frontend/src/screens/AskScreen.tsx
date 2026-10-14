@@ -5,7 +5,7 @@ import { BigButton } from "../components/Button";
 import { Banner, Card, Spinner } from "../components/bits";
 import type { Dict } from "../i18n";
 import { LiveSpeechRecognizer } from "../lib/speechRecognition";
-import { useApp } from "../state";
+import { useApp, useNav } from "../state";
 import type { AskResult, Lang } from "../types";
 
 type Phase = "idle" | "recording" | "transcribing" | "asking";
@@ -19,7 +19,7 @@ function requestErrorText(error: unknown, t: Dict): string {
   return t.ask.answerFailed;
 }
 
-const PRESET_QUESTIONS: Record<Lang, Array<{ label: string; query: string; topicId?: string }>> = {
+const PRESET_QUESTIONS: Partial<Record<Lang, Array<{ label: string; query: string; topicId?: string }>>> = {
   en: [
     { label: "Should I share OTP?", query: "Someone is calling and asking for my OTP to verify account", topicId: "pin_otp" },
     { label: "Electricity bill cutoff SMS", query: "Received SMS that electricity will be cut off tonight", topicId: "urgency" },
@@ -42,6 +42,7 @@ const PRESET_QUESTIONS: Record<Lang, Array<{ label: string; query: string; topic
 
 export function AskScreen() {
   const { t, lang, speakIfOn } = useApp();
+  const { route } = useNav();
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [input, setInput] = useState("");
@@ -51,6 +52,7 @@ export function AskScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const recognizerRef = useRef<LiveSpeechRecognizer | null>(null);
+  const presets = PRESET_QUESTIONS[lang] ?? PRESET_QUESTIONS.en ?? [];
 
   useEffect(() => {
     return () => {
@@ -82,6 +84,13 @@ export function AskScreen() {
     },
     [lang, speakIfOn, t],
   );
+
+  useEffect(() => {
+    if (route.screen === "ask" && (route as any).initialQuery) {
+      void askQuestion((route as any).initialQuery);
+    }
+  }, [route, askQuestion]);
+
 
   const stopListening = useCallback(() => {
     recognizerRef.current?.stop();
@@ -193,7 +202,7 @@ export function AskScreen() {
           <h2 className="text-base font-extrabold">{t.ask.suggestions}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
-          {PRESET_QUESTIONS[lang].map((item, index) => (
+          {presets.map((item, index) => (
             <button
               key={index}
               type="button"
@@ -204,6 +213,7 @@ export function AskScreen() {
             </button>
           ))}
         </div>
+
       </div>
 
       {/* Typed question */}
