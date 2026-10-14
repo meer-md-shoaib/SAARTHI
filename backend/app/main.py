@@ -145,7 +145,7 @@ async def analyze(payload: AnalyzePaymentRequest) -> AnalyzePaymentResponse:
     )
 
     # 1. Non-UPI message or text: Think before replying instead of canned UPI errors
-    if not is_upi and len(raw) > 5:
+    if not is_upi and len(raw) >= 1:
         settings = get_settings()
         lang = payload.language if payload.language in ("en", "hi", "kn") else "en"
         strings = get_strings(lang)
@@ -169,8 +169,12 @@ async def analyze(payload: AnalyzePaymentRequest) -> AnalyzePaymentResponse:
                 warning_signs = [
                     WarningSign(
                         id=f"gemini_warning_{i}",
-                        severity=Severity.HIGH if w.get("severity") == "high" else Severity.MEDIUM,
-                        title=w.get("title", "Safety Warning"),
+                        severity=(
+                            Severity.HIGH
+                            if w.get("severity") == "high"
+                            else (Severity.INFO if w.get("severity") == "info" else Severity.MEDIUM)
+                        ),
+                        title=w.get("title", "Safety Note"),
                         detail=w.get("detail", ""),
                     )
                     for i, w in enumerate(gemini_res.get("warning_signs", []))

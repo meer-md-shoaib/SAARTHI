@@ -165,14 +165,23 @@ class GeminiService:
 A user has submitted the following text, message, or link:
 \"\"\"{text.strip()}\"\"\"
 
-Analyze this content thoroughly.
+Analyze this complete content thoroughly with high nuance and common sense.
 THINK BEFORE REPLYING:
-1. Is this an actual UPI QR payment transfer? (Almost always false unless it starts with upi://pay or has a direct UPI VPA address).
-2. What is this message REALLY about? (e.g. electricity bill threat, fake KYC update, courier delivery scam, lottery prize, part-time job fraud, bank debit SMS, promotional advertisement, or casual conversation).
-3. Risk level: 'high' (fraud, scam, phishing, extortion, PIN/OTP theft), 'medium' (unverified claims, suspicious links, unknown sender), or 'low' (safe, routine communication, or normal greeting).
-4. Category: 'scam', 'promotional', 'legitimate', or 'unknown'.
-5. Explanation: Provide a plain-language explanation (2-3 sentences) in {target_lang} explaining exactly what this message is and why it is safe or dangerous.
-6. Safe next steps: 2-3 concrete bullet points in {target_lang} advising the user what to do right now.
+1. COMPLETE MESSAGE ANALYSIS:
+   - Do NOT just flag single words out of context! If the user simply types a keyword like 'OTP', 'PIN', 'UPI', 'Bank', or asks an informational question (e.g. 'What is OTP?'):
+     * This is NOT an active scam or fraud attack. It is an informational query or isolated term.
+     * Set category = 'legitimate' or 'unknown', and risk_level = 'low' or 'medium'.
+     * In the summary/explanation, explain what the term means in plain, reassuring language and advise that it is completely safe as long as they never share it with callers or strangers.
+   - If the message is an official or legitimate bank alert (e.g., 'Your OTP for transaction is 482910. Do not share with anyone.' or 'Rs 500 debited from A/c...'):
+     * This is a standard bank notification, NOT a scam attempt. Set category = 'legitimate', risk_level = 'low'.
+   - ONLY mark risk_level = 'high' and category = 'scam' when there is an actual predatory fraud attempt, such as:
+     * Someone pressuring, demanding, or asking the user to share, tell, send, or enter an OTP/PIN/password.
+     * Threat of account suspension, disconnection, or legal action demanding immediate call/payment.
+     * Fake cashback, lottery, or gift claiming user won money but must pay a fee or enter PIN.
+     * Malicious links, unknown APK downloads, or fake customer care numbers.
+2. Is this an actual UPI QR payment transfer? (Almost always false unless it starts with upi://pay or has a direct UPI VPA address).
+3. Explanation: Provide a helpful, clear, plain-language explanation (2-3 sentences) in {target_lang}.
+4. Safe next steps: 2-3 concrete bullet points in {target_lang}.
 
 Respond ONLY with valid JSON matching this schema:
 {{
@@ -184,7 +193,7 @@ Respond ONLY with valid JSON matching this schema:
   "explanation": "Detailed plain explanation in {target_lang}",
   "recommended_actions": ["step 1 in {target_lang}", "step 2 in {target_lang}"],
   "warning_signs": [
-    {{"title": "Title in {target_lang}", "detail": "Detail in {target_lang}", "severity": "high" | "medium"}}
+    {{"title": "Title in {target_lang}", "detail": "Detail in {target_lang}", "severity": "high" | "medium" | "info"}}
   ]
 }}"""
 

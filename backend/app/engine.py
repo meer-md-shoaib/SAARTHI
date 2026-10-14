@@ -450,6 +450,13 @@ def _find_match(patterns: list[re.Pattern[str]], text: str) -> str | None:
 
 
 def _find_secret(text: str) -> str | None:
+    clean = text.strip().lower()
+    # Isolated keywords (e.g. typing just "OTP" or "PIN") or definition questions are NOT requests for secrets
+    if clean in ("otp", "pin", "upi pin", "cvv", "mpin", "password", "passcode", "atm pin", "ओटीपी", "पिन"):
+        return None
+    if re.match(r"^(what\s+is|define|meaning\s+of|explain)\s+(an?\s+)?(otp|pin|upi\s+pin|password)\b", clean):
+        return None
+
     for language_patterns in SECRET_PATTERNS.values():
         for pattern in language_patterns:
             match = pattern.search(text)
