@@ -102,7 +102,26 @@ export async function speakText(
 
   const utterance = new SpeechSynthesisUtterance(body);
   utterance.lang = BROWSER_LANG[language];
-  utterance.rate = 0.95;
+  utterance.rate = 0.92; // Slightly gentler pace for elderly listeners
+
+  // Try to find a matching native language voice
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    const langKey = language.toLowerCase();
+    const matchedVoice = voices.find((v) => {
+      const l = v.lang.toLowerCase();
+      const n = v.name.toLowerCase();
+      if (langKey === "kn") return l.startsWith("kn") || n.includes("kannada");
+      if (langKey === "hi") return l.startsWith("hi") || n.includes("hindi");
+      return l.startsWith("en-in") || n.includes("india") || l.startsWith("en");
+    });
+    if (matchedVoice) {
+      utterance.voice = matchedVoice;
+    }
+  } catch {
+    /* fallback to default */
+  }
+
   utterance.onend = done;
   utterance.onerror = done;
   window.speechSynthesis.speak(utterance);

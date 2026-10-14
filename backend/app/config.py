@@ -30,6 +30,7 @@ class Settings:
     stt_model: str
     tts_model: str
     tts_speaker: str | None
+    use_edge_tts: bool
     cors_origins: list[str]
     voice_timeout_seconds: float
     max_audio_bytes: int
@@ -40,7 +41,7 @@ class Settings:
 
     @property
     def tts_configured(self) -> bool:
-        return self.sarvam_api_key is not None
+        return (self.sarvam_api_key is not None) or self.use_edge_tts
 
 
 @lru_cache(maxsize=1)
@@ -66,6 +67,7 @@ def get_settings() -> Settings:
         stt_model=os.getenv("SARVAM_STT_MODEL", "saaras:v4").strip(),
         tts_model=os.getenv("SARVAM_TTS_MODEL", "bulbul:v3").strip(),
         tts_speaker=(os.getenv("SARVAM_TTS_SPEAKER", "") or "").strip() or None,
+        use_edge_tts=os.getenv("USE_EDGE_TTS", "true").strip().lower() in ("1", "true", "yes"),
         cors_origins=_split_csv(os.getenv("CORS_ORIGINS", DEFAULT_ORIGINS)),
         voice_timeout_seconds=timeout,
         max_audio_bytes=max_mb * 1024 * 1024,

@@ -13,10 +13,12 @@ Contract with the rest of the app:
 
 from __future__ import annotations
 
+import base64
 import logging
 import re
 from typing import Any
 
+import edge_tts
 import httpx
 
 from .config import Settings, get_settings
@@ -25,6 +27,13 @@ logger = logging.getLogger("saarthi.voice")
 
 # Sarvam language codes (BCP-47) per app language.
 LANGUAGE_CODES: dict[str, str] = {"en": "en-IN", "hi": "hi-IN", "kn": "kn-IN"}
+
+# High-fidelity Microsoft Neural TTS voices for Kannada, Hindi, and English.
+NEURAL_VOICES: dict[str, str] = {
+    "kn": "kn-IN-GaganNeural",
+    "hi": "hi-IN-SwaraNeural",
+    "en": "en-IN-NeerjaNeural",
+}
 
 # bulbul:v3 rejects numbers longer than 4 digits unless they use commas.
 _LONG_NUMBER_RE = re.compile(r"(?<![\d,.])\d{5,}(?![\d,.])")
@@ -157,80 +166,92 @@ class VoiceService:
 
     # --- text-to-speech -----------------------------------------------------
 
+    async def _synthesize_edge_tts(self, text: str, language: str) -> dict[str, Any]:
+        """Synthesize natural speech using high-fidelity Microsoft Neural voices."""
+        voice = NEURAL_VOICES.get(language, "en-IN-NeerjaNeural")
+        clean_text = text[:MAX_TTS_CHARS].strip()
+        if not clean_text:
+            return {
+                "status": "unavailable",
+                "error_code": "empty_text",
+                "message": "No text provided for speech synthesis.",
+                "fallback": "browser_voice",
+            }
+        try:
+            communicate = edge_tts.Communicate(clean_text, voice)
+            audio_data = b""
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    audio_data += chunk["data"]
+
+            if not audio_data:
+                return {
+                    "status": "unavailable",
+                    "error_code": "empty_audio",
+                    "message": "Neural speech service returned empty audio.",
+                    "fallback": "browser_voice",
+                }
+
+            b64_audio = base64.b64encode(audio_data).decode("ascii")
+            return {
+                "status": "ok",
+                "audio_base64": b64_audio,
+                "content_type": "audio/mp3",
+                "engine": f"edge-tts:{voice}",
+            }
+        except Exception as exc:
+            logger.warning("Neural speech synthesis error: %s", exc)
+            return {
+                "status": "unavailable",
+                "error_code": "neural_tts_error",
+                "message": f"Neural TTS failed: {exc}",
+                "fallback": "browser_voice",
+            }
+
     async def text_to_speech(self, text: str, language: str = "en") -> dict[str, Any]:
         settings = self.settings
-        if not settings.sarvam_api_key:
-            return {
-                "status": "unavailable",
-                "error_code": "missing_api_key",
-                "message": "Voice output is not configured. Set SARVAM_API_KEY on the backend.",
-                "fallback": "browser_voice",
-            }
 
-        body: dict[str, Any] = {
-            "text": _format_numbers(text[:MAX_TTS_CHARS]),
-            "language_code": LANGUAGE_CODES.get(language, "en-IN"),
-            "model": settings.tts_model,
-        }
-        if settings.tts_speaker:
-            body["speaker"] = settings.tts_speaker
+        # 1. Try Sarvam AI if API key is provided
+        if settings.sarvam_api_key:
+            body: dict[str, Any] = {
+                "text": _format_numbers(text[:MAX_TTS_CHARS]),
+                "language_code": LANGUAGE_CODES.get(language, "en-IN"),
+                "model": settings.tts_model,
+            }
+            if settings.tts_speaker:
+                body["speaker"] = settings.tts_speaker
 
-        try:
-            response = await self.client.post(
-                settings.sarvam_tts_url,
-                json=body,
-                headers={"api-subscription-key": settings.sarvam_api_key},
-            )
-        except httpx.TimeoutException:
-            return {
-                "status": "unavailable",
-                "error_code": "timeout",
-                "message": "The voice service took too long.",
-                "fallback": "browser_voice",
-            }
-        except httpx.HTTPError as exc:
-            logger.warning("text-to-speech transport error: %s", exc)
-            return {
-                "status": "unavailable",
-                "error_code": "network_error",
-                "message": "Could not reach the voice service.",
-                "fallback": "browser_voice",
-            }
+            try:
+                response = await self.client.post(
+                    settings.sarvam_tts_url,
+                    json=body,
+                    headers={"api-subscription-key": settings.sarvam_api_key},
+                )
+                if response.status_code == 200:
+                    payload = response.json()
+                    audios = payload.get("audios") or []
+                    if audios and audios[0]:
+                        return {
+                            "status": "ok",
+                            "audio_base64": audios[0],
+                            "content_type": "audio/wav",
+                            "engine": settings.tts_model,
+                        }
+            except Exception as exc:
+                logger.warning("Sarvam TTS request failed, falling back to neural TTS: %s", exc)
 
-        if response.status_code != 200:
-            logger.warning(
-                "text-to-speech failed with status %s: %s", response.status_code, response.text[:500]
-            )
-            return {
-                "status": "unavailable",
-                "error_code": f"upstream_{response.status_code}",
-                "message": "The voice service could not speak this text right now.",
-                "fallback": "browser_voice",
-            }
+        # 2. High-quality Neural Edge TTS (Kannada, Hindi, Indian English)
+        if settings.use_edge_tts:
+            edge_result = await self._synthesize_edge_tts(text, language)
+            if edge_result.get("status") == "ok":
+                return edge_result
 
-        try:
-            payload = response.json()
-        except ValueError:
-            return {
-                "status": "unavailable",
-                "error_code": "bad_response",
-                "message": "The voice service returned an unreadable response.",
-                "fallback": "browser_voice",
-            }
-
-        audios = payload.get("audios") or []
-        if not audios or not audios[0]:
-            return {
-                "status": "unavailable",
-                "error_code": "empty_audio",
-                "message": "The voice service returned no audio.",
-                "fallback": "browser_voice",
-            }
+        # 3. Honest fallback to browser voice
         return {
-            "status": "ok",
-            "audio_base64": audios[0],
-            "content_type": "audio/wav",
-            "engine": settings.tts_model,
+            "status": "unavailable",
+            "error_code": "missing_api_key",
+            "message": "Voice output is not configured. Set SARVAM_API_KEY on the backend.",
+            "fallback": "browser_voice",
         }
 
 

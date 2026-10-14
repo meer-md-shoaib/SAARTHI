@@ -130,6 +130,7 @@ def test_speech_to_text_reports_fallback_without_key(monkeypatch) -> None:
 
 def test_text_to_speech_reports_fallback_without_key(monkeypatch) -> None:
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
+    monkeypatch.setenv("USE_EDGE_TTS", "false")
     get_settings.cache_clear()
     try:
         with TestClient(app) as client:
@@ -143,6 +144,30 @@ def test_text_to_speech_reports_fallback_without_key(monkeypatch) -> None:
             assert body["fallback"] == "browser_voice"
     finally:
         get_settings.cache_clear()
+
+
+def test_text_to_speech_neural_kannada_and_hindi(client: TestClient) -> None:
+    # Test Kannada neural synthesis
+    response_kn = client.post(
+        "/api/v1/text-to-speech",
+        json={"text": "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ.", "language": "kn"},
+    )
+    assert response_kn.status_code == 200
+    body_kn = response_kn.json()
+    assert body_kn["status"] == "ok"
+    assert body_kn["audio_base64"] is not None
+    assert body_kn["content_type"] in ("audio/mp3", "audio/wav")
+    assert "edge-tts:kn" in body_kn.get("engine", "") or "bulbul" in body_kn.get("engine", "")
+
+    # Test Hindi neural synthesis
+    response_hi = client.post(
+        "/api/v1/text-to-speech",
+        json={"text": "नमस्ते, सावधान रहें।", "language": "hi"},
+    )
+    assert response_hi.status_code == 200
+    body_hi = response_hi.json()
+    assert body_hi["status"] == "ok"
+    assert body_hi["audio_base64"] is not None
 
 
 def test_voice_input_validation(client: TestClient) -> None:
