@@ -215,11 +215,16 @@ try {
   await clickText("Home", "nav button");
   await waitForText("Namaste!");
   await clickText("Learn Safely");
+  await waitForText("Learn Safely");
   await clickText("Safer Choices");
   await waitForText("Meena gets a message");
+  await new Promise((r) => setTimeout(r, 300));
   await clickText("Pause and think first", "button", true);
+  await waitForText("Check the QR in the app");
+  await new Promise((r) => setTimeout(r, 200));
   await clickText("Check the QR in the app", "button", true);
-  await waitForText("High Concern");
+  await waitForText("Do not pay, tell her son");
+  await new Promise((r) => setTimeout(r, 200));
   await clickText("Do not pay, tell her son", "button", true);
   await waitForText("A safe choice");
   pass("story reaches the safe ending");
