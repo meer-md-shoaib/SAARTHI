@@ -101,7 +101,7 @@ export function ScanScreen() {
   );
 
   const handleDetectedText = useCallback(
-    (detected: string, scanSource: "camera" | "manual" | "upload" | "demo") => {
+    async (detected: string, scanSource: "camera" | "manual" | "upload" | "demo") => {
       const clean = detected.trim();
       if (!clean) return;
 
@@ -110,17 +110,42 @@ export function ScanScreen() {
       setSource(scanSource);
 
       const parsedInfo = parseUpiPayment(clean);
-      // Auto-set intent to 'pay' if it is a payment URI or standalone VPA
+      const chosenIntent: Intention = "pay";
       if (parsedInfo.isPayment || clean.toLowerCase().startsWith("upi://pay")) {
-        setIntention("pay");
+        setIntention(chosenIntent);
       }
       if (parsedInfo.amount !== null) {
         setAmountText(String(parsedInfo.amount));
       }
 
-      setStep("details");
+      // If scanned directly through camera: automatically analyze and display the output result!
+      if (scanSource === "camera") {
+        setBusy(true);
+        setActionError(null);
+        try {
+          const result = await api.analyze({
+            raw_text: clean,
+            intention: chosenIntent,
+            expected_amount: parsedInfo.amount,
+            language: lang,
+            source: "camera",
+          });
+          go({
+            screen: "result",
+            result,
+            expectation: { intention: chosenIntent, expectedAmount: parsedInfo.amount },
+          });
+        } catch (error) {
+          setStep("details");
+          setActionError(errorText(error, t));
+        } finally {
+          setBusy(false);
+        }
+      } else {
+        setStep("details");
+      }
     },
-    [stopCamera],
+    [go, lang, stopCamera, t],
   );
 
   const startCamera = useCallback(async () => {
@@ -130,7 +155,7 @@ export function ScanScreen() {
     setCameraState("starting");
     try {
       const scanner = await startQrScanner(video, (text) => {
-        handleDetectedText(text, "camera");
+        void handleDetectedText(text, "camera");
       });
       scannerRef.current = scanner;
       setCameraState("on");
@@ -253,7 +278,7 @@ export function ScanScreen() {
                   className={
                     cameraState === "off"
                       ? "hidden"
-                      : "aspect-[4/3] w-full rounded-2xl bg-black object-cover"
+                      : "aspect-video w-full rounded-2xl bg-black object-cover"
                   }
                 />
 
@@ -300,6 +325,13 @@ export function ScanScreen() {
                 <div className="mt-4 space-y-4">
                   <p className="text-center text-lg font-bold text-navy">
                     {cameraState === "starting" ? t.scan.cameraStarting : t.scan.cameraHint}
+                  </p>
+                  <p className="text-center text-sm font-semibold text-navy/70">
+                    {lang === "hi"
+                      ? "कैमरे के सामने QR कोड को 15-25 सेमी की दूरी पर सीधा रखें — स्कैन होते ही सुरक्षा परिणाम दिखेगा"
+                      : lang === "kn"
+                        ? "ಕ್ಯಾಮರಾದ ಮುಂದೆ QR ಕೋಡ್ ಅನ್ನು 15-25 ಸೆಂ.ಮೀ ದೂರದಲ್ಲಿ ನೇರವಾಗಿ ಹಿಡಿಯಿರಿ — ಸ್ಕ್ಯಾನ್ ಆದ ತಕ್ಷಣ ಸುರಕ್ಷತಾ ಫಲಿತಾಂಶ ಕಾಣಿಸುತ್ತದೆ"
+                        : "Hold the QR code steadily 15-25 cm in front of the camera — safety check will run automatically"}
                   </p>
                   <BigButton
                     variant="coral"
