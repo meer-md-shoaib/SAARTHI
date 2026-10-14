@@ -33,6 +33,13 @@ function parseAmount(value: string): number | null {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
 
+function isUpiPayment(text: string): boolean {
+  const t = text.trim();
+  if (/^upi:\/\//i.test(t)) return true;
+  if (/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(t) || t.toLowerCase().includes("pa=")) return true;
+  return false;
+}
+
 function errorText(error: unknown, t: Dict): string {
   if (error instanceof ApiError) {
     if (error.kind === "timeout") return t.common.timeoutError;
@@ -343,7 +350,12 @@ export function ScanScreen() {
                   disabled={!rawText.trim()}
                   onClick={() => {
                     setSource("manual");
-                    setStep("details");
+                    if (isUpiPayment(rawText)) {
+                      setStep("details");
+                    } else {
+                      // Non-UPI message or text: analyze directly without asking to pay or receive
+                      void runAnalyzeWithText(rawText, "manual");
+                    }
                   }}
                   icon={<ScanLine className="h-6 w-6" />}
                 >

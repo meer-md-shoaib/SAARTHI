@@ -250,9 +250,10 @@ export class LiveSpeechRecognizer {
             return;
           }
 
+          const localFallback = (this.nativeFinalAccumulated.trim() || this.liveInterim.trim());
           // If backend couldn't hear clearly or failed, check native fallback
-          if (this.nativeFinalAccumulated.trim()) {
-            handlers?.onFinal(this.nativeFinalAccumulated.trim());
+          if (localFallback) {
+            handlers?.onFinal(localFallback);
             return;
           }
 
@@ -264,15 +265,17 @@ export class LiveSpeechRecognizer {
       }
 
       // If audio was empty but native had captured words
-      if (this.nativeFinalAccumulated.trim()) {
-        handlers?.onFinal(this.nativeFinalAccumulated.trim());
+      const localFallback = (this.nativeFinalAccumulated.trim() || this.liveInterim.trim());
+      if (localFallback) {
+        handlers?.onFinal(localFallback);
         return;
       }
 
       handlers?.onError?.("empty_audio");
     } catch {
-      if (this.nativeFinalAccumulated.trim()) {
-        handlers?.onFinal(this.nativeFinalAccumulated.trim());
+      const localFallback = (this.nativeFinalAccumulated.trim() || this.liveInterim.trim());
+      if (localFallback) {
+        handlers?.onFinal(localFallback);
       } else {
         handlers?.onError?.("generic");
       }

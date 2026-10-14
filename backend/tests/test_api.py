@@ -510,3 +510,62 @@ def test_unknown_api_path_returns_json_404(client: TestClient) -> None:
     response = client.get("/api/v1/does-not-exist")
     assert response.status_code == 404
     assert "detail" in response.json()
+
+
+def test_gemini_stt_transcription(monkeypatch: pytest.MonkeyPatch, client: TestClient) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "test_gemini_key")
+    get_settings.cache_clear()
+
+    async def mock_transcribe(audio_bytes, mime_type="audio/webm", language="en"):
+        return "Can I share my OTP with a bank manager?"
+
+    with patch("app.gemini.GeminiService.transcribe_audio", side_effect=mock_transcribe):
+        response = client.post(
+            "/api/v1/speech-to-text",
+            files={"file": ("recording.webm", b"fake-audio-bytes", "audio/webm")},
+            data={"language": "en"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "ok"
+        assert body["transcript"] == "Can I share my OTP with a bank manager?"
+        assert "gemini" in body["engine"]
+
+
+def test_gemini_ask_qa(monkeypatch: pytest.MonkeyPatch, client: TestClient) -> None:
+    monkeypatch.setenv("GEMINI_API_KEY", "test_gemini_key")
+    get_settings.cache_clear()
+
+    async def mock_answer(question, language="en", context=None):
+        return "Never share your OTP or UPI PIN with anyone, even if they claim to be from a bank."
+
+    with patch("app.gemini.GeminiService.answer_safety_question", side_effect=mock_answer):
+        response = client.post(
+            "/api/v1/ask",
+            json={"text": "Should I share OTP with bank?", "language": "en"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["answered_by"] == "gemini_ai"
+        assert "Never share your OTP" in body["answer"]
+
+
+def test_non_upi_message_thinking_analysis(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
+    # Verify that a random electricity threat message is NOT rejected as "invalid VPA"
+    response = client.post(
+        "/api/v1/analyze-payment",
+        json={
+            "raw_text": "Dear customer, your electricity will be disconnected tonight at 9:30pm due to unpaid bill. Call officer at 9876543210 immediately.",
+            "intention": "unknown",
+            "language": "en",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    # It must evaluate the threat, not complain about missing UPI QR code
+    assert body["outcome"] in ("high_concern", "be_careful")
+    assert body["ai_overrode_engine"] is True
+    assert len(body["recommended_actions"]) > 0
+

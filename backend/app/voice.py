@@ -222,7 +222,28 @@ class VoiceService:
                 "typed_fallback": True,
             }
 
-        # 1. Primary: Sarvam AI Saaras v4
+        # 1. Primary: Google Gemini 2.5 Flash multimodal STT
+        if settings.gemini_api_key:
+            try:
+                from .gemini import get_gemini_service
+
+                gemini_svc = get_gemini_service()
+                gemini_transcript = await gemini_svc.transcribe_audio(
+                    audio_bytes=audio,
+                    mime_type=content_type or "audio/webm",
+                    language=clean_lang,
+                )
+                if gemini_transcript:
+                    return {
+                        "status": "ok",
+                        "transcript": gemini_transcript,
+                        "detected_language": clean_lang,
+                        "engine": f"gemini:{settings.gemini_model}",
+                    }
+            except Exception as exc:
+                logger.warning("Gemini STT failed, falling back: %s", exc)
+
+        # 2. Secondary: Sarvam AI Saaras v4
         if settings.sarvam_api_key:
             mode = "codemix" if clean_lang == "codemix" else "transcribe"
             data: dict[str, str] = {

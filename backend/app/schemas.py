@@ -126,7 +126,7 @@ class AskResponse(BaseModel):
     answer: str
     suggested: list[SuggestedTopic]
     language: Language
-    answered_by: Literal["knowledge_base", "ml_message_analysis", "contextual_followup"] = "knowledge_base"
+    answered_by: Literal["knowledge_base", "ml_message_analysis", "contextual_followup", "gemini_ai"] = "knowledge_base"
 
 
 class SpeechToTextResponse(BaseModel):

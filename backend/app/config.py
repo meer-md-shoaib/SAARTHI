@@ -39,13 +39,19 @@ class Settings:
     tts_speaker: str | None
     use_edge_tts: bool
     use_google_stt: bool
+    gemini_api_key: str | None
+    gemini_model: str
     cors_origins: list[str]
     voice_timeout_seconds: float
     max_audio_bytes: int
 
     @property
     def stt_configured(self) -> bool:
-        return (self.sarvam_api_key is not None) or (self.use_google_stt and HAS_SPEECH_RECOGNITION)
+        return (
+            (self.gemini_api_key is not None)
+            or (self.sarvam_api_key is not None)
+            or (self.use_google_stt and HAS_SPEECH_RECOGNITION)
+        )
 
     @property
     def tts_configured(self) -> bool:
@@ -56,6 +62,8 @@ class Settings:
 def get_settings() -> Settings:
     """Read settings from the environment (cached; call ``get_settings.cache_clear()`` in tests)."""
     key = (os.getenv("SARVAM_API_KEY") or os.getenv("SARVAM_API_TOKEN") or "").strip() or None
+    gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip() or None
+    gemini_model = (os.getenv("GEMINI_MODEL") or "gemini-2.5-flash").strip()
     try:
         timeout = float(os.getenv("VOICE_TIMEOUT_SECONDS", "25"))
     except ValueError:
@@ -77,6 +85,8 @@ def get_settings() -> Settings:
         tts_speaker=(os.getenv("SARVAM_TTS_SPEAKER", "shubh") or "").strip() or "shubh",
         use_edge_tts=os.getenv("USE_EDGE_TTS", "true").strip().lower() in ("1", "true", "yes"),
         use_google_stt=os.getenv("USE_GOOGLE_STT", "false").strip().lower() in ("1", "true", "yes"),
+        gemini_api_key=gemini_key,
+        gemini_model=gemini_model,
         cors_origins=_split_csv(os.getenv("CORS_ORIGINS", DEFAULT_ORIGINS)),
         voice_timeout_seconds=timeout,
         max_audio_bytes=max_mb * 1024 * 1024,

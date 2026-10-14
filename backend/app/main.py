@@ -108,6 +108,8 @@ async def voice_config() -> VoiceConfigResponse:
 
 # --- Security engine ---------------------------------------------------------
 
+# --- Security engine ---------------------------------------------------------
+
 @app.post(
     "/api/v1/analyze-payment",
     response_model=AnalyzePaymentResponse,
@@ -115,11 +117,138 @@ async def voice_config() -> VoiceConfigResponse:
     tags=["analysis"],
 )
 async def analyze(payload: AnalyzePaymentRequest) -> AnalyzePaymentResponse:
-    """Run the deterministic rules engine.
+    """Analyze a payment QR, UPI address, or general communication message.
 
-    The verdict comes exclusively from explicit Python rules. No AI service is
-    consulted and ``ai_overrode_engine`` is always ``False``.
+    If the input is an actual UPI payment QR code or VPA, it runs through the
+    deterministic payment-safety rules engine.
+    If the input is an SMS, message, warning, or link, it evaluates it with
+    deep reasoning (using Gemini 2.5 Flash when available, or calibrated ML)
+    rather than returning canned UPI errors.
     """
+    import re
+    from .engine import Outcome, Severity
+    from .localization import get_strings
+    from .schemas import ExtractedInfo, WarningSign
+
+    raw = payload.raw_text.strip()
+    is_upi = (
+        raw.lower().startswith("upi://")
+        or "pa=" in raw.lower()
+        or bool(re.match(r"^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$", raw))
+    )
+
+    # 1. Non-UPI message or text: Think before replying instead of canned UPI errors
+    if not is_upi and len(raw) > 5:
+        settings = get_settings()
+        lang = payload.language if payload.language in ("en", "hi", "kn") else "en"
+        strings = get_strings(lang)
+
+        # A. Use Gemini 2.5 Flash for deep contextual reasoning when key is configured
+        if settings.gemini_api_key:
+            from .gemini import get_gemini_service
+
+            gemini_svc = get_gemini_service()
+            gemini_res = await gemini_svc.analyze_message_or_content(
+                text=raw, language=payload.language
+            )
+            if gemini_res:
+                risk = gemini_res.get("risk_level", "medium")
+                outcome_map = {
+                    "high": Outcome.HIGH,
+                    "medium": Outcome.CAREFUL,
+                    "low": Outcome.LOW,
+                }
+                outcome = outcome_map.get(risk, Outcome.CAREFUL)
+                warning_signs = [
+                    WarningSign(
+                        id=f"gemini_warning_{i}",
+                        severity=Severity.HIGH if w.get("severity") == "high" else Severity.MEDIUM,
+                        title=w.get("title", "Safety Warning"),
+                        detail=w.get("detail", ""),
+                    )
+                    for i, w in enumerate(gemini_res.get("warning_signs", []))
+                ]
+                outcome_label = strings["outcomes"][outcome.value]["label"]
+                return AnalyzePaymentResponse(
+                    outcome=outcome,
+                    outcome_label=outcome_label,
+                    summary=gemini_res.get("summary") or gemini_res.get("title") or "Content Analysis",
+                    explanation=gemini_res.get("explanation", ""),
+                    warning_signs=warning_signs,
+                    recommended_actions=gemini_res.get("recommended_actions") or [],
+                    checks=[],
+                    status_labels=strings["status_labels"],
+                    extracted=ExtractedInfo(
+                        kind="text",
+                        payee_vpa=None,
+                        payee_name=None,
+                        amount=None,
+                        amount_source=None,
+                        currency=None,
+                        note=None,
+                        transaction_ref=None,
+                        merchant_code=None,
+                        link=None,
+                        supported=True,
+                    ),
+                    insufficient_reasons=[],
+                    disclaimer=strings["disclaimer"],
+                    language=payload.language,
+                    engine_version=f"gemini-{settings.gemini_model}",
+                    ai_overrode_engine=True,
+                )
+
+        # B. Fallback to calibrated message classification service
+        service = get_message_analysis_service()
+        ml_res = service.analyze_message(text=raw, language=payload.language)
+        risk = ml_res.get("risk_level", "medium")
+        outcome_map = {
+            "high": Outcome.HIGH,
+            "medium": Outcome.CAREFUL,
+            "low": Outcome.LOW,
+        }
+        outcome = outcome_map.get(risk, Outcome.CAREFUL)
+        warning_signs = [
+            WarningSign(
+                id=f"ml_evidence_{i}",
+                severity=Severity.HIGH if ml_res.get("category") == "scam" else Severity.MEDIUM,
+                title=e.get("title", "Detected Signal"),
+                detail=e.get("explanation", ""),
+                evidence=e.get("snippet"),
+            )
+            for i, e in enumerate(ml_res.get("evidence", []))
+        ]
+        outcome_label = strings["outcomes"][outcome.value]["label"]
+        return AnalyzePaymentResponse(
+            outcome=outcome,
+            outcome_label=outcome_label,
+            summary=f"Message Safety: {ml_res.get('category', 'Message').title()} Risk",
+            explanation=ml_res.get("explanation", ""),
+            warning_signs=warning_signs,
+            recommended_actions=ml_res.get("safe_next_steps", []),
+            checks=[],
+            status_labels=strings["status_labels"],
+            extracted=ExtractedInfo(
+                kind="text",
+                payee_vpa=None,
+                payee_name=None,
+                amount=None,
+                amount_source=None,
+                currency=None,
+                note=None,
+                transaction_ref=None,
+                merchant_code=None,
+                link=None,
+                supported=True,
+            ),
+            insufficient_reasons=[],
+            disclaimer=strings["disclaimer"],
+            language=payload.language,
+            engine_version="ml-safety-classifier",
+            ai_overrode_engine=True,
+        )
+
+    # 2. UPI payment: Run deterministic payment rules engine
     result: dict[str, Any] = analyze_payment(
         raw_text=payload.raw_text,
         intention=payload.intention,
@@ -136,11 +265,7 @@ async def analyze(payload: AnalyzePaymentRequest) -> AnalyzePaymentResponse:
     tags=["analysis"],
 )
 async def analyze_message_endpoint(payload: AnalyzeMessageRequest) -> AnalyzeMessageResponse:
-    """Analyze a communication or SMS text for fraud and scam indicators.
-
-    Combines calibrated ML categorization with deterministic security checks and
-    secondary evidence extraction.
-    """
+    """Analyze a communication or SMS text for fraud and scam indicators."""
     service = get_message_analysis_service()
     result = service.analyze_message(text=payload.message, language=payload.language)
     return AnalyzeMessageResponse(**result)
@@ -150,7 +275,42 @@ async def analyze_message_endpoint(payload: AnalyzeMessageRequest) -> AnalyzeMes
 
 @app.post("/api/v1/ask", response_model=AskResponse, tags=["assistant"])
 async def ask(payload: AskRequest) -> AskResponse:
-    """Answer a safety question from the curated trilingual knowledge base."""
+    """Answer a safety question via Gemini AI or curated knowledge base."""
+    settings = get_settings()
+
+    # 1. Primary: Use Gemini 2.5 Flash for natural, easy-to-understand response
+    if settings.gemini_api_key and not payload.topic_id:
+        from .gemini import get_gemini_service
+        from .schemas import SuggestedTopic
+
+        gemini_svc = get_gemini_service()
+        gemini_answer = await gemini_svc.answer_safety_question(
+            question=payload.text,
+            language=payload.language,
+            context=payload.context,
+        )
+        if gemini_answer:
+            title_map = {
+                "en": "Saarthi AI Safety Advice",
+                "hi": "सारथी AI सुरक्षा सलाह",
+                "kn": "ಸಾರಥಿ AI ಸುರಕ್ಷತಾ ಸಲಹೆ",
+            }
+            suggested = [
+                SuggestedTopic(topic_id="otp", title="Should I share my OTP?"),
+                SuggestedTopic(topic_id="qr_check", title="How to check QR safely?"),
+                SuggestedTopic(topic_id="already_paid", title="I already sent money"),
+            ]
+            return AskResponse(
+                topic_id="gemini_assistant",
+                question=payload.text,
+                title=title_map.get(payload.language, title_map["en"]),
+                answer=gemini_answer,
+                suggested=suggested,
+                language=payload.language,
+                answered_by="gemini_ai",
+            )
+
+    # 2. Secondary / Chip selection: Curated trilingual knowledge base
     result = answer_question(
         text=payload.text,
         language=payload.language,
