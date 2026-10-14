@@ -51,6 +51,28 @@ export function stopSpeech(): void {
   handler?.();
 }
 
+/** Play audio from a base64 encoded string with clean cleanup. */
+export async function playTtsBase64(base64: string, contentType = "audio/wav"): Promise<void> {
+  stopSpeech();
+  return new Promise((resolve) => {
+    try {
+      const audio = new Audio(`data:${contentType};base64,${base64}`);
+      currentAudio = audio;
+      audio.onended = () => {
+        stopAudio();
+        resolve();
+      };
+      audio.onerror = () => {
+        stopAudio();
+        resolve();
+      };
+      audio.play().catch(() => resolve());
+    } catch {
+      resolve();
+    }
+  });
+}
+
 export async function speakText(
   text: string,
   language: Lang | string,

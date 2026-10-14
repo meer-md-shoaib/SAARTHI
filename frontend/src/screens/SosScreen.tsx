@@ -2,14 +2,18 @@ import { useState, useEffect } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
+  Check,
   CheckCircle2,
+  Copy,
   ExternalLink,
   MessageSquare,
   Phone,
   PhoneCall,
   ShieldAlert,
+  Sparkles,
   Volume2,
 } from "lucide-react";
+import { api } from "../api";
 import { BigButton } from "../components/Button";
 import { Banner, Card, NumberedList } from "../components/bits";
 import { SceneArt } from "../components/illustrations";
@@ -22,11 +26,22 @@ import {
   type EmergencyContact,
 } from "../data/emergencyContacts";
 import { useApp } from "../state";
+import type { EmergencyRescueResponse } from "../types";
 
 export function SosScreen() {
-  const { t, uiLang, speakIfOn } = useApp();
+  const { t, uiLang, lang, speakIfOn } = useApp();
   const [selected, setSelected] = useState<SosChoice | null>(null);
   const [dispatchedContact, setDispatchedContact] = useState<EmergencyContact | null>(null);
+
+  // AI Emergency Rescue Generator state
+  const [showRescueForm, setShowRescueForm] = useState(false);
+  const [incidentDesc, setIncidentDesc] = useState("");
+  const [lostAmount, setLostAmount] = useState("");
+  const [fraudUpi, setFraudUpi] = useState("");
+  const [rescueLoading, setRescueLoading] = useState(false);
+  const [rescueResult, setRescueResult] = useState<EmergencyRescueResponse | null>(null);
+  const [rescueError, setRescueError] = useState("");
+  const [copiedTemplate, setCopiedTemplate] = useState(false);
 
   const titleFor = (choice: SosChoice): string => {
     switch (choice.id) {
@@ -198,6 +213,163 @@ export function SosScreen() {
     </Card>
   );
 
+  const handleGenerateRescue = async () => {
+    if (!incidentDesc.trim() || rescueLoading) return;
+    setRescueLoading(true);
+    setRescueError("");
+    try {
+      const amt = lostAmount ? parseFloat(lostAmount) : null;
+      const resp = await api.emergencyRescue(incidentDesc.trim(), isNaN(amt || 0) ? null : amt, fraudUpi.trim() || null, lang);
+      setRescueResult(resp);
+      speakIfOn(uiLang === "hi" ? "आपकी आपातकालीन शिकायत तैयार है। तुरंत 1930 पर कॉल करें।" : uiLang === "kn" ? "ದೂರು ಸಿದ್ಧವಾಗಿದೆ. ತಕ್ಷಣ 1930ಗೆ ಕರೆ ಮಾಡಿ." : "Your recovery plan and cyber complaint are ready.");
+    } catch {
+      setRescueError(uiLang === "hi" ? "शिकायत तैयार नहीं हो सकी। कृपया सीधे 1930 पर कॉल करें।" : "Could not generate report. Please dial 1930 immediately.");
+    } finally {
+      setRescueLoading(false);
+    }
+  };
+
+  const handleCopyComplaint = () => {
+    if (!rescueResult?.complaint_template) return;
+    navigator.clipboard.writeText(rescueResult.complaint_template);
+    setCopiedTemplate(true);
+    setTimeout(() => setCopiedTemplate(false), 2500);
+  };
+
+  // Section: Instant AI Fraud Rescue & Cybercrime Complaint Generator
+  const renderRescueGenerator = () => (
+    <Card className="border-2 border-red-500/40 bg-gradient-to-br from-red-50/70 via-white to-amber-50/50 p-5 shadow-soft">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-600 text-white shadow-sm">
+            <ShieldAlert className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-extrabold text-navy">
+              {uiLang === "hi" ? "🚨 मैं ठगी का शिकार हुआ — तुरंत शिकायत जनरेटर" : uiLang === "kn" ? "🚨 ವಂಚನೆಗೊಳಗಾಗಿದ್ದೇನೆ — ತುರ್ತು ದೂರು" : "🚨 Fraud Rescue & Instant Complaint Generator"}
+            </h2>
+            <p className="text-xs sm:text-sm text-navy/70">
+              {uiLang === "hi" ? "2 घंटे के अंदर तुरंत बैंक खाता फ्रीज और पोर्टल शिकायत ड्राफ्ट" : uiLang === "kn" ? "ತಕ್ಷಣ ಬ್ಯಾಂಕ್ ಖಾತೆ ಫ್ರೀಜ್ ಮಾಡಲು ದೂರು ಸಿದ್ಧಪಡಿಸಿ" : "Generate official 1930 & cybercrime.gov.in complaint draft in seconds"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowRescueForm((prev) => !prev)}
+          className="rounded-xl border border-red-300 bg-white px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-50 transition-all"
+        >
+          {showRescueForm ? (uiLang === "hi" ? "बंद करें" : "Hide") : (uiLang === "hi" ? "फॉर्म खोलें" : "Open Form")}
+        </button>
+      </div>
+
+      {showRescueForm && (
+        <div className="mt-4 space-y-3 pt-3 border-t border-navy/10 animate-fade-in">
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-navy/70 mb-1">
+              {uiLang === "hi" ? "क्या हुआ? (संक्षेप में लिखें):" : uiLang === "kn" ? "ಏನಾಯಿತು? (ವಿವರಿಸಿ):" : "What happened? (Describe incident):"}
+            </label>
+            <textarea
+              rows={2}
+              value={incidentDesc}
+              onChange={(e) => setIncidentDesc(e.target.value)}
+              placeholder={uiLang === "hi" ? "जैसे: मुझे WhatsApp पर कैशबैक लिंक मिला और ₹4,500 कट गए..." : "e.g. Scammer asked me to scan QR for electricity bill, money debited..."}
+              className="w-full rounded-2xl border-2 border-navy/20 bg-white p-3 text-sm text-navy focus:border-red-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-navy/70 mb-1">
+                {uiLang === "hi" ? "कटी हुई राशि (₹ optional):" : "Amount Lost (₹ optional):"}
+              </label>
+              <input
+                type="number"
+                value={lostAmount}
+                onChange={(e) => setLostAmount(e.target.value)}
+                placeholder="e.g. 5000"
+                className="w-full rounded-xl border-2 border-navy/20 bg-white px-3 py-2 text-sm text-navy focus:border-red-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-navy/70 mb-1">
+                {uiLang === "hi" ? "धोखेबाज का UPI ID / नंबर (optional):" : "Fraudster UPI ID/No. (optional):"}
+              </label>
+              <input
+                type="text"
+                value={fraudUpi}
+                onChange={(e) => setFraudUpi(e.target.value)}
+                placeholder="e.g. fraudster@okaxis"
+                className="w-full rounded-xl border-2 border-navy/20 bg-white px-3 py-2 text-sm text-navy focus:border-red-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={rescueLoading || !incidentDesc.trim()}
+            onClick={handleGenerateRescue}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3 font-extrabold text-white shadow-soft hover:bg-red-700 disabled:opacity-50 transition-all"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>{rescueLoading ? (uiLang === "hi" ? "तैयार कर रहे हैं..." : "Generating Rescue Plan...") : (uiLang === "hi" ? "आपातकालीन शिकायत और कदम बनाएं" : "Generate Rescue Plan & Official Complaint")}</span>
+          </button>
+
+          {rescueError && (
+            <p className="text-xs font-bold text-red-600">{rescueError}</p>
+          )}
+
+          {rescueResult && (
+            <div className="mt-4 space-y-4 rounded-2xl border-2 border-red-300 bg-white p-4">
+              <h3 className="text-base font-extrabold text-navy flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                <span>{uiLang === "hi" ? "तत्काल उठाए जाने वाले 5 कदम:" : "Immediate Recovery Steps:"}</span>
+              </h3>
+
+              <div className="space-y-2">
+                {rescueResult.immediate_actions.map((act) => (
+                  <div key={act.step_number} className="flex items-start gap-2.5 rounded-xl bg-sand/30 p-2.5 text-xs sm:text-sm text-navy">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-600 text-xs font-extrabold text-white">
+                      {act.step_number}
+                    </span>
+                    <div className="flex-1">
+                      <span className="font-extrabold block">{act.title}</span>
+                      <span>{act.action}</span>
+                      {act.contact && (
+                        <span className="ml-2 inline-block font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                          {act.contact}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-navy/70">
+                    {uiLang === "hi" ? "सरकारी पोर्टल हेतु तैयार शिकायत पत्र:" : "Official Cyber Crime Portal Complaint Draft:"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyComplaint}
+                    className="flex items-center gap-1 rounded-lg border border-navy/20 bg-paper px-2 py-1 text-xs font-extrabold text-navy hover:bg-navy/10"
+                  >
+                    {copiedTemplate ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                    <span>{copiedTemplate ? "Copied!" : "Copy Text"}</span>
+                  </button>
+                </div>
+                <div className="rounded-xl border border-navy/15 bg-sand/20 p-3 font-mono text-xs text-navy/90 whitespace-pre-wrap select-all">
+                  {rescueResult.complaint_template}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+
   if (!selected) {
     return (
       <div className="space-y-5">
@@ -213,7 +385,10 @@ export function SosScreen() {
         {/* 2. National Cyber Crime Reporting Portal */}
         {renderCyberCrimePortal()}
 
-        {/* 3. Scenario choices */}
+        {/* 3. AI Instant Fraud Rescue & Complaint Generator */}
+        {renderRescueGenerator()}
+
+        {/* 4. Scenario choices */}
         <div className="space-y-3">
           <h2 className="text-xl font-extrabold">{t.sos.stepsTitle}</h2>
           <ul className="space-y-4">
@@ -260,6 +435,9 @@ export function SosScreen() {
 
       {/* Immediate Family Contacts accessible even inside specific guidance */}
       {renderEmergencyContacts()}
+
+      {/* AI Instant Fraud Rescue & Complaint Generator */}
+      {renderRescueGenerator()}
 
       <Card className="overflow-hidden">
         <SceneArt kind={selected.art} className="w-full" />

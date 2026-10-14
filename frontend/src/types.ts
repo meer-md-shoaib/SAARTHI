@@ -155,3 +155,34 @@ export interface Translated {
   [key: string]: string;
 }
 
+export interface ScamRoleplayResponse {
+  reply: string;
+  resistance_detected: boolean;
+  educational_tip: string;
+  audio_base64: string | null;
+  status: string;
+}
+
+export interface JargonResponse {
+  term: string;
+  plain_english: string;
+  elder_analogy: string;
+  keep_secret: boolean;
+  audio_base64: string | null;
+}
+
+export interface RescueStep {
+  step_number: number;
+  title: string;
+  action: string;
+  contact?: string | null;
+  urgent: boolean;
+}
+
+export interface EmergencyRescueResponse {
+  immediate_actions: RescueStep[];
+  complaint_template: string;
+  helpline_number: string;
+  cybercrime_portal_url: string;
+}
+

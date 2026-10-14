@@ -35,7 +35,14 @@ from .schemas import (
     AnalyzePaymentResponse,
     AskRequest,
     AskResponse,
+    EmergencyRescueRequest,
+    EmergencyRescueResponse,
     HealthResponse,
+    JargonRequest,
+    JargonResponse,
+    RescueStep,
+    ScamRoleplayRequest,
+    ScamRoleplayResponse,
     SpeechToTextResponse,
     TextToSpeechRequest,
     TextToSpeechResponse,
@@ -354,6 +361,231 @@ async def text_to_speech(payload: TextToSpeechRequest) -> TextToSpeechResponse:
         text=payload.text, language=payload.language
     )
     return TextToSpeechResponse(**result)
+
+
+# --- Scam Roleplay Game ------------------------------------------------------
+
+_SCRIPTED_ROLEPLAY: dict[str, list[str]] = {
+    "fake_bank": [
+        "This is urgent! Your bank account will be permanently blocked in 30 minutes unless you share the OTP you just received.",
+        "Sir/Madam, I am calling from the bank fraud department. Tell me your UPI PIN or debit card details so we can reverse the suspicious transaction.",
+        "You are making a serious mistake. Confirm your account details right now or your balance will be frozen.",
+        "Last chance. Send a Rs 1 verification transfer to our secure portal or your account will be suspended today.",
+    ],
+    "lottery_email": [
+        "Congratulations! Your prize of Rs 25 lakh from UK International Lottery is ready. Pay Rs 5,000 processing fee via UPI to release it immediately.",
+        "This reward expires in 24 hours. Many winners have claimed. Do not miss your chance!",
+        "Pay the fee now and the full prize will be transferred within 10 minutes - guaranteed.",
+        "This is your final notice. Without the processing fee, we will cancel your reward.",
+    ],
+    "grandchild_emergency": [
+        "Dadi/Dadu, please hurry! The doctor says I need Rs 15,000 immediately or they will not treat me.",
+        "Please do not call Maa or Papa - I do not want them to panic. Just send the money quickly.",
+        "I am in so much pain. Please send it to this emergency UPI number right now: arjun.care@ybl",
+        "Why are you waiting? Every minute matters. Please just send the money!",
+    ],
+}
+
+_ROLEPLAY_LESSONS: dict[str, dict[str, str]] = {
+    "fake_bank": {
+        "text": "Excellent instinct! Real banks NEVER ask for your OTP, UPI PIN, or account password over a phone call. When in doubt, hang up and call the official number printed on your debit card.",
+        "hint": "Tip: Real banks and government agencies NEVER ask for OTP, PIN or passwords over the phone. Hang up and report to 1930.",
+    },
+    "lottery_email": {
+        "text": "Brilliant! You cannot win a lottery you never entered. Legitimate prize schemes NEVER ask winners to pay fees upfront. Any processing fee request is always a scam.",
+        "hint": "Tip: Legitimate prizes never require upfront payment. If someone asks you to pay money to receive money, it is always a scam.",
+    },
+    "grandchild_emergency": {
+        "text": "Perfect instinct! Before sending money in any emergency, call another family member directly to verify. Scammers create fake urgency to stop you thinking clearly.",
+        "hint": "Tip: Scammers pretend to be family members in emergencies. Always call back on a phone number you already know before sending any money.",
+    },
+}
+
+_RESISTANCE_TRIGGERS = [
+    "otp", "pin", "password", "i will not", "i won't", "no", "refuse", "hang up",
+    "call back", "police", "real bank", "fake", "scam", "fraud", "verify",
+    "official number", "family member", "not real", "suspicious", "report",
+    "never entered", "won't pay", "will not pay", "cybercrime", "1930",
+    "नहीं दूंगा", "ओटीपी नहीं", "पिन नहीं", "ನಾನು ಕೊಡುವುದಿಲ್ಲ", "ಒಟಿಪಿ ಇಲ್ಲ",
+]
+
+
+@app.post("/api/v1/scam-roleplay", response_model=ScamRoleplayResponse, tags=["games"])
+async def scam_roleplay_endpoint(payload: ScamRoleplayRequest) -> ScamRoleplayResponse:
+    """Interactive scam simulation training users to resist social engineering."""
+    user_text = payload.user_message.strip()
+    scenario = payload.scenario.strip().lower()
+
+    # Check if user demonstrated scam resistance
+    is_resistant = any(trigger in user_text.lower() for trigger in _RESISTANCE_TRIGGERS)
+    if is_resistant:
+        lesson = _ROLEPLAY_LESSONS.get(scenario, _ROLEPLAY_LESSONS["fake_bank"])
+        return ScamRoleplayResponse(
+            reply=lesson["text"],
+            is_lesson=True,
+            hint=lesson["hint"],
+            success=True,
+            audio_base64=None,
+        )
+
+    settings = get_settings()
+    reply_text: str | None = None
+
+    # Use Gemini 2.5 Flash for dynamic scammer roleplay when available
+    if settings.gemini_api_key:
+        from .gemini import get_gemini_service
+        gemini_svc = get_gemini_service()
+        reply_text = await gemini_svc.scam_roleplay_reply(
+            scenario=scenario,
+            user_message=user_text,
+            history=payload.history,
+            language=payload.language,
+        )
+
+    if not reply_text:
+        scripted_lines = _SCRIPTED_ROLEPLAY.get(scenario, _SCRIPTED_ROLEPLAY["fake_bank"])
+        turn_index = min(len(payload.history) // 2, len(scripted_lines) - 1)
+        reply_text = scripted_lines[turn_index]
+
+    # Synthesize audio so user can hear the simulated caller
+    audio_b64: str | None = None
+    try:
+        tts_res = await get_voice_service().text_to_speech(
+            text=reply_text, language=payload.language
+        )
+        if tts_res.get("status") == "ok":
+            audio_b64 = tts_res.get("audio_base64")
+    except Exception:
+        pass
+
+    return ScamRoleplayResponse(
+        reply=reply_text,
+        is_lesson=False,
+        hint="Tip: Scammers create urgency to rush your decision. Ask for verification or refuse OTP/PIN.",
+        success=False,
+        audio_base64=audio_b64,
+    )
+
+
+# --- Jargon Buster ------------------------------------------------------------
+
+_JARGON_DATA: dict[str, tuple[str, bool]] = {
+    "upi pin": (
+        "UPI PIN is your secret 4 or 6-digit password known ONLY to you. NEVER share it. Remember: You enter your PIN ONLY when SENDING money, NEVER when RECEIVING money.",
+        True,
+    ),
+    "otp": (
+        "OTP (One Time Password) is a temporary code sent by your bank to verify your identity. Never share OTP with anyone over the phone or SMS.",
+        True,
+    ),
+    "vpa": (
+        "VPA (Virtual Payment Address) is your UPI ID (like yourname@okicici or number@paytm). It is your public digital payment address — safe to share to receive money.",
+        False,
+    ),
+    "collect request": (
+        "A Collect Request is a prompt on your phone asking YOU to send money to someone. Scammers often send collect requests claiming they are sending you a refund or prize.",
+        False,
+    ),
+    "chargeback": (
+        "A formal dispute process through your bank or NPCI to retrieve money deducted due to unauthorized transactions or merchant fraud.",
+        False,
+    ),
+    "digital arrest": (
+        "A 100% scam! Real police, CBI, ED, and customs officers NEVER 'arrest' anyone over WhatsApp/Skype video calls or ask for money transfer to clear your name.",
+        False,
+    ),
+    "apk scam": (
+        "Malicious Android app files (.apk) sent over WhatsApp/SMS that give scammers control of your phone and read your OTPs. Never install APK files from unknown links.",
+        False,
+    ),
+    "qr code": (
+        "A Quick Response barcode. Scanning a merchant QR lets you PAY them. Remember: Scanning a QR code ALWAYS sends money out from your account; you do not need to scan a QR code to receive money.",
+        False,
+    ),
+}
+
+
+@app.post("/api/v1/translate-jargon", response_model=JargonResponse, tags=["knowledge"])
+async def translate_jargon_endpoint(payload: JargonRequest) -> JargonResponse:
+    """Explain banking and digital payment jargon in simple language for elders."""
+    term_clean = payload.term.strip().lower()
+    if term_clean in _JARGON_DATA:
+        expl, keep_priv = _JARGON_DATA[term_clean]
+        return JargonResponse(term=payload.term, explanation=expl, keep_private=keep_priv)
+
+    settings = get_settings()
+    if settings.gemini_api_key:
+        from .gemini import get_gemini_service
+        gemini_svc = get_gemini_service()
+        gemini_expl = await gemini_svc.explain_jargon(term=payload.term, language=payload.language)
+        if gemini_expl:
+            is_secret = any(k in term_clean for k in ("pin", "otp", "password", "cvv"))
+            return JargonResponse(term=payload.term, explanation=gemini_expl, keep_private=is_secret)
+
+    return JargonResponse(
+        term=payload.term,
+        explanation=f"'{payload.term}' is a banking/payment term. Always verify with your bank or call 1930 if someone uses this term to pressure you into paying.",
+        keep_private=False,
+    )
+
+
+# --- Emergency Rescue ---------------------------------------------------------
+
+@app.post("/api/v1/emergency-rescue", response_model=EmergencyRescueResponse, tags=["emergency"])
+async def emergency_rescue_endpoint(payload: EmergencyRescueRequest) -> EmergencyRescueResponse:
+    """Generate instant fraud recovery steps and official cybercrime report template."""
+    import datetime
+
+    now_str = datetime.datetime.now().strftime("%d-%b-%Y %I:%M %p")
+    steps = [
+        RescueStep(
+            step=1,
+            action="Call the National Cybercrime Helpline immediately",
+            detail="Dial 1930 (toll-free, 24/7). Report the transaction right away so police can request the recipient bank to freeze funds.",
+            link="tel:1930",
+        ),
+        RescueStep(
+            step=2,
+            action="Call your bank to freeze UPI and debit card",
+            detail="Call your bank's 24/7 fraud helpline and request an immediate freeze on your netbanking and debit card to prevent further unauthorized debits.",
+            link="tel:1930",
+        ),
+        RescueStep(
+            step=3,
+            action="File an official complaint on cybercrime.gov.in",
+            detail="Log in to https://cybercrime.gov.in and file a formal report under 'Financial Fraud' with your transaction ID and screenshots.",
+            link="https://cybercrime.gov.in",
+        ),
+        RescueStep(
+            step=4,
+            action="Raise a transaction dispute on NPCI portal",
+            detail="Visit the NPCI consumer dispute portal (https://www.npci.org.in) and register a complaint with your UPI reference number.",
+            link="https://www.npci.org.in",
+        ),
+        RescueStep(
+            step=5,
+            action="Save all evidence and file an e-FIR",
+            detail="Do not delete chat logs, phone numbers, or payment screenshots. Submit them to your local police cyber cell.",
+            link=None,
+        ),
+    ]
+
+    complaint_template = (
+        f"INCIDENT REPORT FOR CYBERCRIME HELPLINE 1930 / CYBERCRIME.GOV.IN\n"
+        f"Date & Time: {now_str}\n"
+        f"Incident Description: {payload.description or 'Unauthorized / fraudulent online payment transaction'}\n"
+        f"Amount Defrauded: Rs. {payload.amount_lost:,.2f}\n"
+        f"Suspect UPI ID / Account Involved: {payload.upi_id_involved or 'Not provided'}\n"
+        f"Request: Please freeze the beneficiary account and initiate refund under cybercrime SOP."
+    )
+
+    return EmergencyRescueResponse(
+        helpline="1930",
+        portal="https://cybercrime.gov.in",
+        message="Act within the Golden Hour: the first 2 hours after a fraud are critical for banks to freeze the funds.",
+        rescue_steps=steps,
+        complaint_template=complaint_template,
+    )
 
 
 # --- Errors -------------------------------------------------------------------

@@ -240,6 +240,54 @@ class AnalyzeMessageResponse(BaseModel):
     safety_engine_override: bool
 
 
+class ScamRoleplayRequest(BaseModel):
+    scenario: Literal["fake_bank", "lottery_email", "grandchild_emergency"] = "fake_bank"
+    user_message: str = Field(..., min_length=1, max_length=1000)
+    history: list[dict[str, str]] = Field(default_factory=list)
+    language: str = "en"
+
+
+class ScamRoleplayResponse(BaseModel):
+    reply: str
+    is_lesson: bool = False
+    hint: str | None = None
+    success: bool = False
+    audio_base64: str | None = None
+
+
+class JargonRequest(BaseModel):
+    term: str = Field(..., min_length=1, max_length=100)
+    language: str = "en"
+
+
+class JargonResponse(BaseModel):
+    term: str
+    explanation: str
+    keep_private: bool = False
+
+
+class EmergencyRescueRequest(BaseModel):
+    description: str = Field(default="", max_length=2000)
+    amount_lost: float = 0.0
+    upi_id_involved: str = Field(default="", max_length=200)
+    language: str = "en"
+
+
+class RescueStep(BaseModel):
+    step: int
+    action: str
+    detail: str
+    link: str | None = None
+
+
+class EmergencyRescueResponse(BaseModel):
+    helpline: str = "1930"
+    portal: str = "https://cybercrime.gov.in"
+    message: str
+    rescue_steps: list[RescueStep]
+    complaint_template: str
+
+
 __all__ = [
     "AnalyzeMessageRequest",
     "AnalyzeMessageResponse",
@@ -248,10 +296,17 @@ __all__ = [
     "AskRequest",
     "AskResponse",
     "Check",
+    "EmergencyRescueRequest",
+    "EmergencyRescueResponse",
     "ErrorResponse",
     "EvidenceItem",
     "ExtractedInfo",
     "HealthResponse",
+    "JargonRequest",
+    "JargonResponse",
+    "RescueStep",
+    "ScamRoleplayRequest",
+    "ScamRoleplayResponse",
     "SpeechToTextResponse",
     "SuggestedTopic",
     "TextToSpeechRequest",

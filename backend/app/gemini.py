@@ -213,6 +213,106 @@ Respond ONLY with valid JSON matching this schema:
             logger.warning("Gemini message analysis error: %s", exc)
         return None
 
+    async def scam_roleplay_reply(
+        self,
+        scenario: str,
+        user_message: str,
+        history: list[dict[str, str]],
+        language: str = "en",
+    ) -> str | None:
+        """Generate a realistic scammer reply for educational simulation."""
+        url = self._get_url()
+        if not url:
+            return None
+
+        target_lang = LANG_NAMES.get(language.lower(), "English")
+        scenario_prompts = {
+            "fake_bank": (
+                "You are an actor playing a high-pressure scammer named Rajesh from National Bank of India. "
+                "You are calling the user, claiming their account or card will be permanently blocked in 30 minutes "
+                "unless they verify their OTP, UPI PIN, or date of birth right now. "
+                f"Keep your reply under 35 words. Respond in {target_lang}. Educational simulation only."
+            ),
+            "lottery_email": (
+                "You are an actor playing a persistent scammer named David Williams from UK International Lottery. "
+                "The user 'won' Rs 25 lakh, but they must urgently pay a Rs 5,000 processing fee via UPI to release it. "
+                f"Keep your reply under 35 words. Respond in {target_lang}. Educational simulation only."
+            ),
+            "grandchild_emergency": (
+                "You are an actor playing an impostor pretending to be the user's grandchild Arjun. "
+                "You were in an accident and urgently need Rs 15,000 sent to a UPI number for hospital treatment. "
+                "Beg them not to tell parents yet so they don't panic. "
+                f"Keep your reply under 35 words. Respond in {target_lang}. Educational simulation only."
+            ),
+        }
+        sys_prompt = scenario_prompts.get(scenario, scenario_prompts["fake_bank"])
+
+        conversation_lines = [f"System: {sys_prompt}"]
+        for h in history[-4:]:
+            r = h.get("role", "user")
+            c = h.get("content", "")
+            conversation_lines.append(f"{r.capitalize()}: {c}")
+        conversation_lines.append(f"User: {user_message}")
+        conversation_lines.append("Scammer (under 35 words):")
+
+        full_prompt = "\n".join(conversation_lines)
+        payload = {
+            "contents": [{"parts": [{"text": full_prompt}]}],
+            "generationConfig": {
+                "temperature": 0.5,
+                "maxOutputTokens": 100,
+            },
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                res = await client.post(url, json=payload)
+            if res.status_code == 200:
+                data = res.json()
+                candidates = data.get("candidates") or []
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts and "text" in parts[0]:
+                        return parts[0]["text"].strip()
+        except Exception as exc:
+            logger.warning("Gemini roleplay error: %s", exc)
+        return None
+
+    async def explain_jargon(self, term: str, language: str = "en") -> str | None:
+        """Explain a technical or financial term in simple language for elders."""
+        url = self._get_url()
+        if not url:
+            return None
+
+        target_lang = LANG_NAMES.get(language.lower(), "English")
+        prompt = (
+            f"Explain the digital payment/UPI term '{term}' in 2 very simple, reassuring sentences "
+            f"for an elderly person in India in {target_lang}. "
+            "Clearly mention whether this is something they should keep private (like PIN/OTP) or if it is safe to share."
+        )
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.2,
+                "maxOutputTokens": 200,
+            },
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                res = await client.post(url, json=payload)
+            if res.status_code == 200:
+                data = res.json()
+                candidates = data.get("candidates") or []
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts and "text" in parts[0]:
+                        return parts[0]["text"].strip()
+        except Exception as exc:
+            logger.warning("Gemini jargon explanation error: %s", exc)
+        return None
+
 
 _gemini_service: GeminiService | None = None
 
@@ -222,3 +322,4 @@ def get_gemini_service() -> GeminiService:
     if _gemini_service is None:
         _gemini_service = GeminiService()
     return _gemini_service
+

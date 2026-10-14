@@ -155,6 +155,18 @@ export const en = {
   learn: {
     title: "Learn Safely",
     subtitle: "Short lessons and tools that help you avoid scams.",
+    practice: {
+      title: "Abhyas — Practice Mode",
+      sub: "Consequence-free zero-money sandbox to practice safely.",
+    },
+    roleplay: {
+      title: "Scam Roleplay Game",
+      sub: "Interactive AI scammer simulation to practice saying NO.",
+    },
+    jargon: {
+      title: "Jargon Buster",
+      sub: "Plain-language explanations of confusing banking terms.",
+    },
     quiz: { title: "Scam or Safe?", sub: "Quick everyday situations." },
     sos: { title: "Safety SOS", sub: "Someone is asking me to pay." },
     story: { title: "Safer Choices", sub: "A short picture story." },
@@ -406,6 +418,18 @@ export const hi: Dict = {
   learn: {
     title: "सुरक्षित रहकर सीखें",
     subtitle: "छोटे पाठ और उपकरण जो ठगी से बचाते हैं।",
+    practice: {
+      title: "अभ्यास — सुरक्षित प्रैक्टिस",
+      sub: "बिना किसी पैसे के धोखेबाजों को पहचानने का सुरक्षित अभ्यास।",
+    },
+    roleplay: {
+      title: "स्कैम रोलप्ले गेम",
+      sub: "धोखेबाजों से बात करके 'ना' कहने का AI गेम।",
+    },
+    jargon: {
+      title: "कठिन शब्दों का सरल अर्थ",
+      sub: "UPI, OTP और बैंकिंग शब्दों की आसान भाषा में समझ।",
+    },
     quiz: { title: "ठगी या सही?", sub: "रोज़ की छोटी स्थितियाँ।" },
     sos: { title: "Safety SOS", sub: "कोई मुझसे पैसे देने को कह रहा है।" },
     story: { title: "सुरक्षित चुनाव", sub: "एक छोटी चित्र कहानी।" },
@@ -658,6 +682,18 @@ export const kn: Dict = {
   learn: {
     title: "ಸುರಕ್ಷಿತವಾಗಿ ಕಲಿಯಿರಿ",
     subtitle: "ವಂಚನೆಯಿಂದ ರಕ್ಷಿಸುವ ಸಣ್ಣ ಪಾಠಗಳು ಮತ್ತು ಸಾಧನಗಳು.",
+    practice: {
+      title: "ಅಭ್ಯಾಸ — ಸುರಕ್ಷಿತ ಅಭ್ಯಾಸ",
+      sub: "ಹಣವಿಲ್ಲದೆ ವಂಚಕರನ್ನು ಗುರುತಿಸುವ ತರಬೇತಿ.",
+    },
+    roleplay: {
+      title: "ಸ್ಕ್ಯಾಮ್ ರೋಲ್‌ಪ್ಲೇ ಗೇಮ್",
+      sub: "AI ವಂಚಕರೊಂದಿಗೆ ಸಂವಾದ ನಡೆಸಿ 'ಬೇಡ' ಎಂದು ಹೇಳುವ ಆಟ.",
+    },
+    jargon: {
+      title: "ಕಠಿಣ ಪದಗಳ ಸರಳ ಅರ್ಥ",
+      sub: "UPI, OTP ಮತ್ತು ಬ್ಯಾಂಕಿಂಗ್ ಪದಗಳ ಸುಲಭ ವಿವರಣೆ.",
+    },
     quiz: { title: "ವಂಚನೆಯಾ ಸುರಕ್ಷಿತವಾ?", sub: "ದಿನನಿತ್ಯದ ಸಣ್ಣ ಸನ್ನಿವೇಶಗಳು." },
     sos: { title: "Safety SOS", sub: "ಯಾರೋ ನನ್ನಿಂದ ಹಣ ಕೊಡಲು ಹೇಳುತ್ತಿದ್ದಾರೆ." },
     story: { title: "ಸುರಕ್ಷಿತ ಆಯ್ಕೆಗಳು", sub: "ಸಣ್ಣ ಚಿತ್ರ ಕಥೆ." },

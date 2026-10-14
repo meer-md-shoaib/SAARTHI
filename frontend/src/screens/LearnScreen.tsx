@@ -9,6 +9,24 @@ export function LearnScreen() {
 
   const cards: { route: Route; art: SceneKind; title: string; sub: string }[] = [
     {
+      route: { screen: "practice" },
+      art: "pin",
+      title: t.learn.practice.title,
+      sub: t.learn.practice.sub,
+    },
+    {
+      route: { screen: "roleplay" },
+      art: "threat",
+      title: t.learn.roleplay.title,
+      sub: t.learn.roleplay.sub,
+    },
+    {
+      route: { screen: "jargon" },
+      art: "qr",
+      title: t.learn.jargon.title,
+      sub: t.learn.jargon.sub,
+    },
+    {
       route: { screen: "quiz" },
       art: "otp",
       title: t.learn.quiz.title,

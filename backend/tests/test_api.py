@@ -569,3 +569,77 @@ def test_non_upi_message_thinking_analysis(
     assert body["ai_overrode_engine"] is True
     assert len(body["recommended_actions"]) > 0
 
+
+def test_scam_roleplay_scripted_and_resistance(client: TestClient) -> None:
+    # 1. Normal turn gives scripted / simulated response
+    resp = client.post(
+        "/api/v1/scam-roleplay",
+        json={
+            "scenario": "fake_bank",
+            "user_message": "Hello, who is this?",
+            "history": [],
+            "language": "en",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_lesson"] is False
+    assert len(data["reply"]) > 0
+
+    # 2. Resisting by refusing OTP triggers educational lesson and victory
+    resisted_resp = client.post(
+        "/api/v1/scam-roleplay",
+        json={
+            "scenario": "fake_bank",
+            "user_message": "I won't share my OTP with you. I will visit my branch.",
+            "history": [],
+            "language": "en",
+        },
+    )
+    assert resisted_resp.status_code == 200
+    resisted_data = resisted_resp.json()
+    assert resisted_data["is_lesson"] is True
+    assert resisted_data["success"] is True
+    assert "Real banks NEVER ask for your OTP" in resisted_data["reply"]
+
+
+def test_translate_jargon_endpoints(client: TestClient) -> None:
+    # 1. Known term from dictionary
+    resp = client.post(
+        "/api/v1/translate-jargon",
+        json={"term": "UPI PIN", "language": "en"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["term"] == "UPI PIN"
+    assert data["keep_private"] is True
+    assert "secret" in data["explanation"].lower()
+
+    # 2. Safe term
+    resp_vpa = client.post(
+        "/api/v1/translate-jargon",
+        json={"term": "VPA", "language": "en"},
+    )
+    assert resp_vpa.status_code == 200
+    data_vpa = resp_vpa.json()
+    assert data_vpa["keep_private"] is False
+
+
+def test_emergency_rescue_endpoint(client: TestClient) -> None:
+    resp = client.post(
+        "/api/v1/emergency-rescue",
+        json={
+            "description": "Scanned fake cashback QR and Rs 4500 debited",
+            "amount_lost": 4500,
+            "upi_id_involved": "fraud@okaxis",
+            "language": "en",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["helpline"] == "1930"
+    assert len(data["rescue_steps"]) == 5
+    assert "1930" in data["rescue_steps"][0]["detail"]
+    assert "4,500" in data["complaint_template"]
+    assert "fraud@okaxis" in data["complaint_template"]
+

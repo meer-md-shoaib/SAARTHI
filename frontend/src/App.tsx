@@ -4,9 +4,12 @@ import { AppProvider, useNav } from "./state";
 import { AskScreen } from "./screens/AskScreen";
 import { HelpScreen } from "./screens/HelpScreen";
 import { HomeScreen } from "./screens/HomeScreen";
+import { JargonScreen } from "./screens/JargonScreen";
 import { LearnScreen } from "./screens/LearnScreen";
+import { PracticeScreen } from "./screens/PracticeScreen";
 import { QuizScreen } from "./screens/QuizScreen";
 import { ResultScreen } from "./screens/ResultScreen";
+import { ScamRoleplayScreen } from "./screens/ScamRoleplayScreen";
 import { ScanScreen } from "./screens/ScanScreen";
 import { SosScreen } from "./screens/SosScreen";
 import { StoryScreen } from "./screens/StoryScreen";
@@ -32,6 +35,12 @@ function CurrentScreen() {
       return <StoryScreen />;
     case "help":
       return <HelpScreen />;
+    case "practice":
+      return <PracticeScreen />;
+    case "roleplay":
+      return <ScamRoleplayScreen />;
+    case "jargon":
+      return <JargonScreen />;
     default:
       return null;
   }

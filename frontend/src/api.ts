@@ -11,8 +11,11 @@ import type {
   AnalyzePayload,
   AnalyzeResult,
   AskResult,
+  EmergencyRescueResponse,
   HealthInfo,
+  JargonResponse,
   Lang,
+  ScamRoleplayResponse,
   SttResult,
   TtsResult,
 } from "./types";
@@ -115,5 +118,37 @@ export const api = {
 
   analyzeMessage: (message: string, language: string) =>
     request<AnalyzeMessageResult>("/api/v1/analyze-message", jsonInit({ message, language })),
+
+  scamRoleplay: (
+    scenario: "fake_bank" | "lottery_email" | "grandchild_emergency",
+    userMessage: string,
+    history: { role: string; content: string }[] = [],
+    language: string = "en",
+  ) =>
+    request<ScamRoleplayResponse>(
+      "/api/v1/scam-roleplay",
+      jsonInit({ scenario, user_message: userMessage, history, language }),
+      45000,
+    ),
+
+  translateJargon: (term: string, language: string = "en") =>
+    request<JargonResponse>("/api/v1/translate-jargon", jsonInit({ term, language }), 30000),
+
+  emergencyRescue: (
+    incidentDescription: string,
+    amountLost?: number | null,
+    upiIdInvolved?: string | null,
+    language: string = "en",
+  ) =>
+    request<EmergencyRescueResponse>(
+      "/api/v1/emergency-rescue",
+      jsonInit({
+        incident_description: incidentDescription,
+        amount_lost: amountLost ?? null,
+        upi_id_involved: upiIdInvolved ?? null,
+        language,
+      }),
+      35000,
+    ),
 };
 
