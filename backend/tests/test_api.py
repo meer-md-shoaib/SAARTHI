@@ -1,8 +1,6 @@
-"""API-level tests (FastAPI TestClient): validation, fallbacks, Sarvam AI STT & TTS."""
-
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import httpx
 import pytest
@@ -111,7 +109,7 @@ def test_ask_hindi_and_fallback(client: TestClient) -> None:
     assert chip.json()["topic_id"] == "qr_check"
 
 
-def test_speech_to_text_reports_fallback_without_key(monkeypatch) -> None:
+def test_speech_to_text_reports_fallback_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
     monkeypatch.setenv("USE_GOOGLE_STT", "false")
     get_settings.cache_clear()
@@ -132,7 +130,7 @@ def test_speech_to_text_reports_fallback_without_key(monkeypatch) -> None:
         get_settings.cache_clear()
 
 
-def test_text_to_speech_reports_fallback_without_key(monkeypatch) -> None:
+def test_text_to_speech_reports_fallback_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
     monkeypatch.setenv("USE_EDGE_TTS", "false")
     get_settings.cache_clear()
@@ -150,7 +148,9 @@ def test_text_to_speech_reports_fallback_without_key(monkeypatch) -> None:
         get_settings.cache_clear()
 
 
-def test_text_to_speech_neural_kannada_and_hindi(monkeypatch, client: TestClient) -> None:
+def test_text_to_speech_neural_kannada_and_hindi(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     # Explicitly test Edge-TTS neural fallback path without consuming Sarvam API
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
     monkeypatch.setenv("USE_EDGE_TTS", "true")
@@ -183,7 +183,9 @@ def test_text_to_speech_neural_kannada_and_hindi(monkeypatch, client: TestClient
 
 # --- Sarvam AI Saaras v4 STT Mocked Tests -------------------------------------
 
-def test_sarvam_stt_success_and_headers(monkeypatch, client: TestClient) -> None:
+def test_sarvam_stt_success_and_headers(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
     get_settings.cache_clear()
 
@@ -225,7 +227,9 @@ def test_sarvam_stt_success_and_headers(monkeypatch, client: TestClient) -> None
         get_settings.cache_clear()
 
 
-def test_sarvam_stt_codemix_and_auto_language(monkeypatch, client: TestClient) -> None:
+def test_sarvam_stt_codemix_and_auto_language(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
     get_settings.cache_clear()
 
@@ -263,7 +267,9 @@ def test_sarvam_stt_codemix_and_auto_language(monkeypatch, client: TestClient) -
         get_settings.cache_clear()
 
 
-def test_sarvam_stt_auth_failure_401(monkeypatch, client: TestClient) -> None:
+def test_sarvam_stt_auth_failure_401(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "invalid_key")
     get_settings.cache_clear()
 
@@ -286,7 +292,9 @@ def test_sarvam_stt_auth_failure_401(monkeypatch, client: TestClient) -> None:
         get_settings.cache_clear()
 
 
-def test_sarvam_stt_rate_limit_429(monkeypatch, client: TestClient) -> None:
+def test_sarvam_stt_rate_limit_429(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "test_key")
     get_settings.cache_clear()
 
@@ -308,7 +316,9 @@ def test_sarvam_stt_rate_limit_429(monkeypatch, client: TestClient) -> None:
         get_settings.cache_clear()
 
 
-def test_sarvam_stt_timeout(monkeypatch, client: TestClient) -> None:
+def test_sarvam_stt_timeout(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "test_key")
     get_settings.cache_clear()
 
@@ -332,7 +342,9 @@ def test_sarvam_stt_timeout(monkeypatch, client: TestClient) -> None:
 
 # --- Sarvam AI Bulbul v3 TTS Mocked Tests -------------------------------------
 
-def test_sarvam_tts_success_and_payload(monkeypatch, client: TestClient) -> None:
+def test_sarvam_tts_success_and_payload(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
     get_settings.cache_clear()
 
@@ -377,7 +389,9 @@ def test_sarvam_tts_success_and_payload(monkeypatch, client: TestClient) -> None
         get_settings.cache_clear()
 
 
-def test_sarvam_tts_all_11_languages(monkeypatch, client: TestClient) -> None:
+def test_sarvam_tts_all_11_languages(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     """Verify that all 11 languages supported by Bulbul v3 map to valid BCP-47 codes."""
     monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
     get_settings.cache_clear()
@@ -421,7 +435,9 @@ def test_sarvam_tts_all_11_languages(monkeypatch, client: TestClient) -> None:
         get_settings.cache_clear()
 
 
-def test_sarvam_tts_auth_failure_401(monkeypatch, client: TestClient) -> None:
+def test_sarvam_tts_auth_failure_401(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     monkeypatch.setenv("SARVAM_API_KEY", "invalid_key")
     get_settings.cache_clear()
 
