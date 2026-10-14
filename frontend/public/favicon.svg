@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Saarthi">
+  <circle cx="32" cy="32" r="30" fill="#0F9D8A"/>
+  <circle cx="32" cy="32" r="22" fill="#FFF8E8"/>
+  <path d="M32 10 L36 20 L32 17 L28 20 Z" fill="#FFC857" stroke="#17324D" stroke-width="1.5" stroke-linejoin="round"/>
+  <circle cx="24" cy="30" r="3.2" fill="#17324D"/>
+  <circle cx="40" cy="30" r="3.2" fill="#17324D"/>
+  <path d="M23 39 Q32 47 41 39" stroke="#17324D" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  <circle cx="18" cy="36" r="3" fill="#E85D5D" opacity="0.55"/>
+  <circle cx="46" cy="36" r="3" fill="#E85D5D" opacity="0.55"/>
+</svg>

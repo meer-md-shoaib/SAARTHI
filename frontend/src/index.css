@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* SAARTHI SafePay design tokens                                       */
+/* ------------------------------------------------------------------ */
+@theme {
+  --color-navy: #17324d;
+  --color-navy-soft: #2b4a6b;
+  --color-teal: #0f9d8a;
+  --color-teal-dark: #0b7e6e;
+  --color-teal-soft: #e2f5f1;
+  --color-sun: #ffc857;
+  --color-sun-soft: #fff3d6;
+  --color-cream: #fff8e8;
+  --color-coral: #e85d5d;
+  --color-coral-dark: #c94848;
+  --color-coral-soft: #fdecec;
+  --color-paper: #ffffff;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", "Noto Sans Devanagari", "Noto Sans Kannada", sans-serif;
+
+  --shadow-soft: 0 10px 30px rgba(23, 50, 77, 0.1);
+  --shadow-lift: 0 16px 40px rgba(23, 50, 77, 0.16);
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html {
+    font-size: 100%; /* driven by the text-size control (A / A+ / A++) */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-cream);
+    color: var(--color-navy);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-navy);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--color-sun);
+    color: var(--color-navy);
+  }
+}
+
+@layer utilities {
+  .app-scrollbar::-webkit-scrollbar {
+    width: 10px;
+  }
+  .app-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(23, 50, 77, 0.25);
+    border-radius: 999px;
+    border: 2px solid var(--color-cream);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
