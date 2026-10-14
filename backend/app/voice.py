@@ -13,6 +13,7 @@ Contract with the rest of the app:
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import logging
 import re
@@ -356,9 +357,16 @@ class VoiceService:
         try:
             communicate = edge_tts.Communicate(clean_text, voice)
             audio_data = b""
-            async for chunk in communicate.stream():
-                if chunk["type"] == "audio":
-                    audio_data += chunk["data"]
+
+            async def _collect() -> bytes:
+                data = b""
+                async for chunk in communicate.stream():
+                    if chunk["type"] == "audio":
+                        data += chunk["data"]
+                return data
+
+            timeout_sec = float(self.settings.voice_timeout_seconds or 5.0)
+            audio_data = await asyncio.wait_for(_collect(), timeout=timeout_sec)
 
             if not audio_data:
                 return {
@@ -374,6 +382,14 @@ class VoiceService:
                 "audio_base64": b64_audio,
                 "content_type": "audio/mp3",
                 "engine": f"edge-tts:{voice}",
+            }
+        except asyncio.TimeoutError:
+            logger.warning("Neural speech synthesis timed out")
+            return {
+                "status": "unavailable",
+                "error_code": "timeout",
+                "message": "Neural TTS timed out.",
+                "fallback": "browser_voice",
             }
         except Exception as exc:
             logger.warning("Neural speech synthesis error: %s", exc)

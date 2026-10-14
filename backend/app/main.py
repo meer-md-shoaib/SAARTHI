@@ -152,7 +152,10 @@ async def analyze_message_endpoint(payload: AnalyzeMessageRequest) -> AnalyzeMes
 async def ask(payload: AskRequest) -> AskResponse:
     """Answer a safety question from the curated trilingual knowledge base."""
     result = answer_question(
-        text=payload.text, language=payload.language, topic_id=payload.topic_id
+        text=payload.text,
+        language=payload.language,
+        topic_id=payload.topic_id,
+        context=payload.context,
     )
     return AskResponse(**result)
 

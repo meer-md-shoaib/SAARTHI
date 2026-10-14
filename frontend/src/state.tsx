@@ -41,7 +41,7 @@ export type Route =
       result: AnalyzeResult;
       expectation: { intention: Intention; expectedAmount: number | null };
     }
-  | { screen: "ask"; initialQuery?: string }
+  | { screen: "ask"; initialQuery?: string; context?: string }
   | { screen: "learn" }
   | { screen: "quiz" }
   | { screen: "sos" }

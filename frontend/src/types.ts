@@ -88,7 +88,7 @@ export interface AskResult {
   answer: string;
   suggested: SuggestedTopic[];
   language: string;
-  answered_by: "knowledge_base" | "ml_message_analysis";
+  answered_by: "knowledge_base" | "ml_message_analysis" | "contextual_followup";
 }
 
 export interface EvidenceItem {

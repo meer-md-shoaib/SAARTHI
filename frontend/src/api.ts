@@ -92,10 +92,15 @@ export const api = {
   analyze: (payload: AnalyzePayload) =>
     request<AnalyzeResult>("/api/v1/analyze-payment", jsonInit(payload)),
 
-  ask: (text: string, language: Lang, topicId?: string) =>
+  ask: (text: string, language: Lang, topicId?: string, context?: string) =>
     request<AskResult>(
       "/api/v1/ask",
-      jsonInit({ text, language, ...(topicId ? { topic_id: topicId } : {}) }),
+      jsonInit({
+        text,
+        language,
+        ...(topicId ? { topic_id: topicId } : {}),
+        ...(context ? { context } : {}),
+      }),
     ),
 
   speechToText: (audio: Blob, language: string, filename: string) => {

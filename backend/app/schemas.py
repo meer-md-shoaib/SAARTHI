@@ -101,10 +101,13 @@ class SuggestedTopic(BaseModel):
 
 
 class AskRequest(BaseModel):
-    text: str = Field(..., min_length=1, max_length=500)
+    text: str = Field(..., min_length=1, max_length=1000)
     language: Language = "en"
     topic_id: str | None = Field(
         None, max_length=64, description="Optional direct topic selection (chips)."
+    )
+    context: str | None = Field(
+        None, max_length=4000, description="Optional previous analysis or conversation context for follow-up questions."
     )
 
     @field_validator("text")
@@ -123,7 +126,7 @@ class AskResponse(BaseModel):
     answer: str
     suggested: list[SuggestedTopic]
     language: Language
-    answered_by: Literal["knowledge_base", "ml_message_analysis"] = "knowledge_base"
+    answered_by: Literal["knowledge_base", "ml_message_analysis", "contextual_followup"] = "knowledge_base"
 
 
 class SpeechToTextResponse(BaseModel):

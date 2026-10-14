@@ -364,6 +364,135 @@ TOPICS: list[dict[str, Any]] = [
         },
     },
     {
+        "id": "phishing",
+        "title": {
+            "en": "What is Phishing?",
+            "hi": "फ़िशिंग (Phishing) क्या है?",
+            "kn": "ಫಿಶಿಂಗ್ ಎಂದರೇನು?",
+        },
+        "keywords": {
+            "en": [
+                "phishing", "what is phishing", "fake link", "phishing attack", "phish",
+                "fraudulent link", "phishing scam", "suspicious link"
+            ],
+            "hi": ["फ़िशिंग", "फिशिंग", "फ़िशिंग क्या है", "फर्जी लिंक", "नक़ली लिंक"],
+            "kn": ["ಫಿಶಿಂಗ್", "ನಕಲಿ ಲಿಂಕ್", "ಫಿಶಿಂಗ್ ಎಂದರೇನು", "ಮೋಸದ ಲಿಂಕ್"],
+        },
+        "answer": {
+            "en": (
+                "Phishing is a cyber scam where criminals send fake SMS, emails, or links pretending "
+                "to be from your bank, electricity board, or government. Their goal is to trick you into "
+                "revealing your UPI PIN, passwords, OTPs, or trick you into installing remote-access apps. "
+                "Remember: legitimate banks and departments never send links asking you to enter your secret PIN or passwords."
+            ),
+            "hi": (
+                "फ़िशिंग एक ऐसी ऑनलाइन ठगी है जिसमें धोखेबाज़ बैंक, बिजली विभाग या सरकारी संस्था का रूप धरकर "
+                "नकली SMS या लिंक भेजते हैं। इनका लक्ष्य आपका UPI पिन, पासवर्ड या OTP चुराना होता है। हमेशा याद रखें: "
+                "असली बैंक कभी लिंक भेजकर आपसे गुप्त पिन या पासवर्ड नहीं माँगते।"
+            ),
+            "kn": (
+                "ಫಿಶಿಂಗ್ ಎಂದರೆ ವಂಚಕರು ನಿಮ್ಮ ಬ್ಯಾಂಕ್, ವಿದ್ಯುತ್ ಇಲಾಖೆ ಅಥವಾ ಸರ್ಕಾರದ ಹೆಸರಿನಲ್ಲಿ ನಕಲಿ ಲಿಂಕ್ ಅಥವಾ ಸಂದೇಶ "
+                "ಕಳುಹಿಸಿ ವಂಚಿಸುವ ತಂತ್ರ. ನಿಮ್ಮ UPI ಪಿನ್, ಪಾಸ್‌ವರ್ಡ್ ಅಥವಾ ಒಟಿಪಿ ಕದಿಯುವುದು ಇವರ ಉದ್ದೇಶ. ನಿಜವಾದ ಸಂಸ್ಥೆಗಳು "
+                "ಲಿಂಕ್ ಕಳುಹಿಸಿ ಪಿನ್ ಅಥವಾ ಒಟಿಪಿ ಕೇಳುವುದಿಲ್ಲ."
+            ),
+        },
+    },
+    {
+        "id": "digital_arrest",
+        "title": {
+            "en": "Digital Arrest Scam",
+            "hi": "डिजिटल अरेस्ट (Digital Arrest) क्या है?",
+            "kn": "ಡಿಜಿಟಲ್ ಅರೆಸ್ಟ್ ಎಂದರೇನು?",
+        },
+        "keywords": {
+            "en": [
+                "digital arrest", "police call", "cbi", "video call arrest", "narcotics",
+                "customs arrest", "skype arrest", "police arrest"
+            ],
+            "hi": ["डिजिटल अरेस्ट", "पुलिस कॉल", "सीबीआई", "वीडियो कॉल अरेस्ट", "गिरफ्तारी"],
+            "kn": ["ಡಿಜಿಟಲ್ ಅರೆಸ್ಟ್", "ಪೊಲೀಸ್ ಕರೆ", "ವೀಡಿಯೊ ಕಾಲ್ ಅರೆಸ್ಟ್", "ಬಂಧನ"],
+        },
+        "answer": {
+            "en": (
+                "There is NO legal concept of 'digital arrest' in Indian law. Police, CBI, ED, and courts "
+                "NEVER arrest anyone over WhatsApp, Skype, or video calls, and never demand money to clear cases. "
+                "If someone dressed as a police officer threatens you on a video call, hang up immediately and dial 1930."
+            ),
+            "hi": (
+                "भारतीय कानून में 'डिजिटल अरेस्ट' नाम की कोई चीज़ नहीं होती। पुलिस, सीबीआई या अदालतें वीडियो कॉल "
+                "पर कभी किसी को गिरफ्तार नहीं करतीं और न ही केस रफ़ा-दफ़ा करने के लिए पैसे माँगती हैं। अगर कोई वीडियो कॉल "
+                "पर पुलिस बनकर धमकी दे, तो तुरंत कॉल काटें और 1930 पर शिकायत करें।"
+            ),
+            "kn": (
+                "ಭಾರತೀಯ ಕಾನೂನಿನಲ್ಲಿ 'ಡಿಜಿಟಲ್ ಅರೆಸ್ಟ್' ಎಂಬ ಯಾವುದೇ ನಿಯಮವಿಲ್ಲ. ಪೊಲೀಸ್ ಅಥವಾ ನ್ಯಾಯಾಲಯಗಳು ವೀಡಿಯೊ ಕರೆಯಲ್ಲಿ "
+                "ಯಾರನ್ನೂ ಬಂಧಿಸುವುದಿಲ್ಲ ಮತ್ತು ಹಣ ಕೇಳುವುದಿಲ್ಲ. ಯಾರಾದರೂ ವೀಡಿಯೊ ಕರೆಯಲ್ಲಿ ಹೆದರಿಸಿದರೆ ತಕ್ಷಣ ಕಟ್ ಮಾಡಿ 1930 ಗೆ ಕರೆ ಮಾಡಿ."
+            ),
+        },
+    },
+    {
+        "id": "qr_safety_checklist",
+        "title": {
+            "en": "What to Check Before Paying",
+            "hi": "भुगतान करने से पहले क्या जाँचें?",
+            "kn": "ಪಾವತಿಸುವ ಮೊದಲು ಏನು ಪರಿಶೀಲಿಸಬೇಕು?",
+        },
+        "keywords": {
+            "en": [
+                "what should i check before paying", "qr checklist", "check before paying",
+                "payment checklist", "before payment", "what to check"
+            ],
+            "hi": ["भुगतान से पहले क्या देखें", "भुगतान चेकलिस्ट", "पैसे भेजने से पहले"],
+            "kn": ["ಪಾವತಿಸುವ ಮೊದಲು ಏನು ನೋಡಬೇಕು", "ಪಾವತಿ ಚೆಕ್‌ಲಿಸ್ಟ್"],
+        },
+        "answer": {
+            "en": (
+                "Before entering your UPI PIN: 1) Verify the exact merchant or beneficiary name on your screen. "
+                "2) Confirm the exact amount in rupees. 3) Never enter your UPI PIN to receive money or claim refunds. "
+                "4) If the name or amount does not match what you expected, cancel immediately."
+            ),
+            "hi": (
+                "UPI पिन डालने से पहले: 1) स्क्रीन पर दिखने वाले दुकानदार या व्यक्ति का नाम ध्यान से पढ़ें। "
+                "2) सही राशि (रुपये) की जाँच करें। 3) पैसे पाने या रिफंड के लिए कभी पिन न डालें। "
+                "4) अगर नाम या राशि में थोड़ा भी अंतर दिखे, तो तुरंत रद्द करें।"
+            ),
+            "kn": (
+                "UPI ಪಿನ್ ನಮೂದಿಸುವ ಮೊದಲು: 1) ಪರದೆಯಲ್ಲಿರುವ ಹೆಸರು ಸರಿಯಾಗಿದೆಯೇ ನೋಡಿ. 2) ನಿಖರ ಮೊತ್ತವನ್ನು ದೃಢೀಕರಿಸಿ. "
+                "3) ಹಣ ಪಡೆಯಲು ಎಂದಿಗೂ ಪಿನ್ ನಮೂದಿಸಬೇಡಿ. 4) ಹೆಸರು ಅಥವಾ ಮೊತ್ತದಲ್ಲಿ ವ್ಯತ್ಯಾಸ ಕಂಡರೆ ತಕ್ಷಣ ರದ್ದುಗೊಳಿಸಿ."
+            ),
+        },
+    },
+    {
+        "id": "electricity_bill",
+        "title": {
+            "en": "Electricity Bill Cutoff Scam",
+            "hi": "बिजली बिल कटने का फर्जी संदेश",
+            "kn": "ವಿದ್ಯುತ್ ಬಿಲ್ ವಂಚನೆ ಸಂದೇಶ",
+        },
+        "keywords": {
+            "en": [
+                "electricity", "power cutoff", "electricity bill", "bill pending",
+                "power will be disconnected", "electricity disconnected"
+            ],
+            "hi": ["बिजली बिल", "बिजली कट जाएगी", "बिजली का बिल"],
+            "kn": ["ವಿದ್ಯುತ್ ಬಿಲ್", "ವಿದ್ಯುತ್ ಕಡಿತ"],
+        },
+        "answer": {
+            "en": (
+                "This is a very common scam. Power departments never send SMS from 10-digit mobile numbers "
+                "saying power will be disconnected at 9:30 PM, nor do they tell you to call an officer's phone number. "
+                "Never call the number in such SMS or download any app."
+            ),
+            "hi": (
+                "यह एक बहुत आम धोखा है। बिजली विभाग कभी भी निजी मोबाइल नंबर से आज रात बिजली कटने का संदेश नहीं भेजता, "
+                "न ही किसी अधिकारी को कॉल करने को कहता है। ऐसे संदेश में दिए गए नंबर पर कभी कॉल न करें और कोई ऐप डाउनलोड न करें।"
+            ),
+            "kn": (
+                "ಇದು ಸಾಮಾನ್ಯ ವಂಚನೆ. ವಿದ್ಯುತ್ ಮಂಡಳಿಯು ವೈಯಕ್ತಿಕ ಮೊಬೈಲ್‌ನಿಂದ ರಾತ್ರಿ ವಿದ್ಯುತ್ ಕಡಿತವಾಗುತ್ತದೆ ಎಂದು "
+                "ಸಂದೇಶ ಕಳುಹಿಸುವುದಿಲ್ಲ. ಅಂತಹ ಸಂದೇಶದಲ್ಲಿರುವ ನಂಬರ್‌ಗೆ ಕರೆ ಮಾಡಬೇಡಿ."
+            ),
+        },
+    },
+    {
         "id": FALLBACK_ID,
         "title": {
             "en": "Ask something else",
@@ -417,10 +546,15 @@ def _topic_score(candidate: dict[str, Any], normalized: str) -> int:
 
 
 def answer_question(
-    text: str, language: str = "en", topic_id: str | None = None
+    text: str,
+    language: str = "en",
+    topic_id: str | None = None,
+    context: str | None = None,
 ) -> dict[str, Any]:
     """Match a question to a curated topic or analyze messages using the ML pipeline.
 
+    - If context is provided and user asks follow-up ("Why is it suspicious?", "What should I do?"),
+      explains the actual findings from the previous analysis.
     - If topic_id is provided, answers directly from curated knowledge.
     - If the user provides an SMS/message for evaluation or asks about a message containing
       fraud patterns, analyzes it dynamically using the ML message analysis service.
@@ -431,6 +565,76 @@ def answer_question(
     lang = language if language in ("en", "hi", "kn") else "en"
     clean_text = text.strip()
     normalized = _normalize(clean_text)
+
+    # 1. Contextual follow-up reasoning:
+    # If the user asks "Why is this message dangerous?", "Why did you mark my message as suspicious?",
+    # "Why is it suspicious?", "Explain that again", "What should I check before paying?", "Tell me what I should do"
+    is_followup = any(
+        phrase in clean_text.lower()
+        for phrase in (
+            "why is it suspicious",
+            "why is this suspicious",
+            "why did you mark",
+            "why suspicious",
+            "why dangerous",
+            "why is this dangerous",
+            "why it is dangerous",
+            "explain that",
+            "what should i do",
+            "what should i check",
+            "tell me what to do",
+            "tell me what i should do",
+            "clarify",
+            "यह संदिग्ध क्यों है",
+            "यह खतरनाक क्यों है",
+            "मुझे क्या करना चाहिए",
+            "ಇದು ಏಕೆ ಅನುಮಾನಾಸ್ಪದ",
+            "ಇದು ಏಕೆ ಅಪಾಯಕಾರಿ",
+            "ನಾನು ಏನು ಮಾಡಬೇಕು",
+        )
+    )
+
+    if (context and is_followup) or (context and len(clean_text) < 45 and ("why" in clean_text.lower() or "explain" in clean_text.lower())):
+        title_map = {
+            "en": "Safety Findings Explanation",
+            "hi": "सुरक्षा निष्कर्ष स्पष्टीकरण",
+            "kn": "ಸುರಕ್ಷತಾ ವಿವರಣೆ",
+        }
+        clean_ctx = context.strip()
+        answer_en = (
+            f"Based on your recent safety analysis:\n\n{clean_ctx}\n\n"
+            "This was flagged because it triggered safety rules or matches known scam patterns. "
+            "Safe next steps: Do NOT send money, do not scan any QR to receive funds, and never share your UPI PIN or OTP."
+        )
+        answer_hi = (
+            f"आपके हालिया सुरक्षा विश्लेषण के आधार पर:\n\n{clean_ctx}\n\n"
+            "हमारे सिस्टम ने इसे इसलिए संदिग्ध माना क्योंकि इसमें सुरक्षा नियमों का उल्लंघन या ठगी के ज्ञात संकेत पाए गए हैं। "
+            "सुरक्षित अगला कदम: पैसे न भेजें, पैसे पाने के लिए कोई QR स्कैन न करें और कभी भी अपना UPI पिन या OTP साझा न करें।"
+        )
+        answer_kn = (
+            f"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಸುರಕ್ಷತಾ ಪರಿಶೀಲನೆಯ ಆಧಾರದ ಮೇಲೆ:\n\n{clean_ctx}\n\n"
+            "ಸುರಕ್ಷತಾ ನಿಯಮಗಳ ಉಲ್ಲಂಘನೆ ಅಥವಾ ವಂಚನೆಯ ಲಕ್ಷಣಗಳು ಕಂಡುಬಂದ ಕಾರಣ ಇದನ್ನು ಎಚ್ಚರಿಕೆಯೊಂದಿಗೆ ಗುರುತಿಸಲಾಗಿದೆ. "
+            "ಮುಂದಿನ ಕ್ರಮ: ದಯವಿಟ್ಟು ಹಣ ಕಳುಹಿಸಬೇಡಿ, ಹಣ ಪಡೆಯಲು QR ಸ್ಕ್ಯಾನ್ ಮಾಡಬೇಡಿ ಮತ್ತು ನಿಮ್ಮ UPI ಪಿನ್ ಅಥವಾ ಒಟಿಪಿ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ."
+        )
+        ans_map = {"en": answer_en, "hi": answer_hi, "kn": answer_kn}
+
+        suggested_ids = ["qr_safety_checklist", "otp", "already_paid"]
+        return {
+            "topic_id": "contextual_followup",
+            "question": clean_text,
+            "title": title_map.get(lang, title_map["en"]),
+            "answer": ans_map.get(lang, answer_en),
+            "suggested": [
+                {
+                    "topic_id": cid,
+                    "title": _pick(TOPICS_BY_ID[cid]["title"], TOPICS_BY_ID[cid]["title"], lang),
+                }
+                for cid in suggested_ids
+                if cid in TOPICS_BY_ID
+            ],
+            "language": lang,
+            "answered_by": "contextual_followup",
+        }
 
     # 1. Direct topic selection via chips
     if topic_id and topic_id in TOPICS_BY_ID and topic_id != FALLBACK_ID:

@@ -109,6 +109,23 @@ def test_ask_hindi_and_fallback(client: TestClient) -> None:
     assert chip.json()["topic_id"] == "qr_check"
 
 
+def test_ask_contextual_followup(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/ask",
+        json={
+            "text": "Why is this suspicious?",
+            "language": "en",
+            "context": "Payment has high mismatch risk. Amount Rs. 5000 requested.",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["topic_id"] == "contextual_followup"
+    assert body["answered_by"] == "contextual_followup"
+    assert "Based on your recent safety analysis" in body["answer"]
+    assert "Rs. 5000" in body["answer"]
+
+
 def test_speech_to_text_reports_fallback_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
     monkeypatch.setenv("USE_GOOGLE_STT", "false")
@@ -151,32 +168,37 @@ def test_text_to_speech_reports_fallback_without_key(monkeypatch: pytest.MonkeyP
 def test_text_to_speech_neural_kannada_and_hindi(
     monkeypatch: pytest.MonkeyPatch, client: TestClient
 ) -> None:
-    # Explicitly test Edge-TTS neural fallback path without consuming Sarvam API
+    # Explicitly test Edge-TTS neural fallback path without consuming Sarvam API or hitting network
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
     monkeypatch.setenv("USE_EDGE_TTS", "true")
     get_settings.cache_clear()
-    try:
-        # Test Kannada neural synthesis
-        response_kn = client.post(
-            "/api/v1/text-to-speech",
-            json={"text": "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ.", "language": "kn"},
-        )
-        assert response_kn.status_code == 200
-        body_kn = response_kn.json()
-        assert body_kn["status"] == "ok"
-        assert body_kn["audio_base64"] is not None
-        assert body_kn["content_type"] in ("audio/mp3", "audio/wav")
-        assert "edge-tts:kn" in body_kn.get("engine", "")
 
-        # Test Hindi neural synthesis
-        response_hi = client.post(
-            "/api/v1/text-to-speech",
-            json={"text": "नमस्ते, सावधान रहें।", "language": "hi"},
-        )
-        assert response_hi.status_code == 200
-        body_hi = response_hi.json()
-        assert body_hi["status"] == "ok"
-        assert body_hi["audio_base64"] is not None
+    async def mock_stream(self):
+        yield {"type": "audio", "data": b"fake-neural-audio-stream"}
+
+    try:
+        with patch("edge_tts.Communicate.stream", mock_stream):
+            # Test Kannada neural synthesis
+            response_kn = client.post(
+                "/api/v1/text-to-speech",
+                json={"text": "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ.", "language": "kn"},
+            )
+            assert response_kn.status_code == 200
+            body_kn = response_kn.json()
+            assert body_kn["status"] == "ok"
+            assert body_kn["audio_base64"] is not None
+            assert body_kn["content_type"] in ("audio/mp3", "audio/wav")
+            assert "edge-tts:kn-IN" in body_kn.get("engine", "")
+
+            # Test Hindi neural synthesis
+            response_hi = client.post(
+                "/api/v1/text-to-speech",
+                json={"text": "नमस्ते, सावधान रहें।", "language": "hi"},
+            )
+            assert response_hi.status_code == 200
+            body_hi = response_hi.json()
+            assert body_hi["status"] == "ok"
+            assert body_hi["audio_base64"] is not None
     finally:
         get_settings.cache_clear()
 

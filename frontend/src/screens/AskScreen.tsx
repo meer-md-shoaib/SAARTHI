@@ -62,7 +62,7 @@ export function AskScreen() {
   }, []);
 
   const askQuestion = useCallback(
-    async (text: string, topicId?: string) => {
+    async (text: string, topicId?: string, questionContext?: string) => {
       const question = text.trim();
       if (!question) {
         setError(t.ask.emptyQuestion);
@@ -72,7 +72,7 @@ export function AskScreen() {
       setError(null);
       setPhase("asking");
       try {
-        const result = await api.ask(question, lang, topicId);
+        const result = await api.ask(question, lang, topicId, questionContext);
         setAnswer(result);
         speakIfOn(result.answer);
       } catch (requestError) {
@@ -86,8 +86,8 @@ export function AskScreen() {
   );
 
   useEffect(() => {
-    if (route.screen === "ask" && (route as any).initialQuery) {
-      void askQuestion((route as any).initialQuery);
+    if (route.screen === "ask" && route.initialQuery) {
+      void askQuestion(route.initialQuery, undefined, route.context);
     }
   }, [route, askQuestion]);
 
