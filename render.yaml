@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: saarthi-safepay-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://*.vercel.app,http://localhost:5173,http://127.0.0.1:5173
+      - key: SARVAM_STT_MODEL
+        value: saaras:v4
+      - key: SARVAM_TTS_MODEL
+        value: bulbul:v3
+      - key: SARVAM_TTS_SPEAKER
+        value: shubh
+      - key: USE_EDGE_TTS
+        value: "true"
+      - key: USE_GOOGLE_STT
+        value: "false"

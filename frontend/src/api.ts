@@ -97,13 +97,13 @@ export const api = {
       jsonInit({ text, language, ...(topicId ? { topic_id: topicId } : {}) }),
     ),
 
-  speechToText: (audio: Blob, language: Lang, filename: string) => {
+  speechToText: (audio: Blob, language: string, filename: string) => {
     const form = new FormData();
     form.append("file", audio, filename);
     form.append("language", language);
     return request<SttResult>("/api/v1/speech-to-text", { method: "POST", body: form }, 45000);
   },
 
-  textToSpeech: (text: string, language: Lang) =>
+  textToSpeech: (text: string, language: string) =>
     request<TtsResult>("/api/v1/text-to-speech", jsonInit({ text, language }), 45000),
 };

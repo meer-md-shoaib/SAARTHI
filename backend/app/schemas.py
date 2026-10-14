@@ -134,9 +134,15 @@ class SpeechToTextResponse(BaseModel):
     typed_fallback: bool = True
 
 
+SUPPORTED_TTS_LANGUAGES = {
+    "en", "hi", "kn", "bn", "gu", "ml", "mr", "od", "or", "pa", "ta", "te",
+    "en-in", "hi-in", "kn-in", "bn-in", "gu-in", "ml-in", "mr-in", "od-in", "or-in", "pa-in", "ta-in", "te-in",
+}
+
+
 class TextToSpeechRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=10_000)
-    language: Language = "en"
+    language: str = "en"
 
     @field_validator("text")
     @classmethod
@@ -145,6 +151,16 @@ class TextToSpeechRequest(BaseModel):
         if not cleaned:
             raise ValueError("text must not be empty")
         return cleaned
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, value: str) -> str:
+        clean = value.strip().lower()
+        if clean not in SUPPORTED_TTS_LANGUAGES:
+            raise ValueError(
+                f"language must be one of the 11 supported Bulbul v3 languages: en, hi, kn, bn, gu, ml, mr, od, pa, ta, te"
+            )
+        return clean
 
 
 class TextToSpeechResponse(BaseModel):

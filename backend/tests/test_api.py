@@ -1,7 +1,10 @@
-"""API-level tests (FastAPI TestClient): validation, fallbacks, no fake data."""
+"""API-level tests (FastAPI TestClient): validation, fallbacks, Sarvam AI STT & TTS."""
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, patch
+
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -110,6 +113,7 @@ def test_ask_hindi_and_fallback(client: TestClient) -> None:
 
 def test_speech_to_text_reports_fallback_without_key(monkeypatch) -> None:
     monkeypatch.delenv("SARVAM_API_KEY", raising=False)
+    monkeypatch.setenv("USE_GOOGLE_STT", "false")
     get_settings.cache_clear()
     try:
         with TestClient(app) as client:
@@ -146,31 +150,301 @@ def test_text_to_speech_reports_fallback_without_key(monkeypatch) -> None:
         get_settings.cache_clear()
 
 
-def test_text_to_speech_neural_kannada_and_hindi(client: TestClient) -> None:
-    # Test Kannada neural synthesis
-    response_kn = client.post(
-        "/api/v1/text-to-speech",
-        json={"text": "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ.", "language": "kn"},
-    )
-    assert response_kn.status_code == 200
-    body_kn = response_kn.json()
-    assert body_kn["status"] == "ok"
-    assert body_kn["audio_base64"] is not None
-    assert body_kn["content_type"] in ("audio/mp3", "audio/wav")
-    assert "edge-tts:kn" in body_kn.get("engine", "") or "bulbul" in body_kn.get("engine", "")
+def test_text_to_speech_neural_kannada_and_hindi(monkeypatch, client: TestClient) -> None:
+    # Explicitly test Edge-TTS neural fallback path without consuming Sarvam API
+    monkeypatch.delenv("SARVAM_API_KEY", raising=False)
+    monkeypatch.setenv("USE_EDGE_TTS", "true")
+    get_settings.cache_clear()
+    try:
+        # Test Kannada neural synthesis
+        response_kn = client.post(
+            "/api/v1/text-to-speech",
+            json={"text": "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ.", "language": "kn"},
+        )
+        assert response_kn.status_code == 200
+        body_kn = response_kn.json()
+        assert body_kn["status"] == "ok"
+        assert body_kn["audio_base64"] is not None
+        assert body_kn["content_type"] in ("audio/mp3", "audio/wav")
+        assert "edge-tts:kn" in body_kn.get("engine", "")
 
-    # Test Hindi neural synthesis
-    response_hi = client.post(
-        "/api/v1/text-to-speech",
-        json={"text": "नमस्ते, सावधान रहें।", "language": "hi"},
-    )
-    assert response_hi.status_code == 200
-    body_hi = response_hi.json()
-    assert body_hi["status"] == "ok"
-    assert body_hi["audio_base64"] is not None
+        # Test Hindi neural synthesis
+        response_hi = client.post(
+            "/api/v1/text-to-speech",
+            json={"text": "नमस्ते, सावधान रहें।", "language": "hi"},
+        )
+        assert response_hi.status_code == 200
+        body_hi = response_hi.json()
+        assert body_hi["status"] == "ok"
+        assert body_hi["audio_base64"] is not None
+    finally:
+        get_settings.cache_clear()
+
+
+# --- Sarvam AI Saaras v4 STT Mocked Tests -------------------------------------
+
+def test_sarvam_stt_success_and_headers(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
+    get_settings.cache_clear()
+
+    captured_request = {}
+
+    async def mock_post(url, **kwargs):
+        captured_request["url"] = str(url)
+        captured_request["headers"] = kwargs.get("headers", {})
+        captured_request["data"] = kwargs.get("data", {})
+        captured_request["files"] = kwargs.get("files", {})
+        return httpx.Response(
+            200,
+            json={"transcript": "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ.", "language_code": "kn-IN"},
+        )
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            response = client.post(
+                "/api/v1/speech-to-text",
+                files={"file": ("recording.webm", b"fake-audio-bytes-for-test", "audio/webm")},
+                data={"language": "kn"},
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "ok"
+        assert body["transcript"] == "ನಮಸ್ಕಾರ, ಸುರಕ್ಷಿತವಾಗಿರಿ."
+        assert body["detected_language"] == "kn-IN"
+        assert body["engine"] == "saaras:v4"
+
+        # Verify Sarvam API contracts
+        assert captured_request["url"] == "https://api.sarvam.ai/speech-to-text"
+        assert captured_request["headers"]["api-subscription-key"] == "test_mock_sarvam_key"
+        assert captured_request["data"]["model"] == "saaras:v4"
+        assert captured_request["data"]["mode"] == "transcribe"
+        assert captured_request["data"]["language_code"] == "kn-IN"
+        assert "file" in captured_request["files"]
+    finally:
+        get_settings.cache_clear()
+
+
+def test_sarvam_stt_codemix_and_auto_language(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
+    get_settings.cache_clear()
+
+    captured_requests = []
+
+    async def mock_post(url, **kwargs):
+        captured_requests.append(kwargs)
+        return httpx.Response(
+            200,
+            json={"transcript": "payment ho gaya", "language_code": "hi-IN"},
+        )
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            # Test codemix mode
+            res_codemix = client.post(
+                "/api/v1/speech-to-text",
+                files={"file": ("recording.webm", b"fake-audio", "audio/webm")},
+                data={"language": "codemix"},
+            )
+            assert res_codemix.status_code == 200
+            assert captured_requests[0]["data"]["mode"] == "codemix"
+            assert "language_code" not in captured_requests[0]["data"]
+
+            # Test auto mode
+            res_auto = client.post(
+                "/api/v1/speech-to-text",
+                files={"file": ("recording.webm", b"fake-audio", "audio/webm")},
+                data={"language": "auto"},
+            )
+            assert res_auto.status_code == 200
+            assert captured_requests[1]["data"]["mode"] == "transcribe"
+            assert "language_code" not in captured_requests[1]["data"]
+    finally:
+        get_settings.cache_clear()
+
+
+def test_sarvam_stt_auth_failure_401(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "invalid_key")
+    get_settings.cache_clear()
+
+    async def mock_post(url, **kwargs):
+        return httpx.Response(401, json={"detail": "Invalid API key"})
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            response = client.post(
+                "/api/v1/speech-to-text",
+                files={"file": ("rec.webm", b"audio", "audio/webm")},
+                data={"language": "en"},
+            )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "unavailable"
+        assert body["error_code"] == "auth_error"
+        assert "authentication failed" in body["message"].lower()
+    finally:
+        get_settings.cache_clear()
+
+
+def test_sarvam_stt_rate_limit_429(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "test_key")
+    get_settings.cache_clear()
+
+    async def mock_post(url, **kwargs):
+        return httpx.Response(429, json={"detail": "Too many requests"})
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            response = client.post(
+                "/api/v1/speech-to-text",
+                files={"file": ("rec.webm", b"audio", "audio/webm")},
+                data={"language": "en"},
+            )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "unavailable"
+        assert body["error_code"] == "rate_limited"
+    finally:
+        get_settings.cache_clear()
+
+
+def test_sarvam_stt_timeout(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "test_key")
+    get_settings.cache_clear()
+
+    async def mock_post(url, **kwargs):
+        raise httpx.TimeoutException("Read timed out")
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            response = client.post(
+                "/api/v1/speech-to-text",
+                files={"file": ("rec.webm", b"audio", "audio/webm")},
+                data={"language": "en"},
+            )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "unavailable"
+        assert body["error_code"] == "timeout"
+    finally:
+        get_settings.cache_clear()
+
+
+# --- Sarvam AI Bulbul v3 TTS Mocked Tests -------------------------------------
+
+def test_sarvam_tts_success_and_payload(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
+    get_settings.cache_clear()
+
+    captured_request = {}
+
+    async def mock_post(url, **kwargs):
+        captured_request["url"] = str(url)
+        captured_request["headers"] = kwargs.get("headers", {})
+        captured_request["json"] = kwargs.get("json", {})
+        return httpx.Response(
+            200,
+            json={"audios": ["UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="]},
+        )
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            response = client.post(
+                "/api/v1/text-to-speech",
+                json={"text": "Pay 15000 rupees to store", "language": "hi"},
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "ok"
+        assert body["audio_base64"] == "UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="
+        assert body["content_type"] == "audio/wav"
+        assert body["engine"] == "bulbul:v3"
+
+        # Verify Sarvam Bulbul v3 API payload requirements
+        assert captured_request["url"] == "https://api.sarvam.ai/text-to-speech"
+        assert captured_request["headers"]["api-subscription-key"] == "test_mock_sarvam_key"
+        payload = captured_request["json"]
+        assert payload["model"] == "bulbul:v3"
+        assert payload["speaker"] == "shubh"
+        assert payload["language_code"] == "hi-IN"
+        assert payload["pace"] == 1.0
+        assert payload["speech_sample_rate"] == 22050
+        assert payload["enable_preprocessing"] is True
+        # Numbers > 4 digits must be comma-formatted for bulbul:v3
+        assert "15,000" in payload["text"]
+    finally:
+        get_settings.cache_clear()
+
+
+def test_sarvam_tts_all_11_languages(monkeypatch, client: TestClient) -> None:
+    """Verify that all 11 languages supported by Bulbul v3 map to valid BCP-47 codes."""
+    monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
+    get_settings.cache_clear()
+
+    # The 11 languages for Bulbul v3 and their expected BCP-47 codes
+    languages_to_test = [
+        ("en", "en-IN"),
+        ("hi", "hi-IN"),
+        ("kn", "kn-IN"),
+        ("bn", "bn-IN"),
+        ("gu", "gu-IN"),
+        ("ml", "ml-IN"),
+        ("mr", "mr-IN"),
+        ("od", "od-IN"),
+        ("pa", "pa-IN"),
+        ("ta", "ta-IN"),
+        ("te", "te-IN"),
+    ]
+
+    captured_lang_codes = []
+
+    async def mock_post(url, **kwargs):
+        captured_lang_codes.append(kwargs.get("json", {}).get("language_code"))
+        return httpx.Response(
+            200,
+            json={"audios": ["dGVzdGF1ZGlv"]},
+        )
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            for lang_short, expected_bcp47 in languages_to_test:
+                res = client.post(
+                    "/api/v1/text-to-speech",
+                    json={"text": "Test greeting", "language": lang_short},
+                )
+                assert res.status_code == 200
+                assert res.json()["status"] == "ok"
+
+        assert captured_lang_codes == [expected for _, expected in languages_to_test]
+    finally:
+        get_settings.cache_clear()
+
+
+def test_sarvam_tts_auth_failure_401(monkeypatch, client: TestClient) -> None:
+    monkeypatch.setenv("SARVAM_API_KEY", "invalid_key")
+    get_settings.cache_clear()
+
+    async def mock_post(url, **kwargs):
+        return httpx.Response(401, json={"detail": "Unauthorized"})
+
+    try:
+        with patch.object(httpx.AsyncClient, "post", side_effect=mock_post):
+            response = client.post(
+                "/api/v1/text-to-speech",
+                json={"text": "Safety alert", "language": "en"},
+            )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "unavailable"
+        assert body["error_code"] == "auth_error"
+        assert body["fallback"] == "browser_voice"
+    finally:
+        get_settings.cache_clear()
 
 
 def test_voice_input_validation(client: TestClient) -> None:
+    # Unsupported language for STT
     bad_lang = client.post(
         "/api/v1/speech-to-text",
         files={"file": ("a.webm", b"x", "audio/webm")},
@@ -178,9 +452,18 @@ def test_voice_input_validation(client: TestClient) -> None:
     )
     assert bad_lang.status_code == 422
 
+    # Unsupported language for TTS
+    bad_tts_lang = client.post(
+        "/api/v1/text-to-speech",
+        json={"text": "Bonjour", "language": "fr"},
+    )
+    assert bad_tts_lang.status_code == 422
+
+    # Empty text for TTS
     empty_tts = client.post("/api/v1/text-to-speech", json={"text": "   "})
     assert empty_tts.status_code == 422
 
+    # Missing file for STT
     missing_file = client.post("/api/v1/speech-to-text", data={"language": "en"})
     assert missing_file.status_code == 422
 

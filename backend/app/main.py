@@ -140,19 +140,25 @@ async def ask(payload: AskRequest) -> AskResponse:
 
 @app.post("/api/v1/speech-to-text", response_model=SpeechToTextResponse, tags=["voice"])
 async def speech_to_text(
-    file: UploadFile = File(..., description="Recorded audio (webm, mp4, ogg or wav)"),
-    language: str = Form("en", description="en | hi | kn"),
+    file: UploadFile = File(..., description="Recorded audio (webm, mp4, ogg, wav, mp3, m4a)"),
+    language: str = Form("en", description="Language code (e.g. en, hi, kn, bn, gu, ml, mr, od, pa, ta, te, auto, codemix)"),
 ) -> SpeechToTextResponse:
     """Transcribe audio with Sarvam saaras:v4, or report an honest fallback."""
-    if language not in ("en", "hi", "kn"):
-        raise HTTPException(status_code=422, detail="language must be one of: en, hi, kn")
+    from .voice import SAARAS_V4_LANGUAGES
+
+    clean_lang = language.strip().lower()
+    if clean_lang not in ("auto", "codemix") and clean_lang not in SAARAS_V4_LANGUAGES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"language '{language}' not supported. Must be an Indic language code (e.g. en, hi, kn, bn, gu, ml, mr, od, pa, ta, te), 'auto', or 'codemix'.",
+        )
 
     audio = await file.read()
     result = await get_voice_service().speech_to_text(
         audio=audio,
         filename=file.filename or "recording.webm",
         content_type=file.content_type,
-        language=language,
+        language=clean_lang,
     )
     return SpeechToTextResponse(**result)
 

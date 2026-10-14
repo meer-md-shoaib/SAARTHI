@@ -12,10 +12,19 @@ import type { Lang } from "../types";
 
 export type SpeakMode = "backend" | "browser" | "none";
 
-const BROWSER_LANG: Record<Lang, string> = {
+const BROWSER_LANG: Record<string, string> = {
   en: "en-IN",
   hi: "hi-IN",
   kn: "kn-IN",
+  bn: "bn-IN",
+  gu: "gu-IN",
+  ml: "ml-IN",
+  mr: "mr-IN",
+  od: "or-IN",
+  or: "or-IN",
+  pa: "pa-IN",
+  ta: "ta-IN",
+  te: "te-IN",
 };
 
 let currentAudio: HTMLAudioElement | null = null;
@@ -44,7 +53,7 @@ export function stopSpeech(): void {
 
 export async function speakText(
   text: string,
-  language: Lang,
+  language: Lang | string,
   onState?: (speaking: boolean) => void,
 ): Promise<SpeakMode> {
   stopSpeech();

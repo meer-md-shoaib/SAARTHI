@@ -1,15 +1,32 @@
 /**
  * Speech Recognition (Voice-to-Text) Engine for SAARTHI SafePay.
  *
- * Provides real-time native speech recognition in Kannada (kn-IN), Hindi (hi-IN),
- * and Indian English (en-IN) via the Web Speech API (webkitSpeechRecognition),
- * with automatic fallback to AudioRecorder and backend `/api/v1/speech-to-text`.
+ * Primary STT Engine: Sarvam AI Saaras v4 via backend `/api/v1/speech-to-text`.
+ * Provides high-accuracy transcription for 22 Indic languages, code-mixing,
+ * and Indian English.
+ *
+ * Parallel live preview: Uses the browser Web Speech API (when available)
+ * solely for real-time visual interim feedback while speaking.
  */
 
-import { AudioRecorder, RecorderError } from "./recorder";
+import { AudioRecorder, extensionFor, RecorderError } from "./recorder";
 import { api } from "../api";
 
-export type SttLanguage = "en" | "hi" | "kn";
+export type SttLanguage =
+  | "en"
+  | "hi"
+  | "kn"
+  | "bn"
+  | "gu"
+  | "ml"
+  | "mr"
+  | "od"
+  | "pa"
+  | "ta"
+  | "te"
+  | "auto"
+  | "codemix"
+  | string;
 
 export interface SpeechRecognitionHandlers {
   onInterim?: (text: string) => void;
@@ -18,7 +35,6 @@ export interface SpeechRecognitionHandlers {
   onEnd?: () => void;
 }
 
-// Extended Window interface for Web Speech API
 interface IWindow extends Window {
   SpeechRecognition?: any;
   webkitSpeechRecognition?: any;
@@ -36,12 +52,29 @@ function getSpeechRecognitionClass(): any {
   return win.SpeechRecognition || win.webkitSpeechRecognition || null;
 }
 
-function langToLocale(lang: SttLanguage): string {
-  switch (lang) {
+function langToLocale(lang: string): string {
+  switch (lang.toLowerCase()) {
     case "kn":
       return "kn-IN";
     case "hi":
       return "hi-IN";
+    case "bn":
+      return "bn-IN";
+    case "gu":
+      return "gu-IN";
+    case "ml":
+      return "ml-IN";
+    case "mr":
+      return "mr-IN";
+    case "od":
+    case "or":
+      return "or-IN";
+    case "pa":
+      return "pa-IN";
+    case "ta":
+      return "ta-IN";
+    case "te":
+      return "te-IN";
     case "en":
     default:
       return "en-IN";
@@ -81,158 +114,175 @@ export class LiveSpeechRecognizer {
   private recognition: any = null;
   private recorder: AudioRecorder | null = null;
   private isListening = false;
+  private isFinalizing = false;
   private timeoutId: number | null = null;
+  private liveInterim = "";
+  private nativeFinalAccumulated = "";
+  private currentHandlers: SpeechRecognitionHandlers | null = null;
+  private currentLang = "en";
 
   get listening(): boolean {
     return this.isListening;
   }
 
-  start(lang: SttLanguage, handlers: SpeechRecognitionHandlers): void {
-    if (this.isListening) {
-      this.stop();
+  async start(lang: string, handlers: SpeechRecognitionHandlers): Promise<void> {
+    if (this.isListening || this.isFinalizing) {
+      await this.stop();
     }
 
-    const SpeechRec = getSpeechRecognitionClass();
+    this.currentHandlers = handlers;
+    this.currentLang = lang;
+    this.liveInterim = "";
+    this.nativeFinalAccumulated = "";
 
-    if (SpeechRec) {
-      this.startNativeRecognition(SpeechRec, lang, handlers);
-    } else {
-      // Fallback: use MediaRecorder and backend /api/v1/speech-to-text
-      void this.startAudioRecorderFallback(lang, handlers);
-    }
-  }
-
-  private startNativeRecognition(
-    SpeechRec: any,
-    lang: SttLanguage,
-    handlers: SpeechRecognitionHandlers
-  ): void {
-    try {
-      const recognition = new SpeechRec();
-      this.recognition = recognition;
-      recognition.lang = langToLocale(lang);
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
-
-      let finalAccumulated = "";
-
-      recognition.onstart = () => {
-        this.isListening = true;
-        playMicTone("start");
-      };
-
-      recognition.onresult = (event: any) => {
-        let interim = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const item = event.results[i];
-          const transcript = item[0].transcript;
-          if (item.isFinal) {
-            finalAccumulated += (finalAccumulated ? " " : "") + transcript;
-          } else {
-            interim += transcript;
-          }
-        }
-        if (interim && handlers.onInterim) {
-          handlers.onInterim(interim);
-        }
-        if (finalAccumulated) {
-          handlers.onFinal(finalAccumulated);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        // "no-speech" is not a fatal error; ignore if we got some text
-        if (event.error === "no-speech") {
-          if (!finalAccumulated && handlers.onError) {
-            handlers.onError("no_speech");
-          }
-          return;
-        }
-        if (handlers.onError) {
-          handlers.onError(event.error || "generic");
-        }
-      };
-
-      recognition.onend = () => {
-        this.isListening = false;
-        playMicTone("stop");
-        if (handlers.onEnd) {
-          handlers.onEnd();
-        }
-      };
-
-      recognition.start();
-
-      // Safety timeout after 25s
-      this.timeoutId = window.setTimeout(() => {
-        if (this.isListening) {
-          this.stop();
-        }
-      }, 25000);
-    } catch (err: any) {
-      this.isListening = false;
-      if (handlers.onError) {
-        handlers.onError(err.message || "permission");
-      }
-    }
-  }
-
-  private async startAudioRecorderFallback(
-    lang: SttLanguage,
-    handlers: SpeechRecognitionHandlers
-  ): Promise<void> {
+    // 1. Initialize microphone audio recorder for backend Sarvam Saaras v4
     const recorder = new AudioRecorder();
     this.recorder = recorder;
+
     try {
       await recorder.start();
       this.isListening = true;
       playMicTone("start");
-
-      // Auto stop after 15 seconds of fallback recording
-      this.timeoutId = window.setTimeout(() => {
-        void this.stopFallback(lang, handlers);
-      }, 15000);
     } catch (err) {
       this.isListening = false;
+      this.recorder = null;
       const kind = err instanceof RecorderError ? err.kind : "generic";
-      if (handlers.onError) {
-        handlers.onError(kind);
+      handlers.onError?.(kind);
+      handlers.onEnd?.();
+      return;
+    }
+
+    // 2. Start parallel native Web Speech (if available) strictly for live interim typing preview
+    const SpeechRec = getSpeechRecognitionClass();
+    if (SpeechRec) {
+      try {
+        const recognition = new SpeechRec();
+        this.recognition = recognition;
+        recognition.lang = langToLocale(lang);
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event: any) => {
+          let interim = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const item = event.results[i];
+            const transcript = item[0].transcript;
+            if (item.isFinal) {
+              this.nativeFinalAccumulated += (this.nativeFinalAccumulated ? " " : "") + transcript;
+            } else {
+              interim += transcript;
+            }
+          }
+          this.liveInterim = interim;
+          if (interim && handlers.onInterim) {
+            handlers.onInterim(interim);
+          }
+        };
+
+        recognition.onerror = () => {
+          // Native speech errors are non-fatal since Sarvam Saaras v4 is the primary STT
+        };
+
+        recognition.start();
+      } catch {
+        this.recognition = null;
       }
     }
+
+    // 3. Auto-stop after 25s (Saaras v4 supports up to 30s audio clips)
+    this.timeoutId = window.setTimeout(() => {
+      if (this.isListening) {
+        void this.stop();
+      }
+    }, 25000);
   }
 
-  private async stopFallback(
-    lang: SttLanguage,
-    handlers: SpeechRecognitionHandlers
-  ): Promise<void> {
-    if (!this.recorder) return;
+  async stop(): Promise<void> {
+    if (this.timeoutId !== null) {
+      window.clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+
+    if (!this.isListening && !this.recorder) {
+      return;
+    }
+
     this.isListening = false;
+    this.isFinalizing = true;
     playMicTone("stop");
+
+    const handlers = this.currentHandlers;
+    const lang = this.currentLang;
+    const recorder = this.recorder;
+    this.recorder = null;
+
+    // Stop native recognition
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch {
+        /* already stopped */
+      }
+      this.recognition = null;
+    }
+
+    // Inform UI that transcription is in progress
+    if (this.liveInterim) {
+      handlers?.onInterim?.(this.liveInterim);
+    }
+
+    // 4. Send recorded audio to backend Sarvam STT
     try {
-      const recording = await this.recorder.stop();
-      this.recorder = null;
-      if (!recording || recording.blob.size === 0) {
-        if (handlers.onError) handlers.onError("empty_audio");
+      if (recorder) {
+        const recording = await recorder.stop();
+        if (recording && recording.blob.size > 0) {
+          const ext = extensionFor(recording.mimeType);
+          const file = new File([recording.blob], `voice.${ext}`, {
+            type: recording.mimeType,
+          });
+
+          // Primary: Sarvam AI Saaras v4
+          const result = await api.speechToText(file, lang, file.name);
+
+          if (result.status === "ok" && result.transcript.trim()) {
+            handlers?.onFinal(result.transcript.trim());
+            return;
+          }
+
+          // If backend couldn't hear clearly or failed, check native fallback
+          if (this.nativeFinalAccumulated.trim()) {
+            handlers?.onFinal(this.nativeFinalAccumulated.trim());
+            return;
+          }
+
+          if (result.error_code) {
+            handlers?.onError?.(result.error_code);
+            return;
+          }
+        }
+      }
+
+      // If audio was empty but native had captured words
+      if (this.nativeFinalAccumulated.trim()) {
+        handlers?.onFinal(this.nativeFinalAccumulated.trim());
         return;
       }
-      const file = new File([recording.blob], `voice.${recording.mimeType.includes("ogg") ? "ogg" : "webm"}`, {
-        type: recording.mimeType,
-      });
-      const result = await api.speechToText(file, lang, file.name);
-      if (result.status === "ok" && result.transcript) {
-        handlers.onFinal(result.transcript);
-      } else {
-        if (handlers.onError) handlers.onError(result.error_code || "empty_transcript");
-      }
+
+      handlers?.onError?.("empty_audio");
     } catch {
-      if (handlers.onError) handlers.onError("generic");
+      if (this.nativeFinalAccumulated.trim()) {
+        handlers?.onFinal(this.nativeFinalAccumulated.trim());
+      } else {
+        handlers?.onError?.("generic");
+      }
     } finally {
-      if (handlers.onEnd) handlers.onEnd();
+      this.isFinalizing = false;
+      handlers?.onEnd?.();
     }
   }
 
-  stop(): void {
+  cancel(): void {
     if (this.timeoutId !== null) {
       window.clearTimeout(this.timeoutId);
       this.timeoutId = null;
@@ -241,7 +291,7 @@ export class LiveSpeechRecognizer {
       try {
         this.recognition.stop();
       } catch {
-        // Already stopped
+        /* already stopped */
       }
       this.recognition = null;
     }
@@ -250,5 +300,6 @@ export class LiveSpeechRecognizer {
       this.recorder = null;
     }
     this.isListening = false;
+    this.isFinalizing = false;
   }
 }

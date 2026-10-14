@@ -74,7 +74,7 @@ def get_settings() -> Settings:
         ).strip(),
         stt_model=os.getenv("SARVAM_STT_MODEL", "saaras:v4").strip(),
         tts_model=os.getenv("SARVAM_TTS_MODEL", "bulbul:v3").strip(),
-        tts_speaker=(os.getenv("SARVAM_TTS_SPEAKER", "") or "").strip() or None,
+        tts_speaker=(os.getenv("SARVAM_TTS_SPEAKER", "shubh") or "").strip() or "shubh",
         use_edge_tts=os.getenv("USE_EDGE_TTS", "true").strip().lower() in ("1", "true", "yes"),
         use_google_stt=os.getenv("USE_GOOGLE_STT", "false").strip().lower() in ("1", "true", "yes"),
         cors_origins=_split_csv(os.getenv("CORS_ORIGINS", DEFAULT_ORIGINS)),

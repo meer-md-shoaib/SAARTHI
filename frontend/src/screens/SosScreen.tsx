@@ -86,14 +86,14 @@ export function SosScreen() {
         </div>
       ) : null}
 
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 min-[340px]:grid-cols-2 gap-3 sm:grid-cols-4">
         {EMERGENCY_CONTACTS.map((contact) => (
           <div
             key={contact.id}
             className="flex flex-col items-center rounded-2xl border-2 border-navy/10 bg-paper p-3 text-center shadow-soft transition-transform hover:-translate-y-1 hover:border-coral"
           >
-            <FamilyAvatar role={contact.avatarRole} className="h-18 w-18" />
-            <span className="mt-2 text-lg font-extrabold text-navy">
+            <FamilyAvatar role={contact.avatarRole} className="h-16 w-16 sm:h-18 sm:w-18" />
+            <span className="mt-2 text-base font-extrabold text-navy sm:text-lg">
               {contact.name[lang]}
             </span>
             <span
@@ -107,14 +107,14 @@ export function SosScreen() {
               <button
                 type="button"
                 onClick={() => handleSendAlert(contact)}
-                className="flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-coral bg-coral px-2.5 py-2 text-xs font-extrabold text-white shadow-soft transition-colors hover:bg-coral-dark"
+                className="flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-coral bg-coral px-2 py-2 text-xs font-extrabold text-white shadow-soft transition-colors hover:bg-coral-dark"
                 aria-label={`Send SOS alert to ${contact.name[lang]}`}
               >
-                <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                <span>{t.sos.sendAlert}</span>
+                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="truncate">{t.sos.sendAlert}</span>
               </button>
 
-              <div className="flex w-full gap-1.5">
+              <div className="flex w-full gap-1">
                 <a
                   href={`sms:${contact.phone}?body=${encodeURIComponent(EMERGENCY_MESSAGES[lang])}`}
                   className="flex flex-1 items-center justify-center rounded-xl border border-navy/20 bg-white py-1.5 text-xs font-bold text-navy hover:bg-navy/5"
@@ -129,7 +129,8 @@ export function SosScreen() {
                   className="flex flex-1 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
                   title="WhatsApp"
                 >
-                  WhatsApp
+                  <span className="hidden min-[400px]:inline">WhatsApp</span>
+                  <span className="min-[400px]:hidden">WA</span>
                 </a>
                 <a
                   href={`tel:${contact.phone}`}

@@ -81,22 +81,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-[100dvh] flex-col">
       {/* ------------------------------------------------ top bar */}
-      <header className="sticky top-0 z-30 border-b border-navy/10 bg-cream/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-2 px-3 py-2.5">
+      <header className="sticky top-0 z-30 border-b border-navy/10 bg-cream/95 backdrop-blur pt-[env(safe-area-inset-top,0px)]">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-1.5 px-2.5 py-2 sm:gap-2 sm:px-3 sm:py-2.5">
           <button
             type="button"
             onClick={home}
             aria-label={t.nav.home}
-            className="flex items-center gap-2.5 rounded-2xl px-1.5 py-1 transition-colors hover:bg-navy/5"
+            className="flex items-center gap-2 rounded-2xl px-1 py-1 transition-colors hover:bg-navy/5"
           >
-            <SaarthiMascot className="h-11 w-11 shrink-0" />
+            <SaarthiMascot className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
             <span className="hidden text-left sm:block">
               <span className="block text-lg font-extrabold leading-tight">{t.app.name}</span>
               <span className="block text-xs leading-tight text-navy/70">{t.app.tagline}</span>
             </span>
           </button>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             {/* language picker */}
             <div className="relative">
               <button
@@ -105,7 +105,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => setLangOpen((open) => !open)}
                 aria-expanded={langOpen}
                 aria-label={`${t.nav.language}: ${currentLang.label}`}
-                className="flex min-h-[48px] items-center gap-1.5 rounded-2xl border-2 border-navy/15 bg-paper px-3 font-bold transition-colors hover:border-navy/40"
+                className="flex min-h-[44px] sm:min-h-[48px] items-center gap-1.5 rounded-2xl border-2 border-navy/15 bg-paper px-2.5 sm:px-3 font-bold transition-colors hover:border-navy/40"
               >
                 <Languages className="h-5 w-5" aria-hidden="true" />
                 <span className="hidden sm:inline">{currentLang.native}</span>
@@ -149,7 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               data-testid="text-size-button"
               onClick={() => setScale((scale + 1) % 3)}
               aria-label={`${t.nav.textSize}: ${t.nav.textSizes[scale] ?? ""}`}
-              className="flex min-h-[48px] items-center gap-1 rounded-2xl border-2 border-navy/15 bg-paper px-3 font-bold transition-colors hover:border-navy/40"
+              className="flex min-h-[44px] sm:min-h-[48px] items-center gap-1 rounded-2xl border-2 border-navy/15 bg-paper px-2.5 sm:px-3 font-bold transition-colors hover:border-navy/40"
             >
               <Type className="h-5 w-5" aria-hidden="true" />
               <span className={`${SCALE_CLASSES[scale] ?? "text-base"} leading-none`}>A</span>
@@ -163,16 +163,16 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-pressed={voiceOn}
               aria-label={voiceOn ? t.nav.voiceOn : t.nav.voiceOff}
               title={voiceOn ? t.nav.voiceOn : t.nav.voiceOff}
-              className={`flex min-h-[48px] items-center rounded-2xl border-2 px-3 transition-colors ${
+              className={`flex min-h-[44px] sm:min-h-[48px] items-center rounded-2xl border-2 px-2.5 sm:px-3 transition-colors ${
                 voiceOn
                   ? "border-teal bg-teal text-white hover:bg-teal-dark"
                   : "border-navy/25 bg-paper text-navy/70 hover:border-navy/50"
               }`}
             >
               {voiceOn ? (
-                <Volume2 className="h-6 w-6" aria-hidden="true" />
+                <Volume2 className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
               ) : (
-                <VolumeX className="h-6 w-6" aria-hidden="true" />
+                <VolumeX className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -181,7 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* ------------------------------------------------ main */}
       <main className="app-scrollbar flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-5xl px-4 py-6 pb-32">{children}</div>
+        <div className="mx-auto w-full max-w-5xl px-3 py-4 pb-28 sm:px-4 sm:py-6 sm:pb-32">{children}</div>
       </main>
 
       {/* ------------------------------------------------ speaking indicator */}
@@ -191,17 +191,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
-            className="pointer-events-none fixed inset-x-0 bottom-[110px] z-40 flex justify-center px-4"
+            className="pointer-events-none fixed inset-x-0 bottom-[80px] z-40 flex justify-center px-3 sm:bottom-[100px] sm:px-4"
           >
-            <div className="pointer-events-auto flex items-center gap-3 rounded-2xl bg-navy px-4 py-3 text-white shadow-lift">
-              <Volume2 className="h-6 w-6 animate-pulse" aria-hidden="true" />
-              <span className="font-bold">{t.nav.speaking}</span>
+            <div className="pointer-events-auto flex max-w-[94vw] flex-wrap items-center justify-center gap-2 rounded-2xl bg-navy px-3.5 py-2.5 text-white shadow-lift sm:gap-3 sm:px-4 sm:py-3">
+              <Volume2 className="h-5 w-5 animate-pulse sm:h-6 sm:w-6" aria-hidden="true" />
+              <span className="text-sm font-bold sm:text-base">{t.nav.speaking}</span>
               <button
                 type="button"
                 onClick={stopSpeaking}
-                className="flex min-h-[44px] items-center gap-2 rounded-xl bg-coral px-4 py-2 font-bold transition-colors hover:bg-coral-dark"
+                className="flex min-h-[40px] items-center gap-1.5 rounded-xl bg-coral px-3 py-1.5 text-xs font-bold transition-colors hover:bg-coral-dark sm:min-h-[44px] sm:gap-2 sm:px-4 sm:py-2 sm:text-sm"
               >
-                <Square className="h-4 w-4" aria-hidden="true" />
+                <Square className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
                 {t.nav.stopSpeaking}
               </button>
             </div>
@@ -212,9 +212,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* ------------------------------------------------ bottom navigation */}
       <nav
         aria-label="Main"
-        className="sticky bottom-0 z-30 border-t border-navy/10 bg-cream/95 backdrop-blur"
+        className="sticky bottom-0 z-30 border-t border-navy/10 bg-cream/95 backdrop-blur pb-[max(0.35rem,env(safe-area-inset-bottom,0px))]"
       >
-        <div className="mx-auto grid w-full max-w-5xl grid-cols-4 gap-1.5 px-3 py-2">
+        <div className="mx-auto grid w-full max-w-5xl grid-cols-4 gap-1 px-2 py-1.5 sm:gap-1.5 sm:px-3 sm:py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -225,9 +225,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 disabled={item.disabled}
                 title={item.title}
                 aria-label={item.label}
-                className="flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-xs font-bold transition-colors hover:bg-navy/8 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex min-h-[56px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-[11px] font-bold transition-colors hover:bg-navy/8 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent sm:min-h-[64px] sm:gap-1 sm:py-2 sm:text-xs"
               >
-                <Icon className="h-6 w-6" aria-hidden="true" />
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                 <span className="max-w-full truncate">{item.label}</span>
               </button>
             );
