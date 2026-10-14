@@ -1,0 +1,11 @@
+{
+  "name": "saarthi-safepay",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "typecheck": "npm run typecheck --prefix frontend",
+    "test": "node scripts/e2e-smoke.mjs",
+    "test:features": "node scripts/e2e-features-test.mjs"
+  }
+}

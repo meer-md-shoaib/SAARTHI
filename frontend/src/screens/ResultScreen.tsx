@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ScanLine, ShieldAlert, Volume2 } from "lucide-react";
 import { BigButton } from "../components/Button";
 import { Banner, Card, NumberedList } from "../components/bits";
+import { VisualPaymentCard } from "../components/VisualPaymentCard";
 import { SceneArt, type SceneKind } from "../components/illustrations";
 import {
   CHECK_ICON,
@@ -11,6 +12,8 @@ import {
   SEVERITY_ICON,
   SEVERITY_STYLE,
 } from "../components/icons";
+import { findFamilyMatch } from "../lib/family";
+import { type ParsedPayment, parseUpiPayment } from "../lib/upi";
 import { useApp, useNav } from "../state";
 import type { Outcome } from "../types";
 
@@ -43,8 +46,29 @@ export function ResultScreen() {
 
   if (!result || !expectation) return null;
 
-  const OutcomeIcon = OUTCOME_ICON[result.outcome];
   const extracted = result.extracted;
+  const familyMatch = findFamilyMatch(extracted.payee_vpa);
+  const parsedPayment = parseUpiPayment(extracted.payee_vpa || "");
+
+  const paymentData: ParsedPayment = {
+    isPayment: extracted.supported,
+    kind: extracted.kind as ParsedPayment["kind"],
+    payeeVpa: extracted.payee_vpa,
+    payeeName: extracted.payee_name,
+    displayName: extracted.payee_name || extracted.payee_vpa,
+    amount: extracted.amount,
+    currency: extracted.currency || "INR",
+    note: extracted.note,
+    bankName: extracted.bank_name || parsedPayment.bankName,
+    direction: expectation.intention,
+    rawText: "",
+    isLegitBank: Boolean(extracted.bank_name || parsedPayment.isLegitBank),
+    isSuspicious: parsedPayment.isSuspicious,
+    suspicionReason: parsedPayment.suspicionReason,
+    handle: parsedPayment.handle,
+  };
+
+  const OutcomeIcon = OUTCOME_ICON[result.outcome];
 
   return (
     <div className="space-y-5">
@@ -74,6 +98,17 @@ export function ResultScreen() {
           <p className="text-center text-sm text-navy/70">{t.result.readAloudHint}</p>
         </div>
       </section>
+
+      {/* Multilingual Visual Explanation Card with Family Verification */}
+      {paymentData ? (
+        <VisualPaymentCard
+          payment={paymentData}
+          intention={expectation.intention}
+          expectedAmount={expectation.expectedAmount}
+          outcome={result.outcome}
+          familyMatch={familyMatch}
+        />
+      ) : null}
 
       {/* warning signs */}
       <section aria-labelledby="warning-signs">

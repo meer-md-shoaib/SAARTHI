@@ -247,12 +247,100 @@ AMOUNT_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"([0-9][0-9,]*(?:\.[0-9]{1,2})?)\s*(?:rupees|₹)(?![A-Za-z])", re.IGNORECASE),
 ]
 
-VPA_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{1,255}@[a-zA-Z]{2,64}$")
+VPA_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{1,255}@[a-zA-Z0-9]{2,64}$")
 EMBEDDED_VPA_RE = re.compile(
-    r"(?<![A-Za-z0-9._-])([a-zA-Z0-9][a-zA-Z0-9._-]{1,255}@[a-zA-Z]{2,64})(?![A-Za-z0-9.-])"
+    r"(?<![A-Za-z0-9._-])([a-zA-Z0-9][a-zA-Z0-9._-]{1,255}@[a-zA-Z0-9]{2,64})(?![A-Za-z0-9.-])"
 )
-UPI_PAY_RE = re.compile(r"upi://pay\b[^\s]*", re.IGNORECASE)
+UPI_PAY_RE = re.compile(r"upi:(?://)?pay\b[^\s]*", re.IGNORECASE)
 URL_RE = re.compile(r"^(?:https?://|www\.)\S+$", re.IGNORECASE)
+
+BANK_HANDLES: dict[str, str] = {
+    # Google Pay certified handles
+    "okhdfcbank": "HDFC Bank",
+    "oksbi": "State Bank of India",
+    "okaxis": "Axis Bank",
+    "okicici": "ICICI Bank",
+    # PhonePe certified handles
+    "ybl": "YES Bank (PhonePe)",
+    "ibl": "ICICI Bank (PhonePe)",
+    "axl": "Axis Bank (PhonePe)",
+    # Paytm certified handles
+    "paytm": "Paytm Payments Bank",
+    "ptsbi": "State Bank of India (Paytm)",
+    "pthdfc": "HDFC Bank (Paytm)",
+    "ptaxis": "Axis Bank (Paytm)",
+    "pticici": "ICICI Bank (Paytm)",
+    # BHIM / NPCI
+    "upi": "NPCI BHIM UPI",
+    # Major Public and Private Banks
+    "sbi": "State Bank of India",
+    "sbiupi": "State Bank of India",
+    "hdfcbank": "HDFC Bank",
+    "icici": "ICICI Bank",
+    "eazypay": "ICICI Bank EazyPay",
+    "axisbank": "Axis Bank",
+    "axis": "Axis Bank",
+    "kotak": "Kotak Mahindra Bank",
+    "kmbl": "Kotak Mahindra Bank",
+    "pnb": "Punjab National Bank",
+    "barodampay": "Bank of Baroda",
+    "bob": "Bank of Baroda",
+    "cnrb": "Canara Bank",
+    "canarabank": "Canara Bank",
+    "unionbank": "Union Bank of India",
+    "unionbankofindia": "Union Bank of India",
+    "uboi": "Union Bank of India",
+    "indianbank": "Indian Bank",
+    "indbank": "Indian Bank",
+    "boi": "Bank of India",
+    "cbi": "Central Bank of India",
+    "idfcbank": "IDFC FIRST Bank",
+    "idfc": "IDFC FIRST Bank",
+    "indus": "IndusInd Bank",
+    "indusind": "IndusInd Bank",
+    "federal": "Federal Bank",
+    "fed": "Federal Bank",
+    "yesbank": "YES Bank",
+    "rbl": "RBL Bank",
+    "bandhan": "Bandhan Bank",
+    "uco": "UCO Bank",
+    "postbank": "India Post Payments Bank",
+    "ippb": "India Post Payments Bank",
+    "airtel": "Airtel Payments Bank",
+    "airtelbank": "Airtel Payments Bank",
+    "jio": "Jio Payments Bank",
+    "jiopay": "Jio Payments Bank",
+    "aubank": "AU Small Finance Bank",
+    # Amazon Pay & WhatsApp Pay
+    "apl": "Amazon Pay (Axis Bank)",
+    "rapl": "Amazon Pay (RBL Bank)",
+    "yapl": "Amazon Pay (YES Bank)",
+    "waaxis": "WhatsApp Pay (Axis Bank)",
+    "wahdfc": "WhatsApp Pay (HDFC Bank)",
+    "waicici": "WhatsApp Pay (ICICI Bank)",
+    "wasbi": "WhatsApp Pay (SBI)",
+    # Fintech & Digital PSPs
+    "slice": "Slice (Axis Bank)",
+    "axisb": "CRED (Axis Bank)",
+    "cbwq": "CRED",
+    "ikwik": "MobiKwik",
+    "freecharge": "Freecharge (Axis Bank)",
+    "jupiteraxis": "Jupiter (Axis Bank)",
+    "tapicici": "Tata Neu (ICICI Bank)",
+    "navi": "Navi",
+    "scb": "Standard Chartered Bank",
+    "hsbc": "HSBC Bank",
+    "kvb": "Karur Vysya Bank",
+    "sib": "South Indian Bank",
+}
+
+# Suspicious words often used in scam VPAs to impersonate KYC, refund, lottery, or support
+VPA_SCAM_KEYWORDS: list[str] = [
+    "kyc", "refund", "cashback", "reward", "lottery", "winner", "prize",
+    "helpline", "tollfree", "toll-free", "customercare", "customer.care",
+    "customer-care", "support", "verification", "unblock", "suspended",
+    "electricity-bill", "electricity.bill", "billdesk", "bonus", "freegift", "free-gift"
+]
 
 
 # --- Extraction ---------------------------------------------------------------
@@ -270,6 +358,7 @@ class Extraction:
     merchant_code: str | None = None
     link: str | None = None
     supported: bool = False
+    bank_name: str | None = None
     reasons: list[str] = field(default_factory=list)
 
     def as_dict(self) -> dict[str, Any]:
@@ -285,6 +374,7 @@ class Extraction:
             "merchant_code": self.merchant_code,
             "link": self.link,
             "supported": self.supported,
+            "bank_name": self.bank_name,
         }
 
 
@@ -361,7 +451,11 @@ def extract_payment_info(raw_text: str) -> Extraction:
     url_text = _find_upi_payload(original, text)
     if url_text:
         info.kind = "upi_pay"
-        query = parse_qs(urlparse(url_text).query, keep_blank_values=True)
+        parsed_url = urlparse(url_text)
+        query_str = parsed_url.query
+        if not query_str and "?" in url_text:
+            query_str = url_text.split("?", 1)[1]
+        query = parse_qs(query_str, keep_blank_values=True)
         params = {key.lower(): values for key, values in query.items()}
 
         def param(name: str) -> str | None:
@@ -423,9 +517,15 @@ def _finalize(info: Extraction) -> Extraction:
         info.reasons = ["invalid_payee"]
         info.supported = False
     else:
-        info.reasons = []
-        info.supported = info.kind in ("upi_pay", "vpa")
-        if not info.supported:
+        handle = info.payee_vpa.split("@")[1].lower() if "@" in info.payee_vpa else ""
+        info.bank_name = BANK_HANDLES.get(handle)
+        if not info.bank_name:
+            info.reasons = ["unknown_bank_handle"]
+            info.supported = False
+        else:
+            info.reasons = []
+            info.supported = info.kind in ("upi_pay", "vpa")
+        if not info.supported and not info.reasons:
             info.reasons = ["no_payment_info"]
     return info
 
@@ -507,21 +607,29 @@ def evaluate_rules(
         hit=RuleHit("SECRET_REQUEST", Severity.HIGH, evidence=secret) if secret else None,
     )
 
-    # 2. Urgency / threats ----------------------------------------------------
+    # 2. Urgency / threats & VPA Impersonation ---------------------------------
     urgency = None
     for language_patterns in URGENCY_PATTERNS.values():
         urgency = _find_match(language_patterns, text)
         if urgency:
             break
+
+    # Also detect scam / phishing / impersonation keywords in the UPI VPA itself
+    if not urgency and info.payee_vpa:
+        vpa_user = info.payee_vpa.split("@")[0].lower()
+        matched_kw = next((kw for kw in VPA_SCAM_KEYWORDS if kw in vpa_user), None)
+        if matched_kw:
+            urgency = f"Suspicious keyword '{matched_kw}' in address: {info.payee_vpa}"
+
     mark(
         "URGENCY_PRESSURE",
-        applicable=bool(text),
+        applicable=bool(text or info.payee_vpa),
         hit=RuleHit("URGENCY_PRESSURE", Severity.HIGH, evidence=urgency) if urgency else None,
     )
 
     # 3. Intent mismatch ------------------------------------------------------
     intent_known = intention in ("pay", "receive")
-    relevant = intent_known and info.kind == "upi_pay"
+    relevant = intent_known and (info.kind in ("upi_pay", "vpa"))
     mismatch_hit: RuleHit | None = None
     if relevant and intention == "receive":
         mismatch_hit = RuleHit(
@@ -549,7 +657,7 @@ def evaluate_rules(
         )
     mark("AMOUNT_MISMATCH", applicable=expected_amount is not None, hit=mismatch_hit)
 
-    amount_missing_applicable = expected_amount is not None and info.kind == "upi_pay"
+    amount_missing_applicable = expected_amount is not None and (info.kind in ("upi_pay", "vpa"))
     missing_hit = None
     if amount_missing_applicable and info.amount is None:
         missing_hit = RuleHit(
@@ -573,7 +681,15 @@ def evaluate_rules(
 
     # 5. Missing / unsupported information ------------------------------------
     has_payee = info.payee_vpa is not None
-    payee_invalid = has_payee and VPA_RE.match(info.payee_vpa) is None
+    handle = (
+        info.payee_vpa.split("@")[1].lower()
+        if (has_payee and "@" in info.payee_vpa)
+        else ""
+    )
+    is_handle_known = handle in BANK_HANDLES
+    payee_invalid = has_payee and (
+        VPA_RE.match(info.payee_vpa) is None or not is_handle_known
+    )
 
     invalid_hit = (
         RuleHit("INVALID_VPA", Severity.MEDIUM, evidence=info.payee_vpa)

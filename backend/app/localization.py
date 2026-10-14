@@ -158,6 +158,7 @@ _EN: dict[str, Any] = {
         "no_payment_info": "The text does not contain payment information.",
         "missing_payee": "No payment address (UPI ID) was found.",
         "invalid_payee": "The payment address does not look valid.",
+        "unknown_bank_handle": "The bank handle after '@' is not recognized as an authorized Indian bank or UPI provider.",
         "unsupported_link": "Website links are not supported for safety checks.",
     },
     "disclaimer": (
@@ -315,6 +316,7 @@ _HI: dict[str, Any] = {
         "no_payment_info": "टेक्स्ट में भुगतान की जानकारी नहीं है।",
         "missing_payee": "भुगतान पता (UPI आईडी) नहीं मिला।",
         "invalid_payee": "भुगतान पता मान्य नहीं लगता।",
+        "unknown_bank_handle": "'@' के बाद वाला बैंक हैंडल किसी मान्यता प्राप्त भारतीय बैंक या UPI प्रदाता का नहीं है।",
         "unsupported_link": "सुरक्षा जाँच के लिए वेबसाइट लिंक समर्थित नहीं हैं।",
     },
     "disclaimer": (
@@ -473,6 +475,7 @@ _KN: dict[str, Any] = {
         "no_payment_info": "ಪಠ್ಯದಲ್ಲಿ ಪಾವತಿ ಮಾಹಿತಿ ಇಲ್ಲ.",
         "missing_payee": "ಪಾವತಿ ವಿಳಾಸ (UPI ಐಡಿ) ಸಿಗಲಿಲ್ಲ.",
         "invalid_payee": "ಪಾವತಿ ವಿಳಾಸ ಮಾನ್ಯವಾಗಿ ಕಾಣುತ್ತಿಲ್ಲ.",
+        "unknown_bank_handle": "'@' ನಂತರದ ಬ್ಯಾಂಕ್ ಹ್ಯಾಂಡಲ್ ಭಾರತದ ಅಧಿಕೃತ ಬ್ಯಾಂಕ್ ಅಥವಾ UPI ಪೂರೈಕೆದಾರರಿಗೆ ಸೇರಿಲ್ಲ.",
         "unsupported_link": "ಸುರಕ್ಷತಾ ಪರಿಶೀಲನೆಗೆ ಜಾಲತಾಣ ಕೊಂಡಿಗಳು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ.",
     },
     "disclaimer": (

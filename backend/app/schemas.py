@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 Language = Literal["en", "hi", "kn"]
 Intention = Literal["pay", "receive", "unknown"]
 OutcomeValue = Literal["low_concern", "be_careful", "high_concern", "unable_to_verify"]
-Source = Literal["camera", "manual", "demo"]
+Source = Literal["camera", "manual", "demo", "upload"]
 
 
 class AnalyzePaymentRequest(BaseModel):
@@ -60,6 +60,7 @@ class ExtractedInfo(BaseModel):
     merchant_code: str | None = None
     link: str | None = None
     supported: bool
+    bank_name: str | None = None
 
 
 class WarningSign(BaseModel):

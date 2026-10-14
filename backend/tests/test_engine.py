@@ -204,3 +204,51 @@ def test_empty_input_is_unable_to_verify() -> None:
     result = analyze_payment("   ", "pay", None, "en")
     assert result["outcome"] == "unable_to_verify"
     assert result["extracted"]["supported"] is False
+
+
+def test_vpa_intent_mismatch_when_user_wants_to_receive() -> None:
+    result = analyze_payment("merchant@oksbi", "receive", None, "en")
+    assert result["outcome"] == "high_concern"
+    assert "INTENT_MISMATCH" in _ids(result)
+
+
+def test_vpa_pay_is_low_concern() -> None:
+    result = analyze_payment("merchant@oksbi", "pay", None, "en")
+    assert result["outcome"] == "low_concern"
+    assert result["extracted"]["payee_vpa"] == "merchant@oksbi"
+    assert result["extracted"]["supported"] is True
+
+
+def test_resolves_bank_name_from_handle() -> None:
+    result = analyze_payment("rahul@okhdfcbank", "pay", None, "en")
+    assert result["extracted"]["bank_name"] == "HDFC Bank"
+
+    result_sbi = analyze_payment("someone@oksbi", "pay", None, "en")
+    assert result_sbi["extracted"]["bank_name"] == "State Bank of India"
+
+
+def test_extracts_from_upi_scheme_variations() -> None:
+    info = extract_payment_info("UPI://PAY?PA=alice@okhdfcbank&PN=Alice&AM=50")
+    assert info.payee_vpa == "alice@okhdfcbank"
+    assert info.payee_name == "Alice"
+    assert info.amount == 50
+    assert info.bank_name == "HDFC Bank"
+
+
+def test_unknown_bank_handle_is_unable_to_verify() -> None:
+    result = analyze_payment("scammer@fakebank", "pay", None, "en")
+    assert result["outcome"] == "unable_to_verify"
+    assert "INVALID_VPA" in _ids(result)
+    assert result["extracted"]["bank_name"] is None
+    assert result["extracted"]["supported"] is False
+
+
+def test_scam_keyword_in_vpa_is_high_concern() -> None:
+    result = analyze_payment("sbi.kyc.update@okhdfcbank", "pay", None, "en")
+    assert result["outcome"] == "high_concern"
+    assert "URGENCY_PRESSURE" in _ids(result)
+    sign = next(s for s in result["warning_signs"] if s["id"] == "URGENCY_PRESSURE")
+    assert "kyc" in (sign.get("evidence") or "").lower()
+
+
+

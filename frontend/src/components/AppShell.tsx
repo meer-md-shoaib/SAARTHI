@@ -219,6 +219,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             return (
               <button
                 key={item.key}
+                data-testid={`nav-${item.key}`}
                 type="button"
                 onClick={item.onClick}
                 disabled={item.disabled}

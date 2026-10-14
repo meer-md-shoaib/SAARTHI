@@ -37,6 +37,7 @@ export interface ExtractedInfo {
   merchant_code: string | null;
   link: string | null;
   supported: boolean;
+  bank_name?: string | null;
 }
 
 export interface AnalyzeResult {
@@ -61,7 +62,7 @@ export interface AnalyzePayload {
   intention: Intention;
   expected_amount: number | null;
   language: Lang;
-  source: "camera" | "manual" | "demo";
+  source: "camera" | "manual" | "demo" | "upload";
 }
 
 export interface SuggestedTopic {

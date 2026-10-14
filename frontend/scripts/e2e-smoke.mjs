@@ -65,6 +65,20 @@ try {
   }
 
   async function clickText(text, selector = "button", exact = false) {
+    await page.waitForFunction(
+      (needle, sel, isExact) => {
+        const nodes = [...document.querySelectorAll(sel)];
+        return nodes.some((node) => {
+          const value = node.textContent.replace(/\s+/g, " ").trim();
+          return isExact ? value === needle : value.includes(needle);
+        });
+      },
+      { timeout: 8000 },
+      text,
+      selector,
+      exact,
+    );
+    await new Promise((r) => setTimeout(r, 250));
     const clicked = await page.evaluate(
       (needle, sel, isExact) => {
         const nodes = [...document.querySelectorAll(sel)];
@@ -73,6 +87,8 @@ try {
           return isExact ? value === needle : value.includes(needle);
         });
         if (!target) return false;
+        target.scrollIntoView({ block: "center" });
+        target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         target.click();
         return true;
       },
@@ -80,7 +96,11 @@ try {
       selector,
       exact,
     );
-    if (!clicked) throw new Error(`element not found: "${text}" (${selector})`);
+    if (!clicked) {
+      const allButtons = await page.evaluate(() => [...document.querySelectorAll("button")].map(b => b.textContent.replace(/\s+/g, " ").trim()));
+      console.log(`[FAILED clickText("${text}")]. Available buttons:`, allButtons);
+      throw new Error(`element not found: "${text}" (${selector})`);
+    }
   }
 
   /* ---------------------------------------------------------- home */

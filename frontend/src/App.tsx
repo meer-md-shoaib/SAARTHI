@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AppShell } from "./components/AppShell";
 import { AppProvider, useNav } from "./state";
 import { AskScreen } from "./screens/AskScreen";
+import { FamilyProfilesScreen } from "./screens/FamilyProfilesScreen";
 import { HelpScreen } from "./screens/HelpScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { LearnScreen } from "./screens/LearnScreen";
@@ -32,6 +33,8 @@ function CurrentScreen() {
       return <StoryScreen />;
     case "help":
       return <HelpScreen />;
+    case "family":
+      return <FamilyProfilesScreen />;
     default:
       return null;
   }

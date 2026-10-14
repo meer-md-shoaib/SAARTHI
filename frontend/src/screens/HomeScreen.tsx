@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ChevronRight, ShieldAlert, Volume2 } from "lucide-react";
+import { ChevronRight, ShieldAlert, Users, Volume2 } from "lucide-react";
 import { Banner } from "../components/bits";
 import { SaarthiMascot, SceneArt } from "../components/illustrations";
 import { useApp, useNav } from "../state";
@@ -81,6 +81,21 @@ export function HomeScreen() {
       <Banner tone="tip" icon={<ShieldAlert className="h-7 w-7" aria-hidden="true" />} title={t.app.reminder}>
         <p className="text-navy/85">{t.app.reminderSub}</p>
       </Banner>
+
+      {/* Family Profiles shortcut */}
+      <button
+        type="button"
+        onClick={() => go({ screen: "family" })}
+        className="flex w-full items-center justify-between gap-3 rounded-3xl border-2 border-teal bg-teal-soft/60 px-5 py-4 text-left transition-colors hover:bg-teal hover:text-white"
+      >
+        <span>
+          <span className="block text-xl font-extrabold">{t.home.familyCard.title}</span>
+          <span className="mt-0.5 block text-base opacity-90">{t.home.familyCard.sub}</span>
+        </span>
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal text-white">
+          <Users className="h-6 w-6" aria-hidden="true" />
+        </span>
+      </button>
 
       {/* SOS shortcut */}
       <button
