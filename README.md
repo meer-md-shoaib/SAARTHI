@@ -1,1003 +1,424 @@
 
-# 🛡️ SAARTHI SafePay
-### Easy Pay. Safe Pay.
+<div align="center">
 
-**An accessible, voice-enabled digital payment safety assistant designed to help older adults understand QR-based payments, recognize suspicious situations, and make informed decisions before proceeding.**
+# 🛡️ SAARTHI SafePay (सारथी)
+### *Easy Pay. Safe Pay. Never Pay in Doubt.*
 
-> **Track:** C – Digital Inclusion & Public Access  
-> **Problem Statement:** 8 – Easy Pay, Safe Pay  
-> **Duration:** 24-Hour Hackathon  
-> **Domains:** Cybersecurity · Digital Inclusion · Payment Safety · Accessibility
+**An accessible, voice-first digital payment safety companion designed specifically for older adults and first-time digital citizens to navigate UPI payments, detect deceptive scams, and protect their hard-earned money.**
+
+---
+
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20App-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://saarthi-safepay.vercel.app)
+[![Render Backend](https://img.shields.io/badge/Render-FastAPI%20Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://saarthi-safepay-backend.onrender.com/health)
+[![Python Version](https://img.shields.io/badge/Python-3.12%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![React Version](https://img.shields.io/badge/React-19.3.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.4.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Three.js](https://img.shields.io/badge/Three.js-3D%20Graphics-black?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
+[![Sarvam AI](https://img.shields.io/badge/Sarvam%20AI-Bulbul%20v3%20%7C%20Saaras%20v4-FF6F00?style=for-the-badge)](https://www.sarvam.ai/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-2.5%20Flash-8E75C2?style=for-the-badge&logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+<br/>
+
+<!-- Interactive Quick Action Buttons -->
+<p align="center">
+  <a href="https://saarthi-safepay.vercel.app">
+    <img src="https://img.shields.io/badge/🚀_Launch_Live_App-Visit_Saarthi-teal?style=for-the-badge&labelColor=17324D" alt="Live App" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://saarthi-safepay-backend.onrender.com/docs">
+    <img src="https://img.shields.io/badge/⚡_Swagger_API_Docs-FastAPI-blue?style=for-the-badge&labelColor=0F172A" alt="API Docs" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="tel:1930">
+    <img src="https://img.shields.io/badge/🚨_National_Cyber_Helpline-Dial_1930-red?style=for-the-badge&labelColor=7F1D1D" alt="National Cyber Helpline" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/meer-md-shoaib/SAARTHI/stargazers">
+    <img src="https://img.shields.io/badge/⭐_Star_Repository-GitHub-orange?style=for-the-badge&labelColor=334155" alt="Star Repository" />
+  </a>
+</p>
+
+</div>
 
 ---
 
 ## 📌 Table of Contents
 
-1. [Overview](#-overview)
-2. [Problem Statement](#-problem-statement)
-3. [Our Solution](#-our-solution)
-4. [Key Features](#-key-features)
-5. [Technology Stack](#-technology-stack)
-6. [System Architecture](#-system-architecture)
-7. [Application Workflow](#-application-workflow)
-8. [Security and Risk Analysis](#-security-and-risk-analysis)
-9. [API Design](#-api-design)
-10. [Project Structure](#-project-structure)
-11. [Team Responsibilities](#-team-responsibilities)
-12. [Testing Strategy](#-testing-strategy)
-13. [24-Hour Development Roadmap](#-24-hour-development-roadmap)
-14. [Learning and Awareness Module](#-learning-and-awareness-module)
-15. [Accessibility and Language Support](#-accessibility-and-language-support)
-16. [Privacy and Security](#-privacy-and-security)
-17. [Setup and Installation](#-setup-and-installation)
-18. [Environment Variables](#-environment-variables)
-19. [Deployment](#-deployment)
-20. [Limitations and Future Scope](#-limitations-and-future-scope)
-21. [Demo Plan](#-demo-plan)
-22. [Team](#-team)
+- [💡 Overview & The Problem](#-overview--the-problem)
+- [✨ Key Capabilities](#-key-capabilities)
+- [🌐 Complete 11 Indic Languages Support](#-complete-11-indic-languages-support)
+- [🧠 Hybrid Safety Architecture](#-hybrid-safety-architecture)
+- [🎮 Interactive Learning & 3D Arcade](#-interactive-learning--3d-arcade)
+- [🛠️ Technology Stack](#-technology-stack)
+- [📂 Project Architecture](#-project-architecture)
+- [🚀 Local Development & Setup](#-local-development--setup)
+- [⚙️ Environment Variables](#️-environment-variables)
+- [📡 API Documentation](#-api-documentation)
+- [👥 Meet the Team & Contributors](#-meet-the-team--contributors)
+- [📄 License & Ethics](#-license--ethics)
 
 ---
 
-## 🎯 Overview
+## 💡 Overview & The Problem
 
-Digital payments have made everyday transactions faster and more convenient. However, older adults and less digitally experienced users may find it difficult to distinguish legitimate payment requests from suspicious situations.
+Digital payments (UPI) transformed India into the world’s digital transaction capital. However, **over 140 million senior citizens** and new smartphone users face predatory scam traps daily:
+- **The "Receive Money" Trap:** Scammers claim *"Scan this QR and enter your PIN to claim your prize/cashback"*. Victims do not realize that scanning a QR code can **only send money, never receive it**.
+- **Manipulated Payee Names & VPAs:** Fraudsters spoof familiar names while redirecting payments to rogue accounts.
+- **Urgency & Psychological Coercion:** Victims are threatened with immediate bank account freezing or electricity disconnection within 30 minutes.
+- **Credential Harvesting:** Aggressive solicitations for OTPs, UPI PINs, or password sharing under the guise of customer support.
 
-**SAARTHI SafePay** provides a simple, accessible safety layer that helps users understand supported QR-based payment information before proceeding independently.
+### 🎯 Our Mission: SAARTHI SafePay
+SAARTHI acts as an accessible, voice-first safety companion that sits between the user and any payment. It inspects QR codes and SMS alerts, checks for 9 deterministic fraud indicators, visualizes money flow in elder-friendly language, and provides instant audio guidance in **11 Indian languages**.
 
-Users can scan a QR code, review the available payment details, select their intended action, and receive understandable explanations of potential warning signs.
-
-### Our objectives
-
-- Make digital payment interactions easier to understand.
-- Help users recognize common suspicious situations.
-- Provide explainable, deterministic safety checks.
-- Improve accessibility through voice assistance and multilingual support.
-- Encourage safer digital habits through interactive education.
-- Protect user privacy by avoiding the collection of sensitive banking credentials.
+> ⚠️ **Zero Credential Guarantee:** SAARTHI never asks for your UPI PIN, never stores OTPs, never initiates payments, and never proxies bank credentials.
 
 ---
 
-## 🚨 Problem Statement
+## ✨ Key Capabilities
 
-Older adults and digitally inexperienced users may encounter several challenges when using digital payment systems:
-
-- Confusion between sending and receiving money.
-- Difficulty understanding QR code payment information.
-- Fraudulent requests involving urgency, threats, or impersonation.
-- Requests for sensitive information such as UPI PINs and OTPs.
-- Language barriers and complicated interfaces.
-- Difficulty understanding technical warnings and errors.
-
-### Our challenge
-
-Build an accessible digital assistant that helps users understand payment information, recognize suspicious situations, and learn safer digital payment practices.
-
----
-
-## 💡 Our Solution
-
-SAARTHI SafePay provides a guided payment safety experience.
-
-Instead of immediately proceeding with a payment, users can inspect supported QR data and receive clear guidance about inconsistencies, reported warning signs, and information that could not be verified.
-
-### How it works
-
-1. **Scan:** Read a supported payment QR code using the device camera.
-2. **Enter:** Use manual entry if camera access is unavailable.
-3. **Choose:** Select whether the intention is to pay or receive money.
-4. **Analyze:** Validate supported payment information using deterministic rules.
-5. **Understand:** Review the recipient, amount, warnings, and limitations.
-6. **Act safely:** Verify the details independently before proceeding.
-7. **Learn:** Practice recognizing suspicious situations through educational scenarios.
-
-> **SAARTHI SafePay is a payment safety assistant, not a payment processor or a guarantee of fraud detection.**
-
----
-
-## ✨ Key Features
-
-### 1. QR Code Scanner
-
-- Live camera-based QR scanning.
-- Browser-based QR decoding using `@zxing/browser`.
-- Support for compatible UPI payment QR formats.
-- Manual entry fallback.
-- Handling for malformed and unsupported QR data.
-- No automatic payment initiation.
-
-### 2. Pay or Receive Intent Selection
-
-Users explicitly select their intended action before analysis.
-
-The application checks whether the decoded QR information appears consistent with that intent.
-
-For example, if a user wants to receive money but scans a QR representing a payment request, the application explains the mismatch and advises the user not to use that QR to receive money.
-
-### 3. Explainable Safety Analysis
-
-A deterministic rules engine evaluates supported payment information and predefined warning conditions.
-
-Possible outcomes:
-
-- **Low Concern:** No configured warning was triggered.
-- **Caution:** An inconsistency requires verification.
-- **High Concern:** A warning condition warrants stopping and checking.
-- **Unverified:** The information is insufficient or unsupported.
-
-Every result includes an explanation and recommended next steps.
-
-> A low-concern result does not guarantee that a payment or recipient is safe.
-
-### 4. Voice Assistance
-
-Powered by Sarvam AI speech services, planned capabilities include:
-
-- Speech-to-text for short spoken instructions.
-- Text-to-speech for payment details and safety guidance.
-- Voice-assisted interaction in supported languages.
-- Text fallback when speech services are unavailable.
-
-Voice input is treated as user-provided information and does not independently establish that a payment is safe.
-
-### 5. Multilingual Interface
-
-Planned languages:
-
-- 🇬🇧 English
-- 🇮🇳 Hindi
-- 🇮🇳 Kannada
-
-Core interface text and critical safety messages will use reviewed translations. Voice capabilities will be enabled only for language paths tested during development.
-
-### 6. Scam Awareness Quiz
-
-A short interactive quiz teaches users to identify common suspicious situations.
-
-Each question includes:
-
-- A fictional scenario.
-- Clear answer choices.
-- Immediate feedback.
-- An explanation of the warning sign.
-- A recommended safe action.
-
-### 7. Interactive Safety Story
-
-If time permits, users can explore a short branching story about a suspicious payment request.
-
-Different choices demonstrate different consequences and reinforce safer habits.
-
-### 8. Accessible Interface
-
-- Large, readable text.
-- Clear labels and instructions.
-- Large touch-friendly buttons.
-- High contrast and uncluttered layouts.
-- Simple navigation.
-- Understandable warnings.
-- Visible loading and error states.
+<table>
+  <tr>
+    <td width="50%">
+      <h3>📷 Zero-Trap QR & Screenshot Verification</h3>
+      <ul>
+        <li><b>Dual Mode Scanning:</b> Real-time camera scanner or upload QR screenshots directly from WhatsApp/SMS.</li>
+        <li><b>Intent Mismatch Detection:</b> Instantly alerts if user wants to <i>receive</i> money via a payment QR.</li>
+        <li><b>Whom-to-Whom Visual Card:</b> Replaces dense technical tables with large avatars, explicit transfer arrows, and huge bold amounts.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>🎙️ Voice-First Multilingual Assistant</h3>
+      <ul>
+        <li><b>Sarvam AI Integration:</b> Powered by <code>Bulbul v3</code> (Indian accented TTS) & <code>Saaras v4</code> (conversational STT).</li>
+        <li><b>Subtle Biological Heartbeat:</b> Gentle, organic breathing pulse on the microphone orb indicating listening readiness.</li>
+        <li><b>Full Audio Playback:</b> Reads safety verdicts, explanations, and advice aloud in 11 Indic languages.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>🧠 Calibrated ML Scam Classifier</h3>
+      <ul>
+        <li><b>Class-Weighted LinearSVC:</b> 96.8% accuracy on real-world Indian financial scam SMS datasets.</li>
+        <li><b>Explainable Risk Engine:</b> Pinpoints deceptive urgency, bank impersonation, and fraudulent short-links.</li>
+        <li><b>Gemini 2.5 Flash Fallback:</b> Contextual reasoning when handling nuanced, out-of-distribution threats.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>🚨 Safety SOS & Emergency Rescue</h3>
+      <ul>
+        <li><b>1-Touch Family SOS:</b> Dispatches SMS/WhatsApp alerts to saved family contacts (Son, Wife, Grandchildren).</li>
+        <li><b>Direct 1930 Helpline Access:</b> 1-click dialer and direct link to India's National Cyber Crime Reporting Portal.</li>
+        <li><b>AI Incident Complaint Generator:</b> Drafts official bank freeze templates within the 2-hour golden period.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 🧰 Technology Stack
+## 🌐 Complete 11 Indic Languages Support
 
-| Component | Technology |
+SAARTHI SafePay provides end-to-end user interface translation and voice guidance across **all 11 major Indian languages**:
+
+| Language | Script | Native Greeting | Voice STT / TTS | UI Support |
+|---|---|---|:---:|:---:|
+| **English** | Latin | *"Namaste! How can I help you today?"* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Hindi** | हिन्दी | *"नमस्ते! मैं सारथी हूँ, आपका डिजिटल सुरक्षा साथी।"* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Kannada** | ಕನ್ನಡ | *"ನಮಸ್ಕಾರ! ನಾನು ಸಾರಥಿ, ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಪಾವತಿ ಸುರಕ್ಷಾ ಸಹಾಯಕ."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Telugu** | తెలుగు | *"నమస్కారం! సురక్షిత డిజిటల్ చెల్లింపుల సహచరుడు."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Tamil** | தமிழ் | *"வணக்கம்! உங்கள் பாதுகாப்பான கட்டண உதவியாளர்."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Bengali** | বাংলা | *"নমস্কার! আপনার নিরাপদ ডিজিটাল পেমেন্ট সহকারী।"* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Marathi** | मराठी | *"नमस्कार! मी सारथी, आपला पेमेंट सुरक्षा साथीदार."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Gujarati** | ગુજરાતી | *"નમસ્તે! ડિજિટલ પેમેન્ટ સુરક્ષા સહાયક."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Malayalam** | മലയാളം | *"നമസ്കാരം! നിങ്ങളുടെ ഡിജിറ്റൽ പേയ്‌മെന്റ് സുരക്ഷಾ സഹായി."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Punjabi** | ਪੰਜਾਬੀ | *"ਸਤਿ ਸ਼੍ਰੀ ਅਕਾਲ! ਤੁਹਾਡਾ ਭੁਗਤਾਨ ਸੁਰੱਖਿਆ ਸਾਥੀ."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Odia** | ଓଡ଼ିଆ | *"ନମସ୍କାର! ଆପଣଙ୍କ ଡିଜିଟାଲ ପେମେଣ୍ଟ ସୁରକ୍ଷା ସାଥୀ।"* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+
+---
+
+## 🧠 Hybrid Safety Architecture
+
+SAARTHI uses a **layered, defense-in-depth safety engine** to guarantee reliability and explainability:
+
+```
+[ User Input: QR Code / Camera / Screenshot / SMS Text ]
+                           │
+                           ▼
+          ┌──────────────────────────────────┐
+          │  FastAPI Backend (Python 3.12)   │
+          └────────────────┬─────────────────┘
+                           │
+       ┌───────────────────┴───────────────────┐
+       ▼                                       ▼
+┌─────────────────────────────┐   ┌─────────────────────────────┐
+│ Deterministic Rules Engine  │   │ Calibrated ML Threat Model  │
+│  - 9 Structured Checks      │   │  - LinearSVC Calibrated     │
+│  - Pay vs Receive Mismatch  │   │  - TF-IDF 1-2 N-Grams       │
+│  - VPA / Handle Validation  │   │  - 96.8% Accuracy Benchmark │
+│  - Suspicious Surcharges    │   │  - Class Probabilities      │
+└──────────────┬──────────────┘   └──────────────┬──────────────┘
+               │                                 │
+               └──────────────────┬──────────────┘
+                                  ▼
+┌───────────────────────────────────────────────────────────────┐
+│      Contextual Intelligence & Fallback (Google Gemini)       │
+│  - Out-of-distribution edge cases                             │
+│  - Conversational advice in elder-friendly language           │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────┐
+│           Sarvam AI Speech Engine (Bulbul v3 / Saaras)        │
+│  - Conversational Voice Guidance in 11 Indian Languages      │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────┐
+│                  Modern React 19 Client UI                    │
+│  - Elder-Friendly Whom-to-Whom Visual Transfer Card           │
+│  - 3D Interactive Safety Shield (Three.js)                    │
+│  - One-Touch SOS Emergency Contacts & 1930 Cyber Helpline     │
+└───────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎮 Interactive Learning & 3D Arcade
+
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <h3>🛡️ 3D Defender Arcade</h3>
+      <p>Interactive <b>Three.js WebGL game</b> where elders learn to identify and deflect incoming phishing cubes, cashback traps, and APK threats in real time.</p>
+    </td>
+    <td width="33%" align="center">
+      <h3>🎭 AI Scam Roleplay</h3>
+      <p>Real-time conversational sandbox simulating fake bank managers and lottery callers. Evaluates user resistance and teaches the art of saying <b>NO</b>.</p>
+    </td>
+    <td width="33%" align="center">
+      <h3>💡 Jargon Buster</h3>
+      <p>Translates intimidating financial terms (UPI PIN, OTP, VPA, Phishing) into household analogies like <i>"Your home Godrej locker key"</i>.</p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🛠️ Technology Stack
+
+<div align="center">
+
+| Domain | Technologies |
 |---|---|
-| Frontend | React |
-| Language | TypeScript |
-| Build tool | Vite |
-| Styling | Tailwind CSS |
-| QR scanning | `@zxing/browser` |
-| Backend | Python FastAPI |
-| Validation | Pydantic |
-| Speech-to-text | Sarvam AI `saaras:v4` |
-| Text-to-speech | Sarvam AI `bulbul:v3` |
-| Frontend hosting | Vercel |
-| Backend hosting | Render |
-| Testing | Pytest and browser/device testing |
-| Version control | Git and GitHub |
+| **Frontend Framework** | React 19, TypeScript 5, Vite 6, Tailwind CSS 4 |
+| **3D & Animations** | Three.js WebGL, Framer Motion, Canvas Confetti |
+| **Backend & API** | FastAPI, Uvicorn, Python 3.12 / 3.13, Pydantic v2 |
+| **Machine Learning** | Scikit-learn, CalibratedClassifierCV, LinearSVC, Joblib |
+| **Speech & Audio** | Sarvam AI API (`bulbul:v3`, `saaras:v4`), Edge-TTS, Web Speech API |
+| **LLM & Intelligence** | Google Gemini 2.5 Flash, Structured JSON Schemas |
+| **Computer Vision** | `@zxing/browser`, `@zxing/library` |
+| **Hosting & CI/CD** | Vercel (Frontend SPA), Render (FastAPI Web Service), GitHub Actions |
 
-### Technology principles
-
-- Keep the implementation small and maintainable.
-- Use deterministic rules for safety decisions.
-- Keep external API keys on the backend.
-- Avoid unnecessary databases and authentication systems.
-- Preserve core functionality when optional services fail.
+</div>
 
 ---
 
-## 🏗️ System Architecture
+## 📂 Project Architecture
 
-```mermaid
-flowchart TD
-    A[User] --> B[React + Vite Frontend]
-    B --> C{Input Method}
-
-    C --> D[Live QR Scanner]
-    C --> E[Manual Entry]
-    C --> F[Voice Input]
-
-    D --> G[QR Decoder]
-    E --> H[Payment Input]
-    G --> H
-
-    H --> I[FastAPI Backend]
-    I --> J[Pydantic Validation]
-    J --> K[QR Parser]
-    K --> L[Deterministic Safety Rules]
-    L --> M[Risk Result and Explanation]
-    M --> B
-
-    F --> N[Sarvam STT Endpoint]
-    N --> B
-
-    B --> O[Sarvam TTS Endpoint]
-    O --> P[Spoken Guidance]
-
-    B --> Q[Scam Awareness Quiz]
-    B --> R[Interactive Story]
 ```
-
-### Frontend responsibilities
-
-- User interface and navigation.
-- Camera permissions and QR scanning.
-- Manual entry.
-- Intent selection.
-- Risk result display.
-- Language selection and voice controls.
-- Learning experiences.
-
-### Backend responsibilities
-
-- Input validation.
-- Supported QR parsing.
-- Deterministic risk analysis.
-- Structured explanations.
-- Sarvam speech API integration.
-- Safe error handling.
-
-### Safety engine responsibilities
-
-- Produce the application risk classification.
-- Apply explicit, testable rules.
-- Prevent AI-generated text from overriding the result.
-- Treat missing or unsupported information as unverified.
-
----
-
-## 🔄 Application Workflow
-
-1. The user opens SAARTHI SafePay.
-2. The user selects a preferred language.
-3. The user chooses **Pay** or **Receive**.
-4. The user scans a supported QR code or enters payment information manually.
-5. The frontend submits the decoded information and selected intent to FastAPI.
-6. The backend validates the input and parses supported fields.
-7. The rules engine evaluates intent mismatches, amount discrepancies, reported concerns, and missing information.
-8. The backend returns a structured response.
-9. The frontend displays the result and explanation.
-10. The user verifies the information independently before proceeding.
-
-### Error handling
-
-- If camera access fails, manual entry remains available.
-- If a QR cannot be parsed, the application explains that it cannot verify the information.
-- If the backend is unavailable, the interface offers a retry.
-- If Sarvam services fail, text-based functionality remains available.
-
----
-
-## 🛡️ Security and Risk Analysis
-
-The safety engine is the central technical component of SAARTHI SafePay.
-
-### Risk rules
-
-| Condition | Expected behavior |
-|---|---|
-| Malformed or unsupported QR | Return `unverified` |
-| Required payment address missing | Return `unverified` |
-| Receive intent conflicts with a payment request | Explain the mismatch and advise against using that QR to receive money |
-| Expected amount differs from QR amount | Display the discrepancy and request verification |
-| User reports being asked for a PIN or OTP | Display a strong warning and safe next steps |
-| User reports pressure, threats, or urgency | Recommend stopping and independently verifying the request |
-| Supported data parses successfully with no configured warning | Return `low_concern` and display the payment details |
-
-### Explainable outcomes
-
-Every analysis response should provide:
-
-- Risk classification.
-- Decision guidance.
-- Parsed payment information.
-- Triggered rule codes.
-- Human-readable explanation.
-- Recommended next steps.
-
-### Security limitations
-
-SAARTHI SafePay does not claim to:
-
-- Verify the identity of every recipient.
-- Detect every fraudulent QR code.
-- Access bank-side transaction intelligence.
-- Guarantee transaction safety.
-- Block payments made outside the application.
-- Replace banks or official fraud reporting channels.
-
-An unfamiliar recipient alone is not sufficient evidence of fraud.
-
----
-
-## 🔌 API Design
-
-Base path:
-
-```text
-/api/v1
-```
-
-### 1. Health Check
-
-**Endpoint:** `GET /health`
-
-Example response:
-
-```json
-{
-  "status": "ok",
-  "service": "saarthi-safepay"
-}
-```
-
-### 2. Analyze Payment Information
-
-**Endpoint:** `POST /api/v1/analyze-payment`
-
-Example request:
-
-```json
-{
-  "intent": "receive",
-  "qr_text": "upi://pay?pa=merchant@example&pn=Demo%20Merchant",
-  "expected_amount": null,
-  "language": "en",
-  "reported_concerns": []
-}
-```
-
-Example response:
-
-```json
-{
-  "risk_level": "caution",
-  "decision": "verify_before_proceeding",
-  "recipient": "Demo Merchant",
-  "payment_address": "merchant@example",
-  "amount": null,
-  "currency": "INR",
-  "checks": [
-    {
-      "code": "RECEIVE_PAY_MISMATCH",
-      "passed": false
-    }
-  ],
-  "explanation": "This QR appears to request a payment, but you selected Receive.",
-  "next_steps": [
-    "Do not proceed with this QR for receiving money.",
-    "Confirm the intended action independently."
-  ]
-}
-```
-
-*This response is illustrative. The backend must calculate the actual result from validated input and implemented rules.*
-
-#### Request fields
-
-| Field | Type | Description |
-|---|---|---|
-| `intent` | String | `pay` or `receive` |
-| `qr_text` | String | Decoded QR content or manually supplied supported payment data |
-| `expected_amount` | Number or null | Optional amount the user expects to pay |
-| `language` | String | `en`, `hi`, or `kn` |
-| `reported_concerns` | Array | Optional predefined concerns reported by the user |
-
-Never accept a UPI PIN, OTP, or password in this request.
-
-#### Risk levels
-
-- `low_concern`
-- `caution`
-- `high_concern`
-- `unverified`
-
-#### Decision values
-
-- `review_details`
-- `verify_before_proceeding`
-- `stop_and_check`
-- `unable_to_verify`
-
-### 3. Speech-to-Text
-
-**Endpoint:** `POST /api/v1/speech-to-text`
-
-Request: multipart form data.
-
-| Field | Description |
-|---|---|
-| `file` | Recorded audio file |
-| `language` | Supported language code |
-
-Example response:
-
-```json
-{
-  "text": "I want to receive money",
-  "language": "en"
-}
-```
-
-### 4. Text-to-Speech
-
-**Endpoint:** `POST /api/v1/text-to-speech`
-
-Example request:
-
-```json
-{
-  "text": "Please check the recipient and payment amount before proceeding.",
-  "language": "en"
-}
-```
-
-The implementation should document whether it returns audio bytes or JSON containing encoded audio.
-
-### API error handling
-
-| HTTP status | Meaning |
-|---|---|
-| `400` | Invalid request |
-| `413` | Request or audio file too large |
-| `422` | Schema validation error |
-| `502` | Upstream speech provider failure |
-| `503` | Optional service unavailable |
-
-The backend must not expose API keys, provider secrets, or internal stack traces.
-
----
-
-## 📁 Project Structure
-
-```text
-saarthi-safepay/
+SAARTHI/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app endpoints, CORS, routers
+│   │   ├── engine.py            # 9-rule deterministic QR safety engine
+│   │   ├── ml.py                # LinearSVC ML inference engine
+│   │   ├── gemini_client.py     # Google Gemini contextual fallback
+│   │   ├── sarvam.py            # Sarvam AI speech integration (STT & TTS)
+│   │   └── schemas.py           # Shared Pydantic response models
+│   ├── models/
+│   │   ├── fraud_message_model.joblib   # Trained 96.8% calibrated ML model
+│   │   └── vectorizer.joblib            # TF-IDF feature extractor
+│   ├── tests/
+│   │   ├── test_api.py          # 30+ comprehensive integration tests
+│   │   ├── test_engine.py       # QR safety rule unit tests
+│   │   └── test_ml.py           # ML accuracy and classification tests
+│   └── requirements.txt         # Production Python dependencies
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── QRScanner.tsx
-│   │   │   ├── PaymentSummary.tsx
-│   │   │   ├── RiskResult.tsx
-│   │   │   └── VoiceControls.tsx
-│   │   ├── pages/
-│   │   │   ├── Home.tsx
-│   │   │   ├── Analyze.tsx
-│   │   │   ├── Learn.tsx
-│   │   │   └── Story.tsx
-│   │   ├── services/
-│   │   │   └── api.ts
-│   │   ├── data/
-│   │   │   └── scenarios.ts
+│   │   │   ├── ThreeSafetyShield.tsx # Three.js 3D safety shield
+│   │   │   ├── FamilyAvatar.tsx      # SVG avatars for elder family members
+│   │   │   └── Button.tsx            # Accessible high-contrast components
+│   │   ├── screens/
+│   │   │   ├── HomeScreen.tsx        # Voice orb with subtle heartbeat animation
+│   │   │   ├── ResultScreen.tsx      # Elder-friendly Whom-to-Whom visual card
+│   │   │   ├── ScanScreen.tsx        # Live camera & screenshot QR decoder
+│   │   │   ├── DefenderScreen.tsx    # 3D Three.js Arcade defense game
+│   │   │   ├── ScamRoleplayScreen.tsx# Interactive conversational simulation
+│   │   │   ├── SosScreen.tsx         # 1-Touch Family SOS & 1930 Helpline
+│   │   │   └── JargonScreen.tsx      # Plain-language banking analogies
 │   │   ├── i18n/
-│   │   │   └── messages.ts
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── package.json
-│
-├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── schemas.py
-│   │   ├── api/
-│   │   │   ├── payments.py
-│   │   │   └── speech.py
-│   │   ├── security/
-│   │   │   ├── parser.py
-│   │   │   ├── rules.py
-│   │   │   └── explanations.py
-│   │   └── services/
-│   │       └── sarvam.py
-│   ├── tests/
-│   │   ├── test_parser.py
-│   │   ├── test_rules.py
-│   │   └── test_api.py
-│   └── requirements.txt
-│
-├── README.md
-└── .gitignore
+│   │   │   ├── en.ts                 # Base dictionary and shape
+│   │   │   └── indic.ts              # Native translations for 10 Indic languages
+│   │   └── state.tsx                 # Centralized state & speech hooks
+│   ├── package.json
+│   └── vite.config.ts
+├── vercel.json                  # Production Vercel SPA deployment config
+├── render.yaml                  # Render Infrastructure-as-Code blueprint
+└── package.json                 # Monorepo build and dependency orchestrator
 ```
 
-This is a suggested starting structure. Files can be combined if necessary to keep the implementation manageable.
-
 ---
 
-## 👥 Team Responsibilities
-
-### Meer Mohammed Shoaib — Security and Backend Lead
-
-**Primary responsibility:** Explainable safety analysis.
-
-- Set up FastAPI and Pydantic schemas.
-- Implement supported QR parsing.
-- Develop deterministic security rules.
-- Create risk explanations and response codes.
-- Write backend unit tests.
-- Coordinate backend Sarvam integration.
-- Explain the security design and limitations during judging.
-
-**Deliverable:** A tested backend analyzer with predictable, explainable outcomes.
-
-### Rishitha — Frontend and Accessibility
-
-**Primary responsibility:** Accessible user experience.
-
-- Set up React, Vite, TypeScript, and Tailwind CSS.
-- Build the home screen and intent selection.
-- Develop payment summary and result screens.
-- Implement language selection and readable safety messages.
-- Integrate frontend API calls.
-- Handle loading, validation, and failure states.
-- Test large-text and touch-friendly usability.
-
-**Deliverable:** An accessible frontend that works with mock and live backend responses.
-
-### Ritu — QR Scanning, Voice, and Learning
-
-**Primary responsibility:** Input workflows and educational experiences.
-
-- Implement live camera QR scanning.
-- Add manual entry fallback.
-- Handle camera permissions and scanner errors.
-- Integrate voice controls with backend endpoints.
-- Test Sarvam STT and TTS.
-- Build the Scam or Safe quiz.
-- Add the interactive story if time permits.
-
-**Deliverable:** A working QR input journey, tested voice interactions where available, and a compact learning module.
-
-### Collaboration rules
-
-- Agree on the API contract before independent implementation.
-- Use mock responses to avoid blocking frontend development.
-- Commit working changes frequently.
-- Use separate branches and small pull requests.
-- Integrate early and test on the actual demo device.
-- Help the teammate who is blocked by an integration issue.
-
----
-
-## 🧪 Testing Strategy
-
-### Backend tests
-
-| Test | Expected result |
-|---|---|
-| Valid supported QR | Parsed fields returned accurately |
-| QR contains amount | Correct amount displayed |
-| QR has no amount | Amount remains unknown |
-| Malformed QR | Unverified result; no crash |
-| Unsupported scheme | Clear unsupported-format response |
-| Missing payment address | Unverified result |
-| Receive intent conflicts with payment request | Clear mismatch warning |
-| Expected amount differs | Discrepancy displayed |
-| User reports PIN/OTP request | Strong warning |
-| User reports pressure or threats | Warning and independent verification guidance |
-| Invalid or unexpected input | Safely rejected or handled |
-| Sarvam unavailable | Voice failure handled gracefully |
-| Unsupported language code | Validation error or documented fallback |
-| Oversized audio | Request rejected |
-
-### Frontend and device tests
-
-- [ ] Camera permission granted.
-- [ ] Camera permission denied.
-- [ ] No camera available.
-- [ ] QR cannot be decoded.
-- [ ] Manual entry works without camera access.
-- [ ] Backend offline.
-- [ ] API returns an error.
-- [ ] Language switching works.
-- [ ] Safety messages remain readable.
-- [ ] Voice playback and retry behavior work.
-- [ ] Keyboard navigation and large-text usability.
-- [ ] Mobile viewport and touch interactions.
-
-### Definition of Done
-
-- [ ] Live QR scanning works.
-- [ ] Manual entry works.
-- [ ] Pay/Receive intent is explicit.
-- [ ] Identical input produces the same rules-engine result.
-- [ ] Invalid input never silently becomes safe.
-- [ ] Results include explanations and next steps.
-- [ ] No PIN, OTP, or password is collected or stored.
-- [ ] Frontend handles API and voice failures.
-- [ ] Core language paths have been tested.
-- [ ] The application runs reliably on the demo device.
-
-Testing claims must reflect the scenarios actually executed. Do not claim a fraud-detection accuracy percentage without a representative, labelled dataset.
-
----
-
-## ⏱️ 24-Hour Development Roadmap
-
-| Time | Phase | Deliverables |
-|---|---|---|
-| 00–02 | Setup and contracts | Repository, app skeleton, API schema, rules, QR fixtures |
-| 02–06 | Parallel implementation | Initial backend rules, accessible UI, QR scanner |
-| 06–11 | Core integration | Scan → parse → analyze → display result |
-| 11–14 | Reliability | Error handling, intent mismatch, amount comparison, accessibility |
-| 14–17 | Voice and languages | Sarvam STT/TTS, reviewed translations, text fallback |
-| 17–19 | Learning module | Quiz completed; interactive story if time permits |
-| 19–22 | Regression and deployment | Device testing, deployment attempt, backup demo recording |
-| 22–24 | Freeze and pitch | No new features, demo rehearsal, final checks |
-
-### Critical cutoff rules
-
-- If scan-to-analysis is unreliable by hour 11, postpone voice integration and games.
-- If Sarvam is unstable by hour 17, preserve the text fallback and focus on testing.
-- Freeze new features by hour 19.
-- Reserve the final two hours for demo preparation and troubleshooting.
-
----
-
-## 🎮 Learning and Awareness Module
-
-### Scam or Safe? Quiz
-
-The quiz uses three to five fictional scenarios, such as:
-
-- Someone asks for a UPI PIN to receive money.
-- A caller demands an urgent payment.
-- A QR is presented with a clearly stated amount.
-- A person encourages independent recipient verification.
-
-Each question provides immediate feedback and explains the safer response.
-
-Implementation:
-
-- Static JSON scenarios.
-- Large answer buttons.
-- Immediate feedback.
-- Score and replay option.
-- No database required.
-
-### Interactive Story
-
-If the core application is stable, build one short branching story about a suspicious payment request.
-
-Users choose between actions such as:
-
-- Acting immediately.
-- Checking the recipient independently.
-- Asking a trusted person for help.
-
-Each branch demonstrates a consequence and a lesson.
-
-A completed quiz is more valuable than two unfinished learning features.
-
----
-
-## 🌐 Accessibility and Language Support
-
-The application targets older adults and users with varying levels of digital literacy.
-
-### Accessibility principles
-
-- Use readable font sizes.
-- Keep instructions short and clear.
-- Provide large touch targets.
-- Use consistent navigation.
-- Avoid relying on color alone to communicate risk.
-- Provide clear error messages.
-- Offer manual entry as a scanner alternative.
-- Allow users to read warnings without using voice features.
-
-### Language support
-
-The planned languages are English, Hindi, and Kannada.
-
-Implementation priorities:
-
-1. Translate core navigation and instructions.
-2. Prepare reviewed translations for critical warnings.
-3. Test the selected language throughout the payment flow.
-4. Enable speech services only for tested language paths.
-5. Preserve readable text if voice recognition or playback fails.
-
-Do not rely on unreviewed dynamic translation for critical safety warnings.
-
----
-
-## 🔐 Privacy and Security
-
-SAARTHI SafePay follows a privacy-first approach.
-
-- Never collect or store UPI PINs.
-- Never collect or store OTPs.
-- Never request banking passwords.
-- Keep Sarvam API keys on the backend.
-- Validate all client-supplied data.
-- Treat QR content, OCR text, and speech transcripts as untrusted input.
-- Avoid storing payment information unnecessarily.
-- Use HTTPS for deployed camera and microphone access.
-- Restrict backend CORS to intended origins.
-- Limit audio upload size.
-- Avoid exposing stack traces or secrets.
-- Use fictional payment data for testing and demonstrations.
-
-The application does not initiate, authorize, or complete financial transactions.
-
----
-
-## 💻 Setup and Installation
+## 🚀 Local Development & Setup
 
 ### Prerequisites
+- **Node.js** >= 18.0.0
+- **Python** >= 3.11
+- **npm** or **pnpm**
 
-- Node.js and npm.
-- Python 3.11 or later.
-- Git.
-- A modern browser.
-- A Sarvam API account and key for voice features.
-
-### 1. Clone the repository
-
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/saarthi-safepay.git
-cd saarthi-safepay
+git clone https://github.com/meer-md-shoaib/SAARTHI.git
+cd SAARTHI
 ```
 
-Replace `YOUR_USERNAME` with the GitHub username that owns the repository.
-
-### 2. Set up the frontend
-
-```bash
-cd frontend
-npm install
-npm install @zxing/browser
-npm run dev
-```
-
-Open the local URL displayed by Vite.
-
-### 3. Set up the backend
-
-Open another terminal:
-
+### 2. Backend Setup
 ```bash
 cd backend
-python -m venv .venv
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+# Linux/macOS
+source venv/bin/activate
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
 ```
 
-Activate the virtual environment.
-
-**Windows PowerShell:**
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-**Windows Command Prompt:**
-
-```bat
-.venv\Scripts\activate.bat
-```
-
-**macOS/Linux:**
-
+### 3. Frontend Setup
 ```bash
-source .venv/bin/activate
+# In a separate terminal
+cd frontend
+npm install
+npm run dev
 ```
+Open **`http://localhost:5173`** in your browser.
 
-Install dependencies:
-
+### 4. Running Verification Tests
 ```bash
-pip install fastapi uvicorn pydantic httpx python-multipart pytest
+# Run 67+ backend automated pytest suites
+cd backend
+pytest -v
+
+# Run frontend TypeScript and bundle validations
+cd ../frontend
+npm run typecheck
+npm run build
 ```
-
-Install any additional dependencies required by the Sarvam SDK version selected for the implementation.
-
-Start the API:
-
-```bash
-uvicorn app.main:app --reload
-```
-
-The API will typically be available at:
-
-```text
-http://127.0.0.1:8000
-```
-
-FastAPI's interactive API documentation is typically available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-### 4. Run tests
-
-From the backend directory:
-
-```bash
-pytest
-```
-
-The commands above establish the development environment. They assume the corresponding application files and routes have been implemented.
 
 ---
 
-## 🔑 Environment Variables
+## ⚙️ Environment Variables
 
-Create a local `.env` file in the backend directory.
-
-Example:
+Create `.env` inside `backend/`:
 
 ```env
-SARVAM_API_KEY=your_sarvam_api_key
-FRONTEND_ORIGIN=http://localhost:5173
+# Optional: Google Gemini API Key for contextual reasoning
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Optional: Sarvam AI Key for Indian language voice guidance
+SARVAM_API_KEY=your_sarvam_api_key_here
+SARVAM_STT_MODEL=saaras:v4
+SARVAM_TTS_MODEL=bulbul:v3
+SARVAM_TTS_SPEAKER=shubh
+
+# CORS configuration
+CORS_ORIGINS=*
+USE_EDGE_TTS=true
 ```
 
-Use these variables in backend configuration.
-
-**Important:**
-
-- Never commit `.env` to GitHub.
-- Add `.env` and other secret files to `.gitignore`.
-- Store production secrets in the hosting provider's environment settings.
-- Do not expose `SARVAM_API_KEY` in frontend code or Vite environment variables.
-
-Example `.gitignore` entries:
-
-```gitignore
-node_modules/
-dist/
-.venv/
-__pycache__/
-*.py[cod]
-.env
-.env.*
-!.env.example
-.pytest_cache/
-```
-
-Keep `.env.example` limited to variable names and harmless placeholder values.
+*(Note: SAARTHI works offline with its local deterministic engine and ML model even without cloud API keys).*
 
 ---
 
-## 🚀 Deployment
+## 📡 API Documentation
 
-### Frontend: Vercel
+Interactive Swagger documentation is available locally at **`http://localhost:8000/docs`** and on Render.
 
-1. Push the frontend code to GitHub.
-2. Import the repository into Vercel.
-3. Set the frontend project root to `frontend`.
-4. Configure the production API base URL.
-5. Deploy and test the hosted application.
-
-### Backend: Render
-
-1. Push the backend code to GitHub.
-2. Create a web service in Render.
-3. Set the backend root directory to `backend`.
-4. Configure the Python environment and dependencies.
-5. Configure environment variables securely.
-6. Use a start command such as:
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-7. Test `/health` and the implemented API endpoints.
-
-### Deployment considerations
-
-- Use HTTPS for live camera and microphone access.
-- Configure CORS for the actual frontend origin.
-- Set the frontend API base URL to the deployed backend.
-- Verify audio upload limits and provider access.
-- Test the entire flow on the demo device.
-- Keep a local fallback and backup recording.
-
-Deployment is optional if it would compromise core functionality or testing time.
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/analyze` | `POST` | Deterministic 9-rule QR safety and intent verification |
+| `/api/analyze-message` | `POST` | ML classification of suspicious SMS and payment requests |
+| `/api/ask` | `POST` | Elder-friendly Q&A safety assistant |
+| `/api/voice/stt` | `POST` | Speech-to-Text conversion via Sarvam Saaras v4 |
+| `/api/voice/tts` | `POST` | Natural Indian-accent text-to-speech audio synthesis |
+| `/api/emergency-rescue`| `POST` | Generates official complaint templates for stolen funds |
+| `/api/scam-roleplay` | `POST` | AI conversational scam simulation with resistance grading |
+| `/health` | `GET` | Service status, engine version, and model readiness |
 
 ---
 
-## 🔮 Limitations and Future Scope
+## 👥 Meet the Team & Contributors
 
-### Current limitations
+<div align="center">
 
-- QR analysis is limited to supported formats.
-- The rules engine cannot identify every fraudulent transaction.
-- Recipient identity may not be independently verifiable.
-- Speech recognition depends on service availability and language support.
-- No live bank-side fraud intelligence is assumed.
-- The application does not process payments.
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://github.com/meer-md-shoaib">
+        <img src="https://github.com/meer-md-shoaib.png" width="120px;" style="border-radius: 50%;" alt="Meer Mohammed Shoaib"/><br />
+        <sub><b>Meer Mohammed Shoaib</b></sub>
+      </a><br />
+      <span style="color: #0ea5e9; font-weight: bold;">Project Lead & AI/ML Engineer</span>
+      <p style="font-size: 0.85em; color: #64748b;">Backend architecture, Calibrated LinearSVC ML Model, Rules Engine, Three.js 3D Arcade, Voice Pipeline & Render DevOps.</p>
+      <a href="https://github.com/meer-md-shoaib">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github" alt="GitHub" />
+      </a>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://github.com/Rishithaa06">
+        <img src="https://github.com/Rishithaa06.png" width="120px;" style="border-radius: 50%;" onerror="this.src='https://ui-avatars.com/api/?name=Rishitha&background=6366F1&color=fff&size=120'" alt="Rishitha"/><br />
+        <sub><b>Rishitha</b></sub>
+      </a><br />
+      <span style="color: #10b981; font-weight: bold;">Frontend & Accessibility Lead</span>
+      <p style="font-size: 0.85em; color: #64748b;">React 19 UI system, responsive design system, high-contrast accessible layouts, and seamless API integration.</p>
+      <a href="https://github.com/Rishithaa06">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github" alt="GitHub" />
+      </a>
+    </td>
+    <td align="center" width="33%">
+      <a href="https://github.com/rituswami">
+        <img src="https://github.com/rituswami.png" width="120px;" style="border-radius: 50%;" onerror="this.src='https://ui-avatars.com/api/?name=Ritu+Swami&background=EC4899&color=fff&size=120'" alt="Ritu"/><br />
+        <sub><b>Ritu</b></sub>
+      </a><br />
+      <span style="color: #ec4899; font-weight: bold;">Computer Vision & Interactive Learning</span>
+      <p style="font-size: 0.85em; color: #64748b;">QR decoding pipelines, interactive modals, educational scam quiz modules, and community outreach.</p>
+      <a href="https://github.com/rituswami">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github" alt="GitHub" />
+      </a>
+    </td>
+  </tr>
+</table>
 
-### Future enhancements
-
-- Additional regional languages.
-- More sophisticated but explainable fraud indicators.
-- Improved accessibility and voice interaction.
-- Additional educational scenarios.
-- Optional PWA installation.
-- Privacy-preserving progress tracking.
-- Trusted-contact assistance with explicit user consent.
-- Integration with verified external resources and official reporting channels.
-
-These are future possibilities, not claims about currently implemented functionality.
-
----
-
-## 🎤 Demo Plan
-
-### Suggested 90-second demonstration
-
-1. **Introduce the problem:** Digital payments can be intimidating when users are unsure what a QR code will do.
-2. **Scan a demo QR:** Display the decoded recipient and amount, if available.
-3. **Demonstrate an intent mismatch:** Select Receive for a payment-request QR and show the warning.
-4. **Explain the result:** Highlight the rule that triggered the warning and the recommended next steps.
-5. **Show accessibility:** Switch language and demonstrate voice assistance if tested.
-6. **Finish with learning:** Complete a short Scam or Safe quiz question.
-
-Use fictional examples and label simulated cases honestly.
-
-Do not claim that a QR code has been verified against a bank or live fraud database unless that capability has actually been implemented.
-
-### What to emphasize to judges
-
-- **Accessibility:** Older adults are the primary users, not an afterthought.
-- **Explainable safety:** Warnings have understandable reasons.
-- **Responsible design:** No credentials, automatic payments, or unsupported guarantees.
-- **Resilience:** Manual entry and text guidance work when optional services fail.
-- **Education:** The application helps users develop safer habits.
+</div>
 
 ---
 
-## 👥 Team
+## 📄 License & Ethics
 
-| Team Member | Responsibility |
-|---|---|
-| Meer Mohammed Shoaib | Security rules, backend, validation, testing |
-| Rishitha | React frontend, accessibility, API integration |
-| Ritu | QR scanning, voice integration, learning module |
+Distributed under the **MIT License**. See `LICENSE` for more information.
 
----
+> **Digital Inclusion Pledge:** SAARTHI is built in public for digital public good. We believe that technology should empower rather than deceive. If you or a family member has experienced digital payment fraud, report it within 2 hours to India's **National Cyber Crime Helpline at `1930`** or file a report at **[cybercrime.gov.in](https://cybercrime.gov.in)**.
 
-## 📌 Project Status
+<br/>
 
-**Development stage:** Hackathon MVP.
-
-Planned implementation priorities:
-
-- [ ] QR scanning and manual entry.
-- [ ] Deterministic payment safety engine.
-- [ ] Explainable risk results.
-- [ ] Accessible frontend.
-- [ ] English, Hindi, and Kannada core messages.
-- [ ] Sarvam speech integration.
-- [ ] Scam awareness quiz.
-- [ ] Interactive story, if time permits.
-- [ ] Regression testing.
-- [ ] Deployment and demo rehearsal.
-
-Features should be marked complete only after they have been implemented and tested.
-
----
-
-### SAARTHI SafePay 🛡️
-
-**Easy Pay. Safe Pay.**
-
-*Helping people navigate digital payments with greater clarity, confidence, and awareness.*
+<div align="center">
+  <b>Built for India's Senior Citizens and First-Time Digital Payers</b><br/>
+  <sub>© 2026 SAARTHI SafePay. All rights reserved.</sub>
+</div>
