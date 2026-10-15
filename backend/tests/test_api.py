@@ -643,3 +643,24 @@ def test_emergency_rescue_endpoint(client: TestClient) -> None:
     assert "4,500" in data["complaint_template"]
     assert "fraud@okaxis" in data["complaint_template"]
 
+
+def test_scan_qr_endpoint(client: TestClient) -> None:
+    for endpoint in ("/api/scan-qr", "/api/v1/scan-qr"):
+        resp = client.post(
+            endpoint,
+            json={
+                "raw_text": CLEAN_QR,
+                "intention": "pay",
+                "expected_amount": 250,
+                "language": "en",
+                "source": "camera",
+            },
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["outcome"] == "low_concern"
+        assert body["extracted"]["payee_vpa"] == "green.kiran@okhdfcbank"
+        assert body["extracted"]["amount"] == 250.0
+
+
+

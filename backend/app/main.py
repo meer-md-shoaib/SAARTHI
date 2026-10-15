@@ -118,6 +118,18 @@ async def voice_config() -> VoiceConfigResponse:
 # --- Security engine ---------------------------------------------------------
 
 @app.post(
+    "/api/scan-qr",
+    response_model=AnalyzePaymentResponse,
+    responses={422: {"description": "Invalid input"}},
+    tags=["analysis"],
+)
+@app.post(
+    "/api/v1/scan-qr",
+    response_model=AnalyzePaymentResponse,
+    responses={422: {"description": "Invalid input"}},
+    tags=["analysis"],
+)
+@app.post(
     "/api/v1/analyze-payment",
     response_model=AnalyzePaymentResponse,
     responses={422: {"description": "Invalid input"}},

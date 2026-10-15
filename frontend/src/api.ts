@@ -92,6 +92,14 @@ function jsonInit(payload: unknown): RequestInit {
 export const api = {
   health: () => request<HealthInfo>("/health"),
 
+  scanQr: async (payload: AnalyzePayload) => {
+    try {
+      return await request<AnalyzeResult>("/api/scan-qr", jsonInit(payload));
+    } catch {
+      return await request<AnalyzeResult>("/api/v1/analyze-payment", jsonInit(payload));
+    }
+  },
+
   analyze: (payload: AnalyzePayload) =>
     request<AnalyzeResult>("/api/v1/analyze-payment", jsonInit(payload)),
 

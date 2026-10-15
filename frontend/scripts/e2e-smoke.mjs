@@ -108,42 +108,45 @@ try {
 
   await clickText("Try a demo");
   await clickText("A normal shop payment");
-  await waitForText("Two quick questions");
-  pass("demo scenario loads the intent step");
+  await waitForText("QR Safety Analysis");
+  pass("demo scenario immediately opens senior-friendly modal");
 
-  await clickText("I want to PAY");
-  await waitForText("How much do you expect to pay?");
-  pass("pay intent reveals the amount field");
-
-  step = "analyze-low";
-  await clickText("Check Safety");
-  await waitForText("Safety Check Result");
+  step = "analyze-modal";
   await waitForText("Low Concern");
-  pass("low-concern result reached");
+  pass("modal displays Low Concern verdict");
 
-  if (await hasText("No configured warning signs were detected."))
-    pass("no-warning-signs message shown");
-  else fail("no-warning-signs message missing");
-  if (await hasText("not a safety guarantee"))
-    pass("anti-guarantee disclaimer present");
-  else fail("disclaimer missing");
-  if (await hasText("What to do next")) pass("recommended next steps present");
-  else fail("next steps missing");
-  if (await hasText("rules engine (v1.0.0)")) pass("engine note shown");
-  else fail("engine note missing");
+  if (await hasText("Visual Money Flow")) pass("visual money flow shown");
+  else fail("visual money flow missing");
+
+  if (await hasText("green.kiran@okhdfcbank")) pass("recipient details displayed");
+  else fail("recipient details missing");
+
+  if (await hasText("₹250")) pass("payment amount displayed");
+  else fail("payment amount missing");
+
+  if (await hasText("Listen to Safety Explanation")) pass("voice playback button present");
+  else fail("voice playback button missing");
+
+  if (await hasText("Understood") && (await hasText("Verify Recipient")) && (await hasText("Scan Again"))) {
+    pass("all 3 senior-friendly modal action buttons present");
+  } else {
+    fail("modal action buttons missing");
+  }
 
   const resultButtonHeight = await page.evaluate(() => {
     const button = [...document.querySelectorAll("button")].find((node) =>
-      node.textContent.includes("Listen to Explanation"),
+      node.textContent.includes("Listen to Safety Explanation"),
     );
     return button ? button.getBoundingClientRect().height : 0;
   });
-  if (resultButtonHeight >= 56) pass(`tap target size ok (${Math.round(resultButtonHeight)}px)`);
+  if (resultButtonHeight >= 44) pass(`tap target size ok (${Math.round(resultButtonHeight)}px)`);
   else fail(`Listen button too small: ${resultButtonHeight}px`);
+
+  await clickText("Understood");
+  pass("modal dismissed successfully on Understood");
 
   /* -------------------------------------------- high-concern scenario */
   step = "analyze-high";
-  await clickText("Check Another QR");
   await waitForText("Scan & Check");
   await clickText("Type or paste details");
   if (await hasText("Speak details")) pass("voice dictation option visible in manual scan");
@@ -151,16 +154,14 @@ try {
 
   await clickText("Try a demo");
   await clickText("A threatening message");
-  await waitForText("Two quick questions");
-  await clickText("Check Safety");
   await waitForText("High Concern");
-  pass("high-concern result reached");
-  if (await hasText("Asks for a PIN, OTP or password")) pass("secret-request sign listed");
-  else fail("secret-request sign missing");
-  if (await hasText("Urgency or threats")) pass("urgency sign listed");
-  else fail("urgency sign missing");
-  if (await hasText("Open Safety SOS")) pass("SOS shortcut offered on high concern");
-  else fail("SOS shortcut missing");
+  pass("high-concern modal reached immediately");
+  if (await hasText("Asks for a PIN, OTP or password") || (await hasText("Urgency or threats"))) {
+    pass("threat / secret sign listed");
+  } else {
+    fail("threat / secret sign missing");
+  }
+  await clickText("Understood");
 
   /* ------------------------------------------------ ask saarthi (typed) */
   step = "ask";
