@@ -1,4 +1,4 @@
-import { en, type Dict } from "../i18n";
+import { en, type Dict } from "./en";
 
 function deepMerge<T>(base: T, update: any): T {
   if (!update) return base;

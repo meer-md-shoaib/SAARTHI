@@ -3,8 +3,9 @@
   "private": true,
   "version": "2.0.0",
   "scripts": {
+    "postinstall": "npm --prefix frontend install",
     "dev": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && node -e \"const fs=require('fs'); fs.rmSync('dist', {recursive:true,force:true}); fs.cpSync('frontend/dist', 'dist', {recursive:true});\"",
     "preview": "npm --prefix frontend run preview",
     "typecheck": "npm --prefix frontend run typecheck"
   }
