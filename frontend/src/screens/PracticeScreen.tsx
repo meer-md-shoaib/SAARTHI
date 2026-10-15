@@ -13,19 +13,20 @@ import { BigButton } from "../components/Button";
 import { Banner, Card, ProgressBar } from "../components/bits";
 import { ThreeSafetyShield } from "../components/ThreeSafetyShield";
 import { useApp, useNav } from "../state";
+import { tr } from "../lib/localize";
 
 interface PracticeScenario {
   id: string;
-  category: { en: string; hi: string; kn: string };
+  category: Record<string, string>;
   icon: string;
-  title: { en: string; hi: string; kn: string };
-  story: { en: string; hi: string; kn: string };
+  title: Record<string, string>;
+  story: Record<string, string>;
   previewSnippet: string;
   options: {
     id: string;
-    text: { en: string; hi: string; kn: string };
+    text: Record<string, string>;
     correct: boolean;
-    explanation: { en: string; hi: string; kn: string };
+    explanation: Record<string, string>;
   }[];
 }
 
@@ -256,9 +257,9 @@ export function PracticeScreen() {
         origin: { y: 0.65 },
         colors: ["#2dd4bf", "#f59e0b", "#10b981"],
       });
-      speakIfOn(opt.explanation[uiLang]);
+      speakIfOn(tr(opt.explanation, uiLang));
     } else if (opt) {
-      speakIfOn(opt.explanation[uiLang]);
+      speakIfOn(tr(opt.explanation, uiLang));
     }
   };
 
@@ -390,14 +391,14 @@ export function PracticeScreen() {
             </span>
             <div>
               <span className="rounded-md bg-navy/5 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-navy/70">
-                {scenario.category[uiLang]}
+                {tr(scenario.category, uiLang)}
               </span>
-              <h2 className="text-xl font-extrabold text-navy">{scenario.title[uiLang]}</h2>
+              <h2 className="text-xl font-extrabold text-navy">{tr(scenario.title, uiLang)}</h2>
             </div>
           </div>
           <button
             type="button"
-            onClick={() => speakIfOn(`${scenario.title[uiLang]}. ${scenario.story[uiLang]}`)}
+            onClick={() => speakIfOn(`${tr(scenario.title, uiLang)}. ${tr(scenario.story, uiLang)}`)}
             className="rounded-full p-2 text-navy/60 hover:bg-navy/5 hover:text-navy"
             title="Listen aloud"
           >
@@ -405,7 +406,7 @@ export function PracticeScreen() {
           </button>
         </div>
 
-        <p className="text-lg leading-relaxed text-navy/90">{scenario.story[uiLang]}</p>
+        <p className="text-lg leading-relaxed text-navy/90">{tr(scenario.story, uiLang)}</p>
 
         {/* Realistic snippet box */}
         <div className="rounded-2xl border border-navy/15 bg-sand/40 p-3 font-mono text-sm text-navy/85 break-all shadow-inner">
@@ -451,7 +452,7 @@ export function PracticeScreen() {
                     {option.id.toUpperCase()}
                   </span>
                   <span className="flex-1 text-base sm:text-lg leading-snug">
-                    {option.text[uiLang]}
+                    {tr(option.text, uiLang)}
                   </span>
                   {iconElement}
                 </button>
@@ -470,7 +471,7 @@ export function PracticeScreen() {
                 ? (uiLang === "hi" ? "बिल्कुल सही निर्णय!" : uiLang === "kn" ? "ಸರಿಯಾದ ನಿರ್ಧಾರ!" : "Safe Decision!")
                 : (uiLang === "hi" ? "सावधान — यह एक जाल है!" : uiLang === "kn" ? "ಎಚ್ಚರಿಕೆ — ಇದು ಮೋಸದ ಬಲೆ!" : "Warning — Scam Trap!")}
             >
-              <p className="text-base sm:text-lg">{chosen.explanation[uiLang]}</p>
+              <p className="text-base sm:text-lg">{tr(chosen.explanation, uiLang)}</p>
             </Banner>
 
             <div className="pt-2">

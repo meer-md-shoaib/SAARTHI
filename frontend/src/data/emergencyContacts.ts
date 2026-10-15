@@ -5,12 +5,14 @@
  * and direct access to India's National Cyber Crime Reporting Portal (1930 / cybercrime.gov.in).
  */
 
-export type LanguageCode = "en" | "hi" | "kn";
+import type { Lang } from "../types";
+
+export type LanguageCode = Lang | string;
 
 export interface EmergencyContact {
   id: string;
-  name: Record<LanguageCode, string>;
-  relation: Record<LanguageCode, string>;
+  name: Record<string, string>;
+  relation: Record<string, string>;
   phone: string;
   avatarRole: "son" | "wife" | "grandson" | "granddaughter";
   badgeBg: string;

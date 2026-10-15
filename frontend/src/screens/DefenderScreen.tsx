@@ -15,18 +15,19 @@ import { BigButton } from "../components/Button";
 import { Banner, Card, ProgressBar } from "../components/bits";
 import { ThreeSafetyShield } from "../components/ThreeSafetyShield";
 import { useApp, useNav } from "../state";
+import { tr } from "../lib/localize";
 
 interface ThreatWave {
   id: string;
   type: "scam" | "legit";
-  category: { en: string; hi: string; kn: string };
-  title: { en: string; hi: string; kn: string };
-  incomingText: { en: string; hi: string; kn: string };
+  category: Record<string, string>;
+  title: Record<string, string>;
+  incomingText: Record<string, string>;
   meshColor: number;
   glowColor: number;
   shape: "cube" | "pyramid" | "sphere" | "octahedron";
-  explanation: { en: string; hi: string; kn: string };
-  goldenRule: { en: string; hi: string; kn: string };
+  explanation: Record<string, string>;
+  goldenRule: Record<string, string>;
 }
 
 const DEFENDER_WAVES: ThreatWave[] = [
@@ -507,7 +508,7 @@ export function DefenderScreen() {
         />
         <div className="mt-1 flex justify-between text-xs font-bold text-navy/70">
           <span>{uiLang === "hi" ? `खतरा लहर ${waveIndex + 1}/${DEFENDER_WAVES.length}` : `Threat Wave ${waveIndex + 1}/${DEFENDER_WAVES.length}`}</span>
-          <span className="uppercase tracking-wider">{currentWave.category[uiLang]}</span>
+          <span className="uppercase tracking-wider">{tr(currentWave.category, uiLang)}</span>
         </div>
       </div>
 
@@ -526,10 +527,10 @@ export function DefenderScreen() {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-navy/10 px-3 py-0.5 text-xs font-extrabold text-navy">
               {currentWave.shape.toUpperCase()} THREAT VECTOR
             </span>
-            <span className="text-sm font-extrabold text-navy/80">{currentWave.title[uiLang]}</span>
+            <span className="text-sm font-extrabold text-navy/80">{tr(currentWave.title, uiLang)}</span>
           </div>
           <p className="mt-2 text-lg font-bold leading-relaxed text-navy">
-            "{currentWave.incomingText[uiLang]}"
+            "{tr(currentWave.incomingText, uiLang)}"
           </p>
         </div>
       </Card>
@@ -571,7 +572,7 @@ export function DefenderScreen() {
                   : "Security Breach Warning!"
             }
           >
-            <p className="text-base font-bold">{currentWave.explanation[uiLang]}</p>
+            <p className="text-base font-bold">{tr(currentWave.explanation, uiLang)}</p>
           </Banner>
 
           <Card className="border-l-4 border-l-teal">
@@ -579,7 +580,7 @@ export function DefenderScreen() {
               {uiLang === "hi" ? "स्वर्ण नियम (Golden Rule)" : "Golden Rule"}
             </h3>
             <p className="mt-1 text-lg font-extrabold text-navy">
-              {currentWave.goldenRule[uiLang]}
+              {tr(currentWave.goldenRule, uiLang)}
             </p>
           </Card>
 

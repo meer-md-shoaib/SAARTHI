@@ -160,10 +160,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const lang: Lang = VALID_LANG_CODES.has(storedLang as Lang) ? (storedLang as Lang) : "en";
   const activeLangInfo = useMemo(() => getLanguageInfo(lang), [lang]);
 
-  // Gracefully fall back to English if UI strings are not yet translated for this Indic language
-  const uiLang: UILang = lang === "hi" || lang === "kn" ? lang : "en";
-  const t = STRINGS[uiLang];
-  const hasUiTranslation = lang === "en" || lang === "hi" || lang === "kn";
+  // Active UI language follows the selected language directly
+  const uiLang: UILang = lang;
+  const t = STRINGS[uiLang] ?? STRINGS.en;
+  const hasUiTranslation = true;
 
   const [rawScale, setScale] = usePersisted<number>("saarthi:scale", 0);
   const scale = rawScale >= 0 && rawScale <= 2 ? rawScale : 0;

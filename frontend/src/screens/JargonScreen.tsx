@@ -14,14 +14,15 @@ import { BigButton } from "../components/Button";
 import { Banner, Card } from "../components/bits";
 import { useApp, useNav } from "../state";
 import { playTtsBase64 } from "../lib/speech";
+import { tr } from "../lib/localize";
 
 interface JargonItem {
   term: string;
   badge: "secret" | "safe" | "warning";
-  title: { en: string; hi: string; kn: string };
-  simpleMeaning: { en: string; hi: string; kn: string };
-  analogy: { en: string; hi: string; kn: string };
-  rule: { en: string; hi: string; kn: string };
+  title: Record<string, string>;
+  simpleMeaning: Record<string, string>;
+  analogy: Record<string, string>;
+  rule: Record<string, string>;
 }
 
 const PRESET_JARGON: JargonItem[] = [
@@ -396,7 +397,7 @@ export function JargonScreen() {
               <span>{uiLang === "hi" ? "घरेलू उदाहरण (समझने के लिए):" : uiLang === "kn" ? "ದೈನಂದಿನ ಉದಾಹರಣೆ:" : "Real-world analogy:"}</span>
             </h3>
             <p className="mt-1.5 text-base text-navy/90 leading-relaxed italic">
-              "{activeItem.analogy[uiLang]}"
+              "{tr(activeItem.analogy, uiLang)}"
             </p>
           </div>
 
@@ -406,7 +407,7 @@ export function JargonScreen() {
               <span>{uiLang === "hi" ? "याद रखने योग्य नियम:" : uiLang === "kn" ? "ನೆನಪಿನಲ್ಲಿಡಬೇಕಾದ ನಿಯಮ:" : "Safety Golden Rule:"}</span>
             </h3>
             <p className="mt-1.5 text-base font-bold text-navy leading-relaxed">
-              {activeItem.rule[uiLang]}
+              {tr(activeItem.rule, uiLang)}
             </p>
           </div>
         </Card>

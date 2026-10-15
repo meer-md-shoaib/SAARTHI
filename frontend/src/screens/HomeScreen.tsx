@@ -120,8 +120,42 @@ export function HomeScreen() {
               />
             )}
 
-            <button
+            {/* Subtle organic heartbeat glow for idle microphone */}
+            {!isListening && !isSpeaking && !isProcessing && (
+              <motion.div
+                className="absolute h-28 w-28 sm:h-32 sm:w-32 rounded-full bg-teal/25 pointer-events-none"
+                animate={{
+                  scale: [1, 1.09, 1, 1.05, 1],
+                  opacity: [0.2, 0.45, 0.2, 0.35, 0.2],
+                }}
+                transition={{
+                  duration: 2.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  times: [0, 0.14, 0.28, 0.42, 1],
+                }}
+              />
+            )}
+
+            <motion.button
               type="button"
+              animate={
+                !isListening && !isSpeaking && !isProcessing
+                  ? {
+                      scale: [1, 1.035, 1, 1.02, 1],
+                    }
+                  : undefined
+              }
+              transition={
+                !isListening && !isSpeaking && !isProcessing
+                  ? {
+                      duration: 2.4,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      times: [0, 0.14, 0.28, 0.42, 1],
+                    }
+                  : undefined
+              }
               onClick={() => {
                 if (isListening) {
                   stopVoiceSession();
@@ -132,14 +166,14 @@ export function HomeScreen() {
                 }
               }}
               aria-label={isListening ? "Stop listening" : "Start speaking"}
-              className={`relative z-10 flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full shadow-lift transition-all transform active:scale-95 ${
+              className={`relative z-10 flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full shadow-lift transition-colors transform active:scale-95 ${
                 isListening
                   ? "bg-coral text-white ring-4 ring-coral/40"
                   : isSpeaking
                     ? "bg-teal text-white ring-4 ring-teal/40"
                     : isProcessing
                       ? "bg-navy/80 text-white animate-pulse"
-                      : "bg-gradient-to-tr from-teal-dark to-teal text-white hover:opacity-95"
+                      : "bg-gradient-to-tr from-teal-dark to-teal text-white hover:opacity-95 shadow-lg shadow-teal/20"
               }`}
             >
               {isListening ? (
@@ -149,7 +183,7 @@ export function HomeScreen() {
               ) : (
                 <Mic className="h-10 w-10 sm:h-12 sm:w-12" />
               )}
-            </button>
+            </motion.button>
           </div>
 
           {/* Action indicator labels */}

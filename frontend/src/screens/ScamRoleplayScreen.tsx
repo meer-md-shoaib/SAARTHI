@@ -17,6 +17,7 @@ import { BigButton } from "../components/Button";
 import { Banner, Card } from "../components/bits";
 import { useApp, useNav } from "../state";
 import { playTtsBase64 } from "../lib/speech";
+import { tr } from "../lib/localize";
 
 type ScenarioKey = "fake_bank" | "lottery_email" | "grandchild_emergency";
 
@@ -112,7 +113,7 @@ export function ScamRoleplayScreen() {
 
   const startScenario = (key: ScenarioKey) => {
     const sc = SCENARIOS.find((s) => s.key === key)!;
-    const openingMsg = sc.opening[uiLang];
+    const openingMsg = tr(sc.opening, uiLang);
 
     setActiveScenarioKey(key);
     setMessages([
@@ -284,14 +285,14 @@ export function ScamRoleplayScreen() {
                         <Icon className="h-6 w-6 text-coral-dark" />
                       </div>
                       <h2 className="text-xl font-extrabold text-navy group-hover:text-coral-dark">
-                        {sc.title[uiLang]}
+                        {tr(sc.title, uiLang)}
                       </h2>
                     </div>
                     <span className="rounded-full bg-navy/5 px-3 py-1 text-xs font-bold text-navy/70">
                       {uiLang === "hi" ? "प्रारंभ करें →" : uiLang === "kn" ? "ಪ್ರಾರಂಭಿಸಿ →" : "Start →"}
                     </span>
                   </div>
-                  <p className="text-base text-navy/80">{sc.subtitle[uiLang]}</p>
+                  <p className="text-base text-navy/80">{tr(sc.subtitle, uiLang)}</p>
                 </button>
               );
             })}
@@ -306,7 +307,7 @@ export function ScamRoleplayScreen() {
                 {activeScenario && <activeScenario.icon className="h-5 w-5" />}
               </div>
               <div>
-                <h2 className="text-lg font-extrabold text-navy">{activeScenario?.title[uiLang]}</h2>
+                <h2 className="text-lg font-extrabold text-navy">{activeScenario ? tr(activeScenario.title, uiLang) : ""}</h2>
                 <p className="text-xs text-navy/70">
                   {uiLang === "hi" ? "सावधानी: गोपनीय जानकारी बिल्कुल न दें।" : uiLang === "kn" ? "ಎಚ್ಚರಿಕೆ: ಗೌಪ್ಯ ಮಾಹಿತಿ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ." : "Mission: Stand your ground and refuse to share secret info."}
                 </p>
@@ -412,10 +413,10 @@ export function ScamRoleplayScreen() {
                     key={idx}
                     type="button"
                     disabled={loading}
-                    onClick={() => handleSendMessage(qr[uiLang])}
+                    onClick={() => handleSendMessage(tr(qr, uiLang))}
                     className="rounded-full border border-navy/20 bg-white px-3.5 py-1.5 text-xs sm:text-sm font-bold text-navy hover:border-teal hover:bg-teal/10 hover:text-teal-dark active:scale-95 transition-all"
                   >
-                    💬 {qr[uiLang]}
+                    💬 {tr(qr, uiLang)}
                   </button>
                 ))}
               </div>

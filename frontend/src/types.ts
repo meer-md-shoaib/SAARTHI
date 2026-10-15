@@ -145,7 +145,7 @@ export interface HealthInfo {
   };
 }
 
-export type UILang = "en" | "hi" | "kn";
+export type UILang = Lang;
 
 /** Localised text container used by demo/quiz/SOS/story content. */
 export interface Translated {

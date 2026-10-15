@@ -919,4 +919,18 @@ export const kn: Dict = {
   },
 };
 
-export const STRINGS: Record<UILang, Dict> = { en, hi, kn };
+import { te, ta, bn, mr, gu, ml, pa, od } from "./i18n/indic";
+
+export const STRINGS: Record<UILang, Dict> = {
+  en,
+  hi,
+  kn,
+  te,
+  ta,
+  bn,
+  mr,
+  gu,
+  ml,
+  pa,
+  od,
+};
