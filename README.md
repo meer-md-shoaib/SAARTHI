@@ -382,8 +382,8 @@ Interactive Swagger documentation is available locally at **`http://localhost:80
       </a>
     </td>
     <td align="center" width="33%">
-      <a href="https://github.com/Rishithaa06">
-        <img src="https://github.com/Rishithaa06.png" width="120px;" style="border-radius: 50%;" onerror="this.src='https://ui-avatars.com/api/?name=Rishitha&background=6366F1&color=fff&size=120'" alt="Rishitha"/><br />
+      <a href="https://github.com/rishita720925">
+        <img src="https://github.com/rishita720925.png" width="120px;" style="border-radius: 50%;" onerror="this.src='https://ui-avatars.com/api/?name=Rishitha&background=6366F1&color=fff&size=120'" alt="Rishitha"/><br />
         <sub><b>Rishitha</b></sub>
       </a><br />
       <span style="color: #10b981; font-weight: bold;">Frontend & Accessibility Lead</span>
