@@ -24,7 +24,7 @@
 
 <!-- Interactive Quick Action Buttons -->
 <p align="center">
-  <a href="https://saarthi-safepay.vercel.app">
+  <a href="https://saarthi-beta.vercel.app/">
     <img src="https://img.shields.io/badge/🚀_Launch_Live_App-Visit_Saarthi-teal?style=for-the-badge&labelColor=17324D" alt="Live App" />
   </a>
   &nbsp;&nbsp;
