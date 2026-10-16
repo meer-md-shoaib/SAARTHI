@@ -99,6 +99,11 @@ SECRET_PATTERNS: dict[str, list[re.Pattern[str]]] = {
         re.compile(r"(ಒಟಿಪಿ|ಪಿನ್|ಪಾಸ್‌ವರ್ಡ್).{0,30}(ಹಂಚಿಕೊಳ್ಳಿ|ನಮೂದಿಸಿ|ಕಳುಹಿಸಿ|ತಿಳಿಸಿ|ನೀಡಿ|ಅನ್‌ಬ್ಲಾಕ್|ಪಡೆಯಲು)", re.IGNORECASE),
         re.compile(r"(ಎಟಿಎಂ\s*ಪಿನ್|ಕಾರ್ಡ್\s*ಸಂಖ್ಯೆ.{0,20}ಸಿವಿವಿ)", re.IGNORECASE),
     ],
+    "ur": [
+        re.compile(r"(شیئر|بتائیں|دیں|بھیجیں|درج|ڈالیں|مانگیں|پوچھیں).{0,30}(او\s*ٹی\s*پی|پن|پاس\s*ورڈ|سی\s*وی\s*وی|خفیہ\s*کوڈ)", re.IGNORECASE),
+        re.compile(r"(او\s*ٹی\s*پی|پن|پاس\s*ورڈ|سی\s*وی\s*وی).{0,30}(بتائیں|دیں|بھیجیں|درج|شیئر|ان\s*بلاک|حاصل\s*کرنے|ضروری)", re.IGNORECASE),
+        re.compile(r"(اے\s*ٹی\s*ایم\s*پن|نیٹ\s*بینکنگ\s*پاس\s*ورڈ|کارڈ\s*نمبر.{0,20}سی\s*وی\s*وی)", re.IGNORECASE),
+    ],
 }
 
 # If any of these appear shortly BEFORE a secret term, the text is telling the
@@ -108,6 +113,7 @@ NEGATIONS: list[str] = [
     "shouldn't", "should not",
     "न करें", "न दें", "न बताएं", "नहीं", "कभी", "मत दें", "साझा न",
     "ಬೇಡಿ", "ಮಾಡಬೇಡಿ", "ನೀಡಬೇಡಿ", "ಹಂಚಿಕೊಳ್ಳಬೇಡಿ",
+    "مت دیں", "شیئر نہ کریں", "کبھی نہیں", "نہ بتائیں", "درج نہ کریں", "نہ دیں",
 ]
 
 # Urgency, threats and pressure.
@@ -183,6 +189,26 @@ URGENCY_PATTERNS: dict[str, list[re.Pattern[str]]] = {
         re.compile("ಖಾತೆ ಮುಚ್ಚಲಾಗಿದೆ"),
         re.compile("ಸೀಮಿತ ಸಮಯ"),
     ],
+    "ur": [
+        re.compile("فوری"),
+        re.compile("ابھی"),
+        re.compile("فورا"),
+        re.compile("جلدی"),
+        re.compile("آج ہی"),
+        re.compile("آخری وارننگ"),
+        re.compile("بلاک"),
+        re.compile("اکاؤنٹ بند"),
+        re.compile("معطل"),
+        re.compile("منجمد"),
+        re.compile("گرفتار"),
+        re.compile("پولیس"),
+        re.compile("جیل"),
+        re.compile("قانونی کارروائی"),
+        re.compile("کے وائی سی"),
+        re.compile("تصدیق کریں"),
+        re.compile("جرمانہ"),
+        re.compile("محدود وقت"),
+    ],
 }
 
 # Claims that the user will RECEIVE money (used to catch "scan to receive" scams).
@@ -225,6 +251,16 @@ RECEIVE_CLAIM_PATTERNS: dict[str, list[re.Pattern[str]]] = {
         re.compile("ವಿಜೇತ"),
         re.compile("ಮರುಪಾವತಿ"),
         re.compile("ಬಹುಮಾನ"),
+    ],
+    "ur": [
+        re.compile("پیسے ملیں گے"),
+        re.compile("رقم موصول"),
+        re.compile("اکاؤنٹ میں آئیں گے"),
+        re.compile("کیش بیک"),
+        re.compile("آپ جیتے"),
+        re.compile("لاٹری"),
+        re.compile("انعام"),
+        re.compile("ریفنڈ"),
     ],
 }
 
@@ -439,7 +475,7 @@ def _find_match(patterns: list[re.Pattern[str]], text: str) -> str | None:
 def _find_secret(text: str) -> str | None:
     clean = text.strip().lower()
     # Isolated keywords (e.g. typing just "OTP" or "PIN") or definition questions are NOT requests for secrets
-    if clean in ("otp", "pin", "upi pin", "cvv", "mpin", "password", "passcode", "atm pin", "ओटीपी", "पिन"):
+    if clean in ("otp", "pin", "upi pin", "cvv", "mpin", "password", "passcode", "atm pin", "ओटीपी", "पिन", "او ٹی پی", "پن"):
         return None
     if re.match(r"^(what\s+is|define|meaning\s+of|explain)\s+(an?\s+)?(otp|pin|upi\s+pin|password)\b", clean):
         return None
@@ -449,7 +485,7 @@ def _find_secret(text: str) -> str | None:
             match = pattern.search(text)
             if not match:
                 continue
-            window = text[max(0, match.start() - 70) : match.start()].lower()
+            window = text[max(0, match.start() - 70) : min(len(text), match.end() + 70)].lower()
             if any(negation in window for negation in NEGATIONS):
                 continue
             return match.group(0).strip()
