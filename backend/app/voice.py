@@ -52,6 +52,8 @@ BULBUL_V3_LANGUAGES: dict[str, str] = {
     "ta-in": "ta-IN",
     "te": "te-IN",
     "te-in": "te-IN",
+    "ur": "ur-IN",
+    "ur-in": "ur-IN",
 }
 
 # Saaras v4 supported input languages (22 scheduled Indian languages + English, plus auto and codemix)
@@ -107,6 +109,8 @@ NEURAL_VOICES: dict[str, str] = {
     "ta-in": "ta-IN-PallaviNeural",
     "te": "te-IN-MohanNeural",
     "te-in": "te-IN-MohanNeural",
+    "ur": "ur-IN-GulNeural",
+    "ur-in": "ur-IN-GulNeural",
 }
 
 # bulbul:v3 rejects numbers longer than 4 digits unless they use commas.
