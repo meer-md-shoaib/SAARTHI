@@ -7,7 +7,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator
 
 Language = Literal[
-    "en", "hi", "kn", "bn", "gu", "ml", "mr", "od", "or", "pa", "ta", "te"
+    "en", "hi", "kn", "bn", "gu", "ml", "mr", "od", "or", "pa", "ta", "te", "ur"
 ]
 Intention = Literal["pay", "receive", "unknown"]
 OutcomeValue = Literal["low_concern", "be_careful", "high_concern", "unable_to_verify"]
@@ -140,8 +140,8 @@ class SpeechToTextResponse(BaseModel):
 
 
 SUPPORTED_TTS_LANGUAGES = {
-    "en", "hi", "kn", "bn", "gu", "ml", "mr", "od", "or", "pa", "ta", "te",
-    "en-in", "hi-in", "kn-in", "bn-in", "gu-in", "ml-in", "mr-in", "od-in", "or-in", "pa-in", "ta-in", "te-in",
+    "en", "hi", "kn", "bn", "gu", "ml", "mr", "od", "or", "pa", "ta", "te", "ur",
+    "en-in", "hi-in", "kn-in", "bn-in", "gu-in", "ml-in", "mr-in", "od-in", "or-in", "pa-in", "ta-in", "te-in", "ur-in",
 }
 
 
