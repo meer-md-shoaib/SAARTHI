@@ -159,7 +159,7 @@ async def analyze(payload: AnalyzePaymentRequest) -> AnalyzePaymentResponse:
     # 1. Non-UPI message or text: Think before replying instead of canned UPI errors
     if not is_upi and len(raw) >= 1:
         settings = get_settings()
-        lang = payload.language if payload.language in ("en", "hi", "kn") else "en"
+        lang = payload.language if payload.language in ("en", "hi", "kn", "ur") else "en"
         strings = get_strings(lang)
 
         # A. Use Gemini 2.5 Flash for deep contextual reasoning when key is configured
@@ -317,6 +317,7 @@ async def ask(payload: AskRequest) -> AskResponse:
                 "en": "Saarthi AI Safety Advice",
                 "hi": "सारथी AI सुरक्षा सलाह",
                 "kn": "ಸಾರಥಿ AI ಸುರಕ್ಷತಾ ಸಲಹೆ",
+                "ur": "سارتھی AI حفاظتی مشورہ",
             }
             suggested = [
                 SuggestedTopic(topic_id="otp", title="Should I share my OTP?"),
@@ -348,7 +349,7 @@ async def ask(payload: AskRequest) -> AskResponse:
 @app.post("/api/v1/speech-to-text", response_model=SpeechToTextResponse, tags=["voice"])
 async def speech_to_text(
     file: UploadFile = File(..., description="Recorded audio (webm, mp4, ogg, wav, mp3, m4a)"),
-    language: str = Form("en", description="Language code (e.g. en, hi, kn, bn, gu, ml, mr, od, pa, ta, te, auto, codemix)"),
+    language: str = Form("en", description="Language code (e.g. en, hi, kn, bn, gu, ml, mr, od, pa, ta, te, ur, auto, codemix)"),
 ) -> SpeechToTextResponse:
     """Transcribe audio with Sarvam saaras:v4, or report an honest fallback."""
     from .voice import SAARAS_V4_LANGUAGES
@@ -357,7 +358,7 @@ async def speech_to_text(
     if clean_lang not in ("auto", "codemix") and clean_lang not in SAARAS_V4_LANGUAGES:
         raise HTTPException(
             status_code=422,
-            detail=f"language '{language}' not supported. Must be an Indic language code (e.g. en, hi, kn, bn, gu, ml, mr, od, pa, ta, te), 'auto', or 'codemix'.",
+            detail=f"language '{language}' not supported. Must be an Indic language code (e.g. en, hi, kn, bn, gu, ml, mr, od, pa, ta, te, ur), 'auto', or 'codemix'.",
         )
 
     audio = await file.read()
