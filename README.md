@@ -49,7 +49,7 @@
 
 - [💡 Overview & The Problem](#-overview--the-problem)
 - [✨ Key Capabilities](#-key-capabilities)
-- [🌐 Complete 11 Indic Languages Support](#-complete-11-indic-languages-support)
+- [🌐 Complete 12 Indic Languages Support](#-complete-12-indic-languages-support)
 - [🧠 Hybrid Safety Architecture](#-hybrid-safety-architecture)
 - [🎮 Interactive Learning & 3D Arcade](#-interactive-learning--3d-arcade)
 - [🛠️ Technology Stack](#-technology-stack)
@@ -71,7 +71,7 @@ Digital payments (UPI) transformed India into the world’s digital transaction 
 - **Credential Harvesting:** Aggressive solicitations for OTPs, UPI PINs, or password sharing under the guise of customer support.
 
 ### 🎯 Our Mission: SAARTHI SafePay
-SAARTHI acts as an accessible, voice-first safety companion that sits between the user and any payment. It inspects QR codes and SMS alerts, checks for 9 deterministic fraud indicators, visualizes money flow in elder-friendly language, and provides instant audio guidance in **11 Indian languages**.
+SAARTHI acts as an accessible, voice-first safety companion that sits between the user and any payment. It inspects QR codes and SMS alerts, checks for 9 deterministic fraud indicators, visualizes money flow in elder-friendly language, and provides instant audio guidance in **12 Indian languages**.
 
 > ⚠️ **Zero Credential Guarantee:** SAARTHI never asks for your UPI PIN, never stores OTPs, never initiates payments, and never proxies bank credentials.
 
@@ -94,7 +94,7 @@ SAARTHI acts as an accessible, voice-first safety companion that sits between th
       <ul>
         <li><b>Sarvam AI Integration:</b> Powered by <code>Bulbul v3</code> (Indian accented TTS) & <code>Saaras v4</code> (conversational STT).</li>
         <li><b>Subtle Biological Heartbeat:</b> Gentle, organic breathing pulse on the microphone orb indicating listening readiness.</li>
-        <li><b>Full Audio Playback:</b> Reads safety verdicts, explanations, and advice aloud in 11 Indic languages.</li>
+        <li><b>Full Audio Playback:</b> Reads safety verdicts, explanations, and advice aloud in 12 Indic languages.</li>
       </ul>
     </td>
   </tr>
@@ -120,9 +120,9 @@ SAARTHI acts as an accessible, voice-first safety companion that sits between th
 
 ---
 
-## 🌐 Complete 11 Indic Languages Support
+## 🌐 Complete 12 Indic Languages Support
 
-SAARTHI SafePay provides end-to-end user interface translation and voice guidance across **all 11 major Indian languages**:
+SAARTHI SafePay provides end-to-end user interface translation and voice guidance across **all 12 major Indian languages**:
 
 | Language | Script | Native Greeting | Voice STT / TTS | UI Support |
 |---|---|---|:---:|:---:|
@@ -137,6 +137,7 @@ SAARTHI SafePay provides end-to-end user interface translation and voice guidanc
 | **Malayalam** | മലയാളം | *"നമസ്കാരം! നിങ്ങളുടെ ഡിജിറ്റൽ പേയ്‌മെന്റ് സുരക്ഷಾ സഹായി."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
 | **Punjabi** | ਪੰਜਾਬੀ | *"ਸਤਿ ਸ਼੍ਰੀ ਅਕਾਲ! ਤੁਹਾਡਾ ਭੁਗਤਾਨ ਸੁਰੱਖਿਆ ਸਾਥੀ."* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
 | **Odia** | ଓଡ଼ିଆ | *"ନମସ୍କାର! ଆପଣଙ୍କ ଡିଜିଟାଲ ପେମେଣ୍ଟ ସୁରକ୍ଷା ସାଥୀ।"* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
+| **Urdu** | اردو | *"السلام علیکم! محفوظ ڈیجیٹل ادائیگیوں کا بااعتماد ساتھی۔"* | ✅ Sarvam Bulbul / Saaras | ✅ Full |
 
 ---
 
@@ -173,7 +174,7 @@ SAARTHI uses a **layered, defense-in-depth safety engine** to guarantee reliabil
                                 ▼
 ┌───────────────────────────────────────────────────────────────┐
 │           Sarvam AI Speech Engine (Bulbul v3 / Saaras)        │
-│  - Conversational Voice Guidance in 11 Indian Languages      │
+│  - Conversational Voice Guidance in 12 Indian Languages      │
 └───────────────────────────────┬───────────────────────────────┘
                                 │
                                 ▼
@@ -263,7 +264,7 @@ SAARTHI/
 │   │   │   └── JargonScreen.tsx      # Plain-language banking analogies
 │   │   ├── i18n/
 │   │   │   ├── en.ts                 # Base dictionary and shape
-│   │   │   └── indic.ts              # Native translations for 10 Indic languages
+│   │   │   └── indic.ts              # Native translations for 11 Indic languages
 │   │   └── state.tsx                 # Centralized state & speech hooks
 │   ├── package.json
 │   └── vite.config.ts
