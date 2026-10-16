@@ -30,6 +30,7 @@ LANG_NAMES: dict[str, str] = {
     "pa": "Punjabi (ਪੰਜਾਬੀ)",
     "ta": "Tamil (தமிழ்)",
     "te": "Telugu (తెలుగు)",
+    "ur": "Urdu (اردو)",
 }
 
 
