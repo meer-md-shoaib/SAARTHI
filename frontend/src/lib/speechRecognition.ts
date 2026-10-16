@@ -24,6 +24,7 @@ export type SttLanguage =
   | "pa"
   | "ta"
   | "te"
+  | "ur"
   | "auto"
   | "codemix"
   | string;
@@ -75,6 +76,8 @@ function langToLocale(lang: string): string {
       return "ta-IN";
     case "te":
       return "te-IN";
+    case "ur":
+      return "ur-IN";
     case "en":
     default:
       return "en-IN";

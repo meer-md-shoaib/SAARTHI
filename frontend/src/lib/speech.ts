@@ -25,6 +25,7 @@ const BROWSER_LANG: Record<string, string> = {
   pa: "pa-IN",
   ta: "ta-IN",
   te: "te-IN",
+  ur: "ur-IN",
 };
 
 let currentAudio: HTMLAudioElement | null = null;
@@ -144,6 +145,7 @@ export async function speakText(
       const n = v.name.toLowerCase();
       if (langKey === "kn") return l.startsWith("kn") || n.includes("kannada");
       if (langKey === "hi") return l.startsWith("hi") || n.includes("hindi");
+      if (langKey === "ur") return l.startsWith("ur") || n.includes("urdu");
       return l.startsWith("en-in") || n.includes("india") || l.startsWith("en");
     });
     if (matchedVoice) {

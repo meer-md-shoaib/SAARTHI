@@ -129,6 +129,16 @@ export const SUPPORTED_LANGUAGES: LanguageInfo[] = [
     greeting: "ନମସ୍କାର! ମୁଁ ସାରଥୀ, ଆପଣଙ୍କ ଡିଜିଟାଲ୍ ପେମେଣ୍ଟ ସୁରକ୍ଷା ସାଥୀ।",
     assistantPrompt: "ମୁଁ ଶୁଣୁଛି। ସୁରକ୍ଷିତ ପେମେଣ୍ଟ ପାଇଁ ମୁଁ ଆପଣଙ୍କୁ କିପରି ସାହାଯ್ಯ କରିପାରିବି?",
   },
+  {
+    code: "ur",
+    label: "Urdu",
+    native: "اردو",
+    hasUiTranslation: true,
+    speechSupported: true,
+    bcp47: "ur-IN",
+    greeting: "السلام علیکم! میں سارتھی ہوں، آپ کا ڈیجیٹل ادائیگی حفاظتی ساتھی۔ مائیک پر ٹیپ کریں یا 'QR اسکین کرو' بولیں۔",
+    assistantPrompt: "میں سن رہا ہوں۔ ادائیگی کی حفاظت میں میں آپ کی کیا مدد کر سکتا ہوں؟",
+  },
 ];
 
 export function getLanguageInfo(code: string): LanguageInfo {

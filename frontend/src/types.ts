@@ -15,7 +15,8 @@ export type Lang =
   | "od"
   | "pa"
   | "ta"
-  | "te";
+  | "te"
+  | "ur";
 
 export type Intention = "pay" | "receive" | "unknown";
 

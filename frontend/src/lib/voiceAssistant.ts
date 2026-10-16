@@ -77,6 +77,7 @@ function parseLanguageChange(text: string): Lang | null {
   if (lowered.includes("punjabi") || lowered.includes("ਪੰਜਾਬੀ")) return "pa";
   if (lowered.includes("tamil") || lowered.includes("தமிழ்")) return "ta";
   if (lowered.includes("telugu") || lowered.includes("తెలుగు")) return "te";
+  if (lowered.includes("urdu") || lowered.includes("اردو") || lowered.includes("उर्दू")) return "ur";
   return null;
 }
 
@@ -93,7 +94,7 @@ export function parseVoiceIntent(rawText: string, currentLang: Lang): ParsedInte
     lowered.includes("stop speaking") ||
     lowered.includes("रुक जाओ") ||
     lowered.includes("बंद करो") ||
-    lowered.includes("ನಿಲ್ಲಿಸು")
+    lowered.includes("ನಿಲ್ಲಿಸು") || lowered.includes("روکیں") || lowered.includes("بند کرو") || lowered.includes("رک جاؤ")
   ) {
     return { intent: "STOP_EXIT" };
   }
@@ -105,7 +106,7 @@ export function parseVoiceIntent(rawText: string, currentLang: Lang): ParsedInte
     ) ||
     lowered.includes("repeat again") ||
     lowered.includes("फिर से") ||
-    lowered.includes("ಮತ್ತೆ ಹೇಳಿ")
+    lowered.includes("ಮತ್ತೆ ಹೇಳಿ") || lowered.includes("دوبارہ") || lowered.includes("دہرائیں")
   ) {
     return { intent: "REPEAT" };
   }
@@ -120,7 +121,7 @@ export function parseVoiceIntent(rawText: string, currentLang: Lang): ParsedInte
       lowered.includes("में बोलो") ||
       lowered.includes("में बात करो") ||
       lowered.includes("ಮಾತನಾಡು") ||
-      lowered.includes("ಬದಲಿಸು"))
+      lowered.includes("ಬದಲಿಸು") || lowered.includes("میں بولو") || lowered.includes("میں بات کرو") || lowered.includes("زبان بدلو"))
   ) {
     return { intent: "CHANGE_LANGUAGE", targetLang };
   }
@@ -144,7 +145,7 @@ export function parseVoiceIntent(rawText: string, currentLang: Lang): ParsedInte
     lowered.includes("கமெரா") ||
     lowered.includes("স্ক্যান") ||
     lowered.includes("કૅમેરા") ||
-    lowered.includes("ਕੈਮਰਾ")
+    lowered.includes("ਕੈਮਰਾ") || lowered.includes("اسکین") || lowered.includes("کیو آر") || lowered.includes("کیمرہ")
   ) {
     return { intent: "SCAN_QR" };
   }
@@ -165,28 +166,28 @@ export function parseVoiceIntent(rawText: string, currentLang: Lang): ParsedInte
     lowered.includes("मदद") ||
     lowered.includes("दबाव") ||
     lowered.includes("ತುರ್ತು") ||
-    lowered.includes("ಸಹಾಯ") ||
-    lowered.includes("ಒತ್ತಡ")
+    lowered.includes("ಸಹಾಯ") || lowered.includes("رہنمائی") ||
+    lowered.includes("ಒತ್ತಡ") || lowered.includes("دھوکہ") || lowered.includes("ایمرجنسی") || lowered.includes("مدد") || lowered.includes("دباؤ")
   ) {
     return { intent: "NAVIGATE_SOS" };
   }
 
   // 6. Navigation to Learn / Quiz / Story
-  if (lowered.includes("story") || lowered.includes("कहानी") || lowered.includes("ಕಥೆ")) {
+  if (lowered.includes("story") || lowered.includes("कहानी") || lowered.includes("ಕಥೆ") || lowered.includes("کہانی")) {
     return { intent: "NAVIGATE_STORY" };
   }
-  if (lowered.includes("quiz") || lowered.includes("game") || lowered.includes("क्विज") || lowered.includes("ಆಟ")) {
+  if (lowered.includes("quiz") || lowered.includes("game") || lowered.includes("क्विज") || lowered.includes("ಆಟ") || lowered.includes("کوئز") || lowered.includes("کھیل")) {
     return { intent: "NAVIGATE_QUIZ" };
   }
-  if (lowered.includes("learn") || lowered.includes("learn safely") || lowered.includes("सीखें") || lowered.includes("ಕಲಿ")) {
+  if (lowered.includes("learn") || lowered.includes("learn safely") || lowered.includes("सीखें") || lowered.includes("ಕಲಿ") || lowered.includes("سیکھیں") || lowered.includes("سیکھنا")) {
     return { intent: "NAVIGATE_LEARN" };
   }
 
   // 7. Help & Home Navigation
-  if (lowered.includes("help") || lowered.includes("how to use") || lowered.includes("सहायता") || lowered.includes("ಸಹಾಯ")) {
+  if (lowered.includes("help") || lowered.includes("how to use") || lowered.includes("सहायता") || lowered.includes("ಸಹಾಯ") || lowered.includes("رہنمائی")) {
     return { intent: "NAVIGATE_HELP" };
   }
-  if (lowered.includes("go home") || lowered.includes("main screen") || lowered.includes("होम") || lowered.includes("ಮುಖಪುಟ")) {
+  if (lowered.includes("go home") || lowered.includes("main screen") || lowered.includes("होम") || lowered.includes("ಮುಖಪುಟ") || lowered.includes("ہوم") || lowered.includes("مرکزی صفحہ")) {
     return { intent: "NAVIGATE_HOME" };
   }
 
@@ -216,13 +217,17 @@ export function parseVoiceIntent(rawText: string, currentLang: Lang): ParsedInte
     lowered === "पैसे" ||
     lowered === "पेमेंट" ||
     lowered === "ಹಣ" ||
-    lowered === "ಪಾವತಿ"
+    lowered === "ಪಾವತಿ" ||
+    lowered === "پیسے" ||
+    lowered === "رقم"
   ) {
     const clarification =
       currentLang === "hi"
         ? "क्या आप भुगतान की सुरक्षा जांचने के लिए QR कोड स्कैन करना चाहते हैं, या कोई सवाल पूछना चाहते हैं?"
         : currentLang === "kn"
           ? "ನೀವು ಪಾವತಿಯ ಸುರಕ್ಷತೆ ಪರಿಶೀಲಿಸಲು QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ, ಅಥವಾ ಪ್ರಶ್ನೆ ಕೇಳಲು ಬಯಸುತ್ತೀರಾ?"
+        : currentLang === "ur"
+          ? "کیا آپ ادائیگی کی حفاظت جانچنے کے لیے QR کوڈ اسکین کرنا چاہتے ہیں، یا کوئی سوال پوچھنا چاہتے ہیں؟"
           : "Would you like to scan a QR code to check payment safety, or ask a question about safe payments?";
     return {
       intent: "CLARIFICATION",
@@ -298,6 +303,8 @@ export class VoiceAssistantSession {
             ? "मुझे कोई आवाज़ नहीं सुनाई दी। जब आप तैयार हों, तब माइक पर टैप करें।"
             : this.lang === "kn"
               ? "ನನಗೆ ಯಾವುದೇ ಧ್ವನಿ ಕೇಳಿಸಲಿಲ್ಲ. ನೀವು ಸಿದ್ಧವಾದಾಗ ಮೈಕ್ ಟ್ಯಾಪ್ ಮಾಡಿ."
+            : this.lang === "ur"
+              ? "مجھے کوئی آواز نہیں سنائی دی۔ جب آپ تیار ہوں، تب مائیک پر ٹیپ کریں۔"
               : "I didn't hear anything. Tap the microphone when you are ready.";
         void this.speakResponse(silentPrompt, false);
       }
@@ -484,6 +491,8 @@ export class VoiceAssistantSession {
             ? "सुरक्षा शिक्षण केंद्र खोला गया है।"
             : this.lang === "kn"
               ? "ಸುರಕ್ಷತಾ ಕಲಿಕಾ ಕೇಂದ್ರ ತೆರೆಯಲಾಗಿದೆ."
+            : this.lang === "ur"
+              ? "حفاظتی تعلیمی مرکز کھولا گیا ہے۔"
               : "Opening the learning center.";
         await this.speakResponse(learnMsg, false);
         break;
@@ -496,6 +505,8 @@ export class VoiceAssistantSession {
             ? "सहाता केंद्र खोला गया है।"
             : this.lang === "kn"
               ? "ಸಹಾಯ ಕೇಂದ್ರ ತೆರೆಯಲಾಗಿದೆ."
+            : this.lang === "ur"
+              ? "رہنمائی اور امدادی مرکز کھولا گیا ہے۔"
               : "Opening help and guidance.";
         await this.speakResponse(helpMsg, false);
         break;
@@ -508,6 +519,8 @@ export class VoiceAssistantSession {
             ? "मुखपृष्ठ पर वापस आ गए हैं।"
             : this.lang === "kn"
               ? "ಮುಖಪುಟಕ್ಕೆ ಮರಳಿದ್ದೀರಿ."
+            : this.lang === "ur"
+              ? "مرکزی صفحہ پر واپس آ گئے ہیں۔"
               : "Back to the home screen.";
         await this.speakResponse(homeMsg, true);
         break;
@@ -534,6 +547,8 @@ export class VoiceAssistantSession {
               ? "संदेश विश्लेषण में असमर्थ। किसी भी अनजान व्यक्ति के साथ अपना पिन या OTP कभी साझा न करें।"
               : this.lang === "kn"
                 ? "ಸಂದೇಶ ವಿಶ್ಲೇಷಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಯಾರೊಂದಿಗೂ ನಿಮ್ಮ ಪಿನ್ ಅಥವಾ ಒಟಿಪಿ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ."
+              : this.lang === "ur"
+                ? "پیغام کا تجزیہ کرنے میں معذرت۔ کسی بھی انجان شخص کے ساتھ اپنا پن یا OTP کبھی شیئر نہ کریں۔"
                 : "Unable to analyze message. Always remember: Never share your UPI PIN or OTP with anyone.";
           await this.speakResponse(fallback, true);
         }
@@ -552,6 +567,8 @@ export class VoiceAssistantSession {
               ? "माफ़ कीजिए, मुझे समझ नहीं आया। क्या आप QR कोड स्कैन करना चाहते हैं?"
               : this.lang === "kn"
                 ? "ಕ್ಷಮಿಸಿ, ಅರ್ಥವಾಗಲಿಲ್ಲ. ನೀವು QR ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಬಯಸುವಿರಾ?"
+              : this.lang === "ur"
+                ? "معاف کیجیے گا، مجھے سمجھ نہیں آیا۔ کیا آپ کیو آر کوڈ اسکین کرنا چاہتے ہیں؟"
                 : "I could not find an answer. Would you like to scan a QR code to check a payment?";
           await this.speakResponse(errFallback, true);
         }
