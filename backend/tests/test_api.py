@@ -64,6 +64,18 @@ def test_analyze_payment_hindi(client: TestClient) -> None:
     assert body["outcome_label"] == "कम चिंता"
 
 
+def test_analyze_payment_urdu(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/analyze-payment",
+        json={"raw_text": CLEAN_QR, "intention": "pay", "language": "ur"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["language"] == "ur"
+    assert body["outcome_label"] == "کم تشویش"
+    assert "حفاظت کی مکمل ضمانت" in body["disclaimer"]
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -107,6 +119,15 @@ def test_ask_hindi_and_fallback(client: TestClient) -> None:
         json={"text": "tell me", "language": "en", "topic_id": "qr_check"},
     )
     assert chip.json()["topic_id"] == "qr_check"
+
+
+def test_ask_urdu(client: TestClient) -> None:
+    urdu = client.post("/api/v1/ask", json={"text": "او ٹی پی کیا ہے", "language": "ur"})
+    assert urdu.status_code == 200
+    body = urdu.json()
+    assert body["topic_id"] == "otp"
+    assert body["answered_by"] == "knowledge_base"
+    assert "او ٹی پی" in body["answer"]
 
 
 def test_ask_contextual_followup(client: TestClient) -> None:
@@ -411,14 +432,14 @@ def test_sarvam_tts_success_and_payload(
         get_settings.cache_clear()
 
 
-def test_sarvam_tts_all_11_languages(
+def test_sarvam_tts_all_12_languages(
     monkeypatch: pytest.MonkeyPatch, client: TestClient
 ) -> None:
-    """Verify that all 11 languages supported by Bulbul v3 map to valid BCP-47 codes."""
+    """Verify that all 12 languages supported by Bulbul v3 map to valid BCP-47 codes."""
     monkeypatch.setenv("SARVAM_API_KEY", "test_mock_sarvam_key")
     get_settings.cache_clear()
 
-    # The 11 languages for Bulbul v3 and their expected BCP-47 codes
+    # The 12 languages for Bulbul v3 and their expected BCP-47 codes
     languages_to_test = [
         ("en", "en-IN"),
         ("hi", "hi-IN"),
@@ -431,6 +452,7 @@ def test_sarvam_tts_all_11_languages(
         ("pa", "pa-IN"),
         ("ta", "ta-IN"),
         ("te", "te-IN"),
+        ("ur", "ur-IN"),
     ]
 
     captured_lang_codes = []

@@ -204,3 +204,28 @@ def test_empty_input_is_unable_to_verify() -> None:
     result = analyze_payment("   ", "pay", None, "en")
     assert result["outcome"] == "unable_to_verify"
     assert result["extracted"]["supported"] is False
+
+
+def test_urdu_secret_and_urgency_detected() -> None:
+    urdu_msg = "فوری طور پر اپنا او ٹی پی اور پن بتائیں ورنہ اکاؤنٹ بلاک ہو جائے گا"
+    result = analyze_payment(urdu_msg, "pay", None, "ur")
+    assert result["outcome"] == "high_concern"
+    ids = _ids(result)
+    assert "SECRET_REQUEST" in ids
+    assert "URGENCY_PRESSURE" in ids
+    assert result["language"] == "ur"
+
+
+def test_urdu_clean_qr_localized() -> None:
+    result = analyze_payment(CLEAN_QR, "pay", 250, "ur")
+    assert result["outcome"] == "low_concern"
+    assert result["language"] == "ur"
+    assert result["outcome_label"] == "کم تشویش"
+    assert "حفاظت کی مکمل ضمانت" in result["disclaimer"]
+
+
+def test_urdu_reminder_not_flagged_as_secret() -> None:
+    reminder = "اپنا UPI پن یا او ٹی پی کسی کو نہ بتائیں"
+    result = analyze_payment(reminder, "pay", None, "ur")
+    assert "SECRET_REQUEST" not in _ids(result)
+
