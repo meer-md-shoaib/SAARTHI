@@ -198,6 +198,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ur" ? "rtl" : "ltr";
   }, [lang]);
 
   /* Backend status (voice configured?) - failures are tolerated. */

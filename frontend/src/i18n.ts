@@ -615,7 +615,7 @@ export const kn: Dict = {
   },
 };
 
-import { te, ta, bn, mr, gu, ml, pa, od } from "./i18n/indic";
+import { te, ta, bn, mr, gu, ml, pa, od, ur } from "./i18n/indic";
 
 export const STRINGS: Record<UILang, Dict> = {
   en,
@@ -629,4 +629,5 @@ export const STRINGS: Record<UILang, Dict> = {
   ml,
   pa,
   od,
+  ur,
 };
